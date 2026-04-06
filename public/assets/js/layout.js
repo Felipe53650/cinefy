@@ -79,9 +79,9 @@
   function renderNavbar() {
     return `
       <div class="fixed inset-x-0 top-0 z-[80] px-2 pt-2 md:px-6 md:pt-3">
-        <div class="mx-auto flex h-[3.85rem] w-full max-w-7xl items-center justify-between gap-3 rounded-[1rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:h-[4.25rem] md:gap-4 md:rounded-[1.2rem] md:px-5">
+        <div class="mx-auto flex h-[4.25rem] w-full max-w-7xl items-center justify-between gap-2 rounded-[1rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:rounded-[1.2rem] md:px-5">
           <div class="flex min-w-0 items-center gap-4 md:gap-8">
-            <a class="min-w-0 text-[1.55rem] font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
+            <a class="min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
               CINEfy
             </a>
             <nav aria-label="Navegacao principal" class="hidden items-center gap-1.5 md:flex">
@@ -108,8 +108,8 @@
             </div>
             ` : ''}
             ${session ? `
-            <a class="flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] py-1 pl-1 pr-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
-              <img alt="Avatar do usuario" class="h-8 w-8 rounded-full object-cover ring-1 ring-red-400/30 md:h-9 md:w-9" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
+            <a class="flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] px-1 py-1 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
+              <img alt="Avatar do usuario" class="h-9 w-9 rounded-full object-cover ring-1 ring-red-400/30" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
               <div class="hidden min-w-0 md:block">
                 <span class="block truncate text-sm font-semibold text-white">${escapeHtml(profile ? profile.displayName : "Perfil")}</span>
                 <span class="block truncate text-[11px] text-zinc-500">${escapeHtml(profile ? profile.email || `@${profile.username}` : "@cinefy")}</span>
