@@ -22,6 +22,16 @@
   const createListButton = document.getElementById("createListButton");
   const listSelector = document.getElementById("listSelector");
   const deleteCurrentListButton = document.getElementById("deleteCurrentListButton");
+  const moviePosterUrlInput = document.getElementById("moviePosterUrl");
+  const moviePosterFileInput = document.getElementById("moviePosterFile");
+  const moviePosterDropzone = document.getElementById("moviePosterDropzone");
+  const moviePosterFeedback = document.getElementById("moviePosterFeedback");
+  const movieFormFeedback = document.getElementById("movieFormFeedback");
+  const posterModeButtons = Array.from(document.querySelectorAll("[data-poster-mode]"));
+  const posterPanels = Array.from(document.querySelectorAll("[data-poster-panel]"));
+
+  let manualPosterMode = "upload";
+  let manualPosterFile = null;
 
   document.getElementById("copyShareButton").addEventListener("click", copyShareLink);
   document.getElementById("resetListButton").addEventListener("click", resetList);
@@ -35,7 +45,16 @@
     event.preventDefault();
     handleCreateList();
   });
+  posterModeButtons.forEach((button) => {
+    button.addEventListener("click", () => setPosterMode(button.dataset.posterMode));
+  });
+  moviePosterDropzone.addEventListener("click", () => moviePosterFileInput.click());
+  moviePosterDropzone.addEventListener("dragover", handlePosterDragOver);
+  moviePosterDropzone.addEventListener("dragleave", handlePosterDragLeave);
+  moviePosterDropzone.addEventListener("drop", handlePosterDrop);
+  moviePosterFileInput.addEventListener("change", handlePosterInputChange);
 
+  setPosterMode("upload");
   render();
 
   function getCurrentProfile() {
@@ -175,24 +194,33 @@
     shareFeedback.textContent = "A lista ativa foi atualizada.";
   }
 
-  function handleAddMovie(event) {
+  async function handleAddMovie(event) {
     event.preventDefault();
 
-    const movie = {
-      id: `movie-${Date.now()}`,
-      title: document.getElementById("movieTitle").value.trim(),
-      genre: document.getElementById("movieGenre").value.trim(),
-      year: Number(document.getElementById("movieYear").value),
-      rating: Number(document.getElementById("movieRating").value),
-      note: document.getElementById("movieNote").value.trim(),
-      poster: document.getElementById("moviePoster").value.trim() || DEFAULT_POSTER
-    };
+    try {
+      setMovieFormFeedback("");
 
-    state.movies.unshift(movie);
-    touchState();
-    movieForm.reset();
-    render();
-    shareFeedback.textContent = `${movie.title} foi adicionado a lista "${state.title}".`;
+      const movie = {
+        id: `movie-${Date.now()}`,
+        title: document.getElementById("movieTitle").value.trim(),
+        genre: document.getElementById("movieGenre").value.trim(),
+        year: Number(document.getElementById("movieYear").value),
+        rating: Number(document.getElementById("movieRating").value),
+        note: document.getElementById("movieNote").value.trim(),
+        poster: await resolveManualPoster()
+      };
+
+      state.movies.unshift(movie);
+      touchState();
+      movieForm.reset();
+      clearPosterSelection();
+      setPosterMode("upload");
+      render();
+      shareFeedback.textContent = `${movie.title} foi adicionado a lista "${state.title}".`;
+      setMovieFormFeedback("Filme adicionado com sucesso.");
+    } catch (error) {
+      setMovieFormFeedback(error.message || "Nao foi possivel adicionar o filme agora.");
+    }
   }
 
   function handleSaveSettings(event) {
@@ -431,5 +459,134 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function setPosterMode(mode) {
+    manualPosterMode = mode === "url" ? "url" : "upload";
+
+    posterModeButtons.forEach((button) => {
+      const isActive = button.dataset.posterMode === manualPosterMode;
+      button.setAttribute("aria-pressed", String(isActive));
+      button.classList.toggle("bg-white", isActive);
+      button.classList.toggle("text-black", isActive);
+      button.classList.toggle("text-zinc-300", !isActive);
+    });
+
+    posterPanels.forEach((panel) => {
+      panel.classList.toggle("hidden", panel.dataset.posterPanel !== manualPosterMode);
+    });
+  }
+
+  function handlePosterInputChange(event) {
+    const [file] = event.target.files || [];
+    if (!file) return;
+    loadPosterFile(file);
+  }
+
+  function handlePosterDragOver(event) {
+    event.preventDefault();
+    moviePosterDropzone.classList.add("border-red-500");
+  }
+
+  function handlePosterDragLeave() {
+    moviePosterDropzone.classList.remove("border-red-500");
+  }
+
+  function handlePosterDrop(event) {
+    event.preventDefault();
+    moviePosterDropzone.classList.remove("border-red-500");
+
+    const [file] = Array.from(event.dataTransfer.files || []);
+    if (!file) return;
+    loadPosterFile(file);
+  }
+
+  function loadPosterFile(file) {
+    if (!file.type.startsWith("image/")) {
+      throwPosterError("Selecione uma imagem PNG, JPG ou WEBP.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      throwPosterError("O poster precisa ter no maximo 5 MB.");
+      return;
+    }
+
+    manualPosterFile = file;
+    moviePosterFeedback.textContent = `Poster selecionado: ${file.name}`;
+    setMovieFormFeedback("");
+  }
+
+  function clearPosterSelection() {
+    manualPosterFile = null;
+    moviePosterFileInput.value = "";
+    if (moviePosterUrlInput) {
+      moviePosterUrlInput.value = "";
+    }
+    moviePosterFeedback.textContent = "Nenhum poster selecionado.";
+    moviePosterDropzone.classList.remove("border-red-500");
+  }
+
+  async function resolveManualPoster() {
+    if (manualPosterMode === "url") {
+      const posterUrl = (moviePosterUrlInput.value || "").trim();
+      return sanitizePosterUrl(posterUrl) || DEFAULT_POSTER;
+    }
+
+    if (!manualPosterFile) {
+      return DEFAULT_POSTER;
+    }
+
+    if (window.CinefyStorage && typeof window.CinefyStorage.uploadUserImage === "function") {
+      try {
+        setMovieFormFeedback("Enviando poster personalizado...");
+        return await window.CinefyStorage.uploadUserImage(manualPosterFile, "posters");
+      } catch (error) {
+        setMovieFormFeedback("Poster salvo localmente. O upload em nuvem sera usado quando estiver disponivel.");
+      }
+    }
+
+    return await readFileAsDataUrl(manualPosterFile);
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Nao foi possivel ler o poster selecionado."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function throwPosterError(message) {
+    setMovieFormFeedback(message);
+    moviePosterFeedback.textContent = "Nenhum poster selecionado.";
+    manualPosterFile = null;
+    moviePosterFileInput.value = "";
+  }
+
+  function setMovieFormFeedback(message) {
+    if (!movieFormFeedback) return;
+    movieFormFeedback.textContent = message || "";
+  }
+
+  function sanitizePosterUrl(value) {
+    const candidate = String(value || "").trim();
+    if (!candidate) return "";
+
+    if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+      return candidate;
+    }
+
+    try {
+      const parsedUrl = new URL(candidate, window.location.origin);
+      if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+        return parsedUrl.href;
+      }
+    } catch (error) {
+      return "";
+    }
+
+    return "";
   }
 })();

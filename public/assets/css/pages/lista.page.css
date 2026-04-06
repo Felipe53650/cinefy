@@ -18,3 +18,15 @@
         background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.18));
       }
 
+      .poster-mode-button {
+        min-width: 5.5rem;
+      }
+
+      .poster-dropzone {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01));
+      }
+
+      .poster-dropzone:hover {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
+      }
+
