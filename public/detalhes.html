@@ -30,22 +30,22 @@
 <body class="min-h-screen bg-background text-on-background" data-page="detalhes">
   <header data-layout="navbar" aria-label="Cabecalho do site"></header>
 
-  <main class="pt-20">
-    <section class="relative min-h-[680px] overflow-hidden rounded-b-[2.5rem] border-b border-white/10">
+  <main class="pt-16 md:pt-20">
+    <section class="relative min-h-[460px] overflow-hidden rounded-b-[2rem] border-b border-white/10 md:min-h-[680px] md:rounded-b-[2.5rem]">
       <img alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover" id="movieBackdrop" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80"/>
       <div class="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-black/30"></div>
       <div class="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent"></div>
-      <div class="relative z-10 mx-auto flex min-h-[680px] max-w-7xl items-end px-6 pb-12">
+      <div class="relative z-10 mx-auto flex min-h-[460px] max-w-7xl items-end px-4 pb-8 md:min-h-[680px] md:px-6 md:pb-12">
         <div class="max-w-4xl">
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
-          <h1 class="font-display text-5xl font-extrabold tracking-tight text-white md:text-7xl" id="movieTitle">Carregando</h1>
-          <p class="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-300" id="movieOverview">Buscando informacoes do filme no TMDB.</p>
-          <div class="mt-8 flex flex-wrap gap-4">
-            <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-7 py-3.5 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110" id="addToListButton" type="button">
+          <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informacoes do filme no TMDB.</p>
+          <div class="mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
+            <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined">add</span>
               Adicionar a Minha Lista
             </button>
-            <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-7 py-3.5 font-bold text-white transition hover:bg-white/15" href="index.html">
+            <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 py-3 font-bold text-white transition hover:bg-white/15 md:px-7 md:py-3.5" href="index.html">
               <span class="material-symbols-outlined">arrow_back</span>
               Voltar para a home
             </a>
@@ -54,8 +54,8 @@
       </div>
     </section>
 
-    <section class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-12 lg:grid-cols-[1.15fr,0.85fr]">
-      <div class="glass-card rounded-[2rem] p-8">
+    <section class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:gap-10 md:px-6 md:py-12 lg:grid-cols-[1.15fr,0.85fr]">
+      <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
         <h2 class="font-display text-3xl font-bold text-white">Sua avaliacao</h2>
         <p class="mt-2 text-sm uppercase tracking-[0.24em] text-zinc-500">Salva localmente para este filme</p>
         <div class="mt-8">
@@ -73,7 +73,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="glass-card rounded-[2rem] p-6">
+        <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <h3 class="font-display text-xl font-bold text-white">Ficha tecnica</h3>
           <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
@@ -95,7 +95,7 @@
           </div>
         </div>
 
-        <div class="glass-card rounded-[2rem] p-6">
+        <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <div class="flex items-center justify-between gap-4">
             <div>
               <h3 class="font-display text-xl font-bold text-white">Elenco principal</h3>

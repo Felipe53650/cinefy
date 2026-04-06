@@ -28,9 +28,9 @@
   <link href="assets/css/theme.css" rel="stylesheet"/>
 </head>
 <body class="text-cine-text font-body antialiased" data-page="cadastro">
-  <main class="min-h-screen px-4 py-8 md:px-8 flex items-center justify-center">
+  <main class="min-h-screen px-4 py-4 md:px-8 md:py-8 flex items-center justify-center">
     <section class="auth-shell w-full max-w-5xl rounded-[2rem] overflow-hidden">
-      <div class="grid min-h-[720px] md:min-h-[680px] lg:grid-cols-[1.15fr,0.85fr]">
+      <div class="grid min-h-0 md:min-h-[680px] lg:grid-cols-[1.15fr,0.85fr]">
         <div class="auth-stage relative flex items-end p-8 sm:p-10 lg:p-12">
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
           <div class="relative z-10 max-w-md">
@@ -44,6 +44,10 @@
 
         <div class="form-panel px-6 py-8 sm:px-10 sm:py-10 lg:px-12 flex items-center">
           <div class="w-full">
+            <div class="mb-8 md:hidden">
+              <a class="inline-block text-4xl font-extrabold italic tracking-tight text-red-600 font-display" href="index.html">CINEfy</a>
+              <p class="mt-3 text-sm leading-relaxed text-white/70">Crie sua conta e continue sua curadoria com mais liberdade.</p>
+            </div>
             <div class="text-center">
               <h2 class="mt-3 text-4xl sm:text-5xl font-bold font-display">Cadastro</h2>
             </div>
@@ -78,10 +82,6 @@
                   <span class="material-symbols-outlined">visibility_off</span>
                 </button>
               </label>
-
-              <div class="rounded-2xl border border-white/12 bg-black/15 px-4 py-3 text-sm text-white/72">
-                Crie seu perfil para montar listas, compartilhar gostos e transformar descobertas em curadoria.
-              </div>
 
               <p aria-live="polite" class="hidden rounded-2xl border border-red-300/20 bg-red-950/40 px-4 py-3 text-sm text-red-100" id="registerFeedback" role="status"></p>
 

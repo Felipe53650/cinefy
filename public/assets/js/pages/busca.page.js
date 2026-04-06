@@ -44,7 +44,7 @@
           setLoading(true);
           const movies = await window.TMDB.getPopularMovies();
           resultsSubtitle.textContent = "Exibindo os filmes mais populares";
-          searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">info</span> Integrado em tempo real com o banco de dados do TMDB.';
+          searchStatus.textContent = "";
           renderMovies(movies);
         } catch (error) {
           handleSearchError(error);

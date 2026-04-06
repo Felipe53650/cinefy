@@ -78,10 +78,10 @@
 
   function renderNavbar() {
     return `
-      <div class="fixed inset-x-0 top-0 z-[80] px-3 pt-3 md:px-6">
-        <div class="mx-auto flex h-[4.25rem] w-full max-w-7xl items-center justify-between gap-4 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-4 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:px-5">
+      <div class="fixed inset-x-0 top-0 z-[80] px-2 pt-2 md:px-6 md:pt-3">
+        <div class="mx-auto flex h-[3.85rem] w-full max-w-7xl items-center justify-between gap-3 rounded-[1rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:h-[4.25rem] md:gap-4 md:rounded-[1.2rem] md:px-5">
           <div class="flex min-w-0 items-center gap-4 md:gap-8">
-            <a class="min-w-0 text-[1.9rem] font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500" href="index.html">
+            <a class="min-w-0 text-[1.55rem] font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
               CINEfy
             </a>
             <nav aria-label="Navegacao principal" class="hidden items-center gap-1.5 md:flex">
@@ -108,20 +108,20 @@
             </div>
             ` : ''}
             ${session ? `
-            <a class="flex min-w-0 items-center gap-3 rounded-[999px] border border-[#6c3437] bg-[#2a1516] py-1.5 pl-1.5 pr-4 transition hover:border-red-500/30 hover:bg-[#341a1b]" href="perfil.html" aria-label="Perfil">
-              <img alt="Avatar do usuario" class="h-9 w-9 rounded-full object-cover ring-1 ring-red-400/30" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
+            <a class="flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] py-1 pl-1 pr-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
+              <img alt="Avatar do usuario" class="h-8 w-8 rounded-full object-cover ring-1 ring-red-400/30 md:h-9 md:w-9" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
               <div class="hidden min-w-0 md:block">
                 <span class="block truncate text-sm font-semibold text-white">${escapeHtml(profile ? profile.displayName : "Perfil")}</span>
                 <span class="block truncate text-[11px] text-zinc-500">${escapeHtml(profile ? profile.email || `@${profile.username}` : "@cinefy")}</span>
               </div>
             </a>
             ` : `
-            <a class="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500" href="login.html">Fazer Login</a>
+            <a class="rounded-full bg-red-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-500 md:px-4" href="login.html">Entrar</a>
             `}
           </div>
         </div>
       </div>
-      <nav aria-label="Navegacao principal mobile" class="fixed bottom-3 left-3 right-3 z-50 flex justify-around rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] py-3 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
+      <nav aria-label="Navegacao principal mobile" class="fixed bottom-2 left-2 right-2 z-50 flex justify-around rounded-[1rem] border border-[#5a2b2d] bg-[#201011] py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
         ${buildMobileLinks()}
       </nav>
     `;
@@ -129,8 +129,8 @@
 
   function renderFooter() {
     return `
-      <div class="mt-auto px-3 pb-24 pt-10 md:px-6 md:pb-10">
-        <div class="mx-auto w-full max-w-7xl rounded-[2rem] border border-white/10 bg-zinc-950/78 px-4 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center">
+      <div class="mt-auto px-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-8 md:px-6 md:pb-10 md:pt-10">
+        <div class="mx-auto w-full max-w-7xl rounded-[1.5rem] border border-white/10 bg-zinc-950/78 px-4 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:rounded-[2rem]">
           <a class="inline-block text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500" href="index.html">CINEfy</a>
           <nav aria-label="Rodape" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
             <a class="text-zinc-500 transition-colors hover:text-red-400" href="index.html">Inicio</a>

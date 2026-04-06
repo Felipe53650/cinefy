@@ -48,3 +48,21 @@
       background: rgba(255, 255, 255, 0.14);
     }
 
+    @media (max-width: 767px) {
+      body {
+        background-attachment: scroll;
+      }
+
+      .auth-shell {
+        border-radius: 1.5rem;
+      }
+
+      .auth-stage {
+        display: none;
+      }
+
+      .form-panel {
+        padding: 1.5rem;
+      }
+    }
+

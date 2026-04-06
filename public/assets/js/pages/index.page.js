@@ -46,7 +46,7 @@
     function renderMovieScroller(containerId, movies) {
       const container = document.getElementById(containerId);
       container.innerHTML = movies.map((movie) => `
-        <article class="group min-w-[190px] max-w-[190px] md:min-w-[250px] md:max-w-[250px]">
+        <article class="group min-w-[160px] max-w-[160px] sm:min-w-[190px] sm:max-w-[190px] md:min-w-[250px] md:max-w-[250px]">
           <a class="block" href="detalhes.html?id=${encodeURIComponent(String(movie.id || ""))}">
             <div class="relative mb-4 aspect-[2/3] overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900 shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
               <img alt="${escapeHtml(movie.title)}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" decoding="async" loading="lazy" src="${escapeAttribute(safeMediaUrl(window.TMDB.getImageUrl(movie.poster_path, fallbackPoster)))}" />
@@ -60,7 +60,7 @@
               </div>
             </div>
             <h3 class="line-clamp-1 text-base font-bold text-white transition group-hover:text-red-300">${escapeHtml(movie.title)}</h3>
-            <p class="mt-1 text-sm text-zinc-400">Toque cinematografico com destaque visual consistente.</p>
+            <p class="mt-1 text-xs text-zinc-400 sm:text-sm">Selecao em destaque.</p>
           </a>
         </article>
       `).join("");
@@ -89,7 +89,7 @@
           ? `detalhes.html?id=${encodeURIComponent(String(tmdbId))}`
           : `detalhes.html?local=${encodeURIComponent(String(movie.id || ""))}`;
         return `
-          <article class="group min-w-[190px] max-w-[190px] md:min-w-[250px] md:max-w-[250px]">
+          <article class="group min-w-[160px] max-w-[160px] sm:min-w-[190px] sm:max-w-[190px] md:min-w-[250px] md:max-w-[250px]">
             <a class="block" href="${escapeAttribute(detailsHref)}">
               <div class="relative mb-4 aspect-[2/3] overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900 shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
                 <img alt="${escapeHtml(movie.title)}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" decoding="async" loading="lazy" src="${escapeAttribute(safeMediaUrl(movie.poster || fallbackPoster))}" />

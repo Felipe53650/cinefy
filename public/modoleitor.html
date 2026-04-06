@@ -30,13 +30,13 @@
 <body class="min-h-screen bg-background text-on-background flex flex-col" data-page="modoleitor">
   <header data-layout="navbar" aria-label="Cabecalho do site"></header>
 
-  <main class="flex-grow pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
-    <section class="mb-10 relative overflow-hidden rounded-[1.75rem] bg-zinc-900 border border-zinc-800 p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+  <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-16 md:pt-24 max-w-7xl mx-auto w-full">
+    <section class="mb-8 relative overflow-hidden rounded-[1.5rem] border border-zinc-800 bg-zinc-900 p-5 shadow-xl md:mb-10 md:rounded-[1.75rem] md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-transparent pointer-events-none"></div>
       <div class="relative z-10">
         <p class="text-xs uppercase tracking-[0.24em] text-red-300">Modo leitor</p>
-        <h1 class="mt-3 text-2xl md:text-3xl font-black text-white" id="readerTitle">Visualizando uma lista compartilhada</h1>
-        <p class="mt-2 text-zinc-400 max-w-2xl" id="readerDescription">A mesma curadoria salva em "Minha Lista" aparece aqui em modo somente leitura.</p>
+        <h1 class="mt-3 text-2xl font-black text-white md:text-3xl" id="readerTitle">Visualizando uma lista compartilhada</h1>
+        <p class="mt-2 max-w-2xl text-sm text-zinc-400 md:text-base" id="readerDescription">A mesma curadoria salva em "Minha Lista" aparece aqui em modo somente leitura.</p>
       </div>
       <div class="relative z-10 flex flex-wrap items-center gap-2">
         <span class="px-3 py-1 bg-zinc-800 text-zinc-300 text-xs rounded-full border border-zinc-700">Somente leitura</span>
@@ -45,15 +45,6 @@
     </section>
 
     <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="readerGrid"></section>
-
-    <section class="mt-20 glass-card rounded-2xl p-10 flex flex-col items-center text-center max-w-4xl mx-auto border border-zinc-800">
-      <h2 class="text-3xl font-extrabold text-white mb-4 tracking-tight italic">Curtiu essa curadoria?</h2>
-      <p class="text-zinc-400 mb-8 max-w-lg">Monte sua propria lista, compartilhe com amigos e volte sempre que quiser editar sua selecao.</p>
-      <a class="bg-red-600 hover:bg-red-700 text-white font-black px-8 py-4 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg shadow-red-600/20" href="lista.html">
-        <span class="material-symbols-outlined">add_circle</span>
-        Editar minha lista
-      </a>
-    </section>
   </main>
 
   <footer data-layout="footer" aria-label="Rodape do site"></footer>

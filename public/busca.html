@@ -30,31 +30,17 @@
 <body class="min-h-screen bg-background font-body text-ink" data-page="buscar">
   <header data-layout="navbar" aria-label="Cabecalho do site"></header>
 
-  <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-24 pt-24 md:px-8 md:pt-28">
-    <section class="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-950/85 px-6 py-8 md:px-10 md:py-10">
+  <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-20 pt-20 md:px-8 md:pb-24 md:pt-28">
+    <section class="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-zinc-950/85 px-5 py-7 md:rounded-[2.25rem] md:px-10 md:py-10">
       <div class="absolute inset-0 bg-gradient-to-r from-red-700/16 via-transparent to-white/5"></div>
       <div class="absolute right-[-10%] top-[-20%] h-72 w-72 rounded-full bg-red-500/12 blur-3xl"></div>
-      <div class="relative z-10 grid gap-6 lg:grid-cols-[1.05fr,0.95fr] lg:items-end">
+      <div class="relative z-10">
         <div class="max-w-3xl">
           <p class="text-xs uppercase tracking-[0.34em] text-red-200">Busca premium</p>
-          <h1 class="mt-4 font-display text-4xl font-extrabold leading-tight text-white md:text-6xl">Encontre o proximo filme para a sua curadoria.</h1>
-          <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 md:text-lg">
-            Explore o catalogo do TMDB, compare resultados em grade ou lista e adicione titulos manualmente sem sair da mesma atmosfera visual do CINEfy.
+          <h1 class="mt-4 font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl">Encontre o proximo filme para a sua curadoria.</h1>
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg">
+            Explore o catalogo do TMDB e adicione titulos a sua lista sem sair da mesma atmosfera visual do CINEfy.
           </p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-3">
-          <div class="glass-card rounded-[1.6rem] p-5">
-            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Fonte</p>
-            <p class="mt-3 text-2xl font-black text-white">TMDB</p>
-          </div>
-          <div class="glass-card rounded-[1.6rem] p-5">
-            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Visual</p>
-            <p class="mt-3 text-2xl font-black text-white">Grid ou lista</p>
-          </div>
-          <div class="glass-card rounded-[1.6rem] p-5">
-            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Fallback</p>
-            <p class="mt-3 text-2xl font-black text-white">Manual</p>
-          </div>
         </div>
       </div>
     </section>
@@ -85,10 +71,7 @@
           </div>
         </div>
 
-        <p class="mt-4 flex items-center gap-2 text-sm text-zinc-400" id="searchStatus">
-          <span class="material-symbols-outlined text-base">info</span>
-          Integrado em tempo real com o banco de dados do TMDB.
-        </p>
+        <p aria-live="polite" class="mt-4 min-h-[1.25rem] text-sm text-zinc-400" id="searchStatus" role="status"></p>
 
         <div class="mt-8 flex items-end justify-between gap-4">
           <div>
@@ -119,9 +102,6 @@
           </div>
           <span class="material-symbols-outlined rounded-2xl bg-white/5 p-3 text-red-300">playlist_add</span>
         </div>
-        <p class="mt-3 text-sm leading-relaxed text-zinc-400">
-          Quando o titulo ainda nao estiver indexado, voce pode incluir manualmente e manter sua lista completa.
-        </p>
 
         <form class="mt-6 space-y-4" id="manualMovieForm">
           <div class="grid gap-4 md:grid-cols-2">

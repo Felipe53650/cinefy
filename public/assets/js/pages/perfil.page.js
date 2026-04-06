@@ -89,12 +89,15 @@
       function renderProfile() {
         friends = store.loadFriends();
         profile.theme = resolveTheme(profile.theme);
+        const friendCountStat = document.getElementById("friendCountStat");
         document.getElementById("profileDisplayName").textContent = profile.displayName;
         document.getElementById("profileUsername").textContent = `@${profile.username}`;
         document.getElementById("profileBioText").textContent = profile.bio;
         document.getElementById("profileLocation").textContent = profile.location;
         document.getElementById("friendCountBadge").textContent = friends.length;
-        document.getElementById("friendCountStat").textContent = friends.length;
+        if (friendCountStat) {
+          friendCountStat.textContent = friends.length;
+        }
         avatarPreview.src = profile.avatar || defaultAvatar;
         renderFriendPreview();
         renderThemeOptions();

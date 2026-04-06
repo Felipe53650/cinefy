@@ -218,7 +218,7 @@
         document.getElementById("suggestionCount").textContent = filteredUsers.length;
         searchFeedback.textContent = term
           ? `${filteredUsers.length} usuarios encontrados para "${searchInput.value.trim()}".`
-          : "Digite para filtrar usuarios sugeridos.";
+          : "";
 
         if (!filteredUsers.length) {
           searchResults.innerHTML = `

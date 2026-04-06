@@ -29,14 +29,14 @@
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col" data-page="perfil">
 <header data-layout="navbar" aria-label="Cabecalho do site"></header>
-<main class="flex-grow pt-24 pb-28 px-4 md:px-8 max-w-7xl mx-auto w-full">
+<main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-28 md:pt-24 max-w-7xl mx-auto w-full">
 <section class="glass-card rounded-[2rem] overflow-hidden">
 <div class="h-36 md:h-44 bg-gradient-to-r from-red-700 via-red-600/50 to-zinc-900"></div>
 <div class="px-6 md:px-8 pb-8 -mt-16 relative z-10">
 <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
 <div class="flex flex-col sm:flex-row sm:items-end gap-5">
 <div class="relative">
-<img alt="Foto de perfil" class="w-32 h-32 rounded-[2rem] object-cover border-4 border-zinc-950 shadow-2xl shadow-black/40" id="profileAvatarPreview" src=""/>
+<img alt="Foto de perfil" class="h-24 w-24 rounded-[1.5rem] border-4 border-zinc-950 object-cover shadow-2xl shadow-black/40 md:h-32 md:w-32 md:rounded-[2rem]" id="profileAvatarPreview" src=""/>
 <label aria-label="Alterar foto de perfil" class="absolute -bottom-3 -right-3 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white text-black cursor-pointer shadow-lg shadow-black/40">
 <span class="material-symbols-outlined">photo_camera</span>
 <input accept="image/*" class="hidden" id="profileAvatarInput" type="file"/>
@@ -102,7 +102,7 @@
 <span class="material-symbols-outlined">save</span>
 <span>Salvar perfil</span>
 </button>
-<p aria-live="polite" class="text-sm text-zinc-400" id="profileFeedback" role="status">As alteracoes ficam salvas neste navegador.</p>
+<p aria-live="polite" class="min-h-[1.25rem] text-sm text-zinc-400" id="profileFeedback" role="status"></p>
 </div>
 </form>
 </div>
@@ -116,23 +116,8 @@
 </div>
 <span class="material-symbols-outlined text-red-300 text-3xl">palette</span>
 </div>
-<p class="mt-3 text-sm text-zinc-400">Escolha uma paleta pronta para atualizar gradiente, fundo, icones, fontes de apoio e botoes em toda a experiencia.</p>
 <div class="mt-5 grid gap-3 sm:grid-cols-2" id="themeSelectorGrid"></div>
-<p class="mt-4 text-sm text-zinc-400" id="themeFeedback">O tema ativo acompanha sua navegacao pela aplicacao.</p>
-</div>
-
-<div class="glass-card rounded-[2rem] p-6">
-<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Resumo social</p>
-<div class="mt-4 grid grid-cols-2 gap-4">
-<div class="rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4">
-<p class="text-sm text-zinc-500">Quantidade de amigos</p>
-<p class="mt-2 text-3xl font-black text-white" id="friendCountStat">0</p>
-</div>
-<div class="rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4">
-<p class="text-sm text-zinc-500">Perfil ativo</p>
-<p class="mt-2 text-3xl font-black text-white">100%</p>
-</div>
-</div>
+<p class="mt-4 min-h-[1.25rem] text-sm text-zinc-400" id="themeFeedback"></p>
 </div>
 
 <div class="glass-card rounded-[2rem] p-6">
