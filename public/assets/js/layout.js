@@ -16,10 +16,10 @@
 
   // Páginas que exigem login
   const navItems = [
-    { key: "home", label: "Inicio", href: "index.html", icon: "home" },
-    { key: "lista", label: "Minha Lista", href: "lista.html", icon: "movie_filter" },
-    { key: "buscar", label: "Buscar Filmes", href: "busca.html", icon: "search" },
-    { key: "amigos", label: "Amigos", href: "amigos.html", icon: "group" }
+    { key: "home", label: "Inicio", mobileLabel: "Home", href: "index.html", icon: "home" },
+    { key: "lista", label: "Minha Lista", mobileLabel: "Lista", href: "lista.html", icon: "movie_filter" },
+    { key: "buscar", label: "Buscar Filmes", mobileLabel: "Buscar", href: "busca.html", icon: "search" },
+    { key: "amigos", label: "Amigos", mobileLabel: "Amigos", href: "amigos.html", icon: "group" }
   ];
 
   let notifications = store ? store.loadNotifications() : [];
@@ -47,7 +47,7 @@
       return `
         <a class="flex flex-col items-center gap-1 rounded-2xl px-3 py-1.5 ${isActive ? "text-white" : "text-zinc-500 transition-colors hover:text-white"}" href="${item.href}"${ariaCurrent}>
           <span class="material-symbols-outlined ${isActive ? "text-red-300" : ""}">${item.icon}</span>
-          <span class="text-[10px] font-medium">${item.label}</span>
+          <span class="text-[10px] font-medium">${item.mobileLabel || item.label}</span>
         </a>
       `;
     }).join("");
@@ -78,24 +78,24 @@
 
   function renderNavbar() {
     return `
-      <div class="fixed inset-x-0 top-0 z-[80] px-2 pt-2 md:px-6 md:pt-3">
-        <div class="mx-auto flex h-[4.25rem] w-full max-w-7xl items-center justify-between gap-2 rounded-[1rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:rounded-[1.2rem] md:px-5">
+      <div class="cinefy-topbar fixed inset-x-0 top-0 z-[80] px-3 pt-3 md:px-6 md:pt-4">
+        <div class="cinefy-topbar__inner mx-auto flex h-[4.25rem] w-full max-w-[1440px] items-center justify-between gap-2 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
           <div class="flex min-w-0 items-center gap-4 md:gap-8">
-            <a class="min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
+            <a class="cinefy-brand min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
               CINEfy
             </a>
             <nav aria-label="Navegacao principal" class="hidden items-center gap-1.5 md:flex">
               ${buildDesktopLinks()}
             </nav>
           </div>
-          <div class="flex items-center gap-3 md:gap-4">
+          <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
             ${session ? `
             <div class="relative">
-              <button class="relative rounded-[0.95rem] border border-[#5a2b2d] bg-[#2a1516] p-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] active:scale-95" id="notificationsButton" type="button" aria-label="Notificacoes">
+              <button class="cinefy-notifications-button relative rounded-[0.95rem] border border-[#5a2b2d] bg-[#2a1516] p-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] active:scale-95" id="notificationsButton" type="button" aria-label="Notificacoes">
                 <span class="material-symbols-outlined text-zinc-300">notifications</span>
                 ${unreadCount ? `<span class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">${Math.min(unreadCount, 9)}</span>` : ""}
               </button>
-              <div aria-hidden="true" class="absolute right-0 mt-3 hidden w-[min(24rem,calc(100vw-2rem))] rounded-[1.2rem] border border-[#5a2b2d] bg-[#170c0d] p-4 shadow-[0_28px_80px_rgba(0,0,0,0.62)]" id="notificationsPanel">
+              <div aria-hidden="true" class="cinefy-notifications-panel absolute right-0 mt-3 hidden w-[min(24rem,calc(100vw-2rem))] rounded-[1.2rem] border border-[#5a2b2d] bg-[#170c0d] p-4 shadow-[0_28px_80px_rgba(0,0,0,0.62)]" id="notificationsPanel">
                 <div class="mb-4 flex items-center justify-between gap-4">
                   <div>
                     <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Central</p>
@@ -103,13 +103,13 @@
                   </div>
                   <button class="text-sm font-bold text-red-300 transition hover:text-red-200" id="markNotificationsReadButton" type="button">Marcar como lidas</button>
                 </div>
-                <div class="space-y-3 max-h-[24rem] overflow-y-auto pr-1">${buildNotifications()}</div>
+                <div class="cinefy-notifications-list space-y-3 max-h-[24rem] overflow-y-auto pr-1">${buildNotifications()}</div>
               </div>
             </div>
             ` : ''}
             ${session ? `
-            <a class="flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] px-1 py-1 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
-              <img alt="Avatar do usuario" class="h-9 w-9 rounded-full object-cover ring-1 ring-red-400/30" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
+            <a class="cinefy-profile-link flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] px-1 py-1 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
+              <img alt="Avatar do usuario" class="cinefy-profile-avatar h-9 w-9 rounded-full object-cover ring-1 ring-red-400/30" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
               <div class="hidden min-w-0 md:block">
                 <span class="block truncate text-sm font-semibold text-white">${escapeHtml(profile ? profile.displayName : "Perfil")}</span>
                 <span class="block truncate text-[11px] text-zinc-500">${escapeHtml(profile ? profile.email || `@${profile.username}` : "@cinefy")}</span>
@@ -121,7 +121,7 @@
           </div>
         </div>
       </div>
-      <nav aria-label="Navegacao principal mobile" class="fixed bottom-2 left-2 right-2 z-50 flex justify-around rounded-[1rem] border border-[#5a2b2d] bg-[#201011] py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
+      <nav aria-label="Navegacao principal mobile" class="cinefy-mobile-nav fixed bottom-2 left-2 right-2 z-50 flex justify-around rounded-[1rem] border border-[#5a2b2d] bg-[#201011] py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
         ${buildMobileLinks()}
       </nav>
     `;
@@ -129,8 +129,8 @@
 
   function renderFooter() {
     return `
-      <div class="mt-auto px-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-8 md:px-6 md:pb-10 md:pt-10">
-        <div class="mx-auto w-full max-w-7xl rounded-[1.5rem] border border-white/10 bg-zinc-950/78 px-4 py-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:rounded-[2rem]">
+      <div class="cinefy-footer-shell mt-auto px-3 pb-[calc(6.75rem+env(safe-area-inset-bottom))] pt-10 md:px-6 md:pb-12 md:pt-14">
+        <div class="cinefy-footer-shell__inner mx-auto w-full max-w-[1440px] rounded-[2rem] border border-white/10 bg-zinc-950/78 px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:px-7 md:py-6">
           <a class="inline-block text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500" href="index.html">CINEfy</a>
           <nav aria-label="Rodape" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
             <a class="text-zinc-500 transition-colors hover:text-red-400" href="index.html">Inicio</a>

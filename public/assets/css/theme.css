@@ -155,10 +155,13 @@ body[data-page="cadastro"] {
 
 .glass-card,
 .glass-panel,
-.section-shell {
+.section-shell,
+.soft-card,
+.auth-shell {
   background: linear-gradient(180deg, rgb(var(--theme-surface-rgb) / 0.84), rgb(var(--theme-surface-rgb) / 0.68)) !important;
   border-color: rgb(var(--theme-outline-rgb) / 0.18) !important;
   box-shadow: 0 24px 70px rgb(0 0 0 / 0.28);
+  border-radius: 2rem !important;
 }
 
 .auth-shell {
@@ -585,12 +588,161 @@ body[data-page="cadastro"] {
   border-radius: 999px;
 }
 
+header[data-layout="navbar"],
+footer[data-layout="footer"] {
+  display: block;
+  width: 100%;
+}
+
+body[data-page="home"] main,
+body[data-page="buscar"] main,
+body[data-page="lista"] main,
+body[data-page="perfil"] main,
+body[data-page="amigos"] main,
+body[data-page="modoleitor"] main,
+body[data-page="404"] main {
+  width: min(1440px, calc(100vw - 2rem));
+  max-width: none !important;
+  margin-inline: auto;
+}
+
+body[data-page="detalhes"] .max-w-7xl,
+body[data-page="home"] .max-w-7xl,
+body[data-page="buscar"] .max-w-7xl,
+body[data-page="lista"] .max-w-7xl,
+body[data-page="perfil"] .max-w-7xl,
+body[data-page="amigos"] .max-w-7xl,
+body[data-page="modoleitor"] .max-w-7xl {
+  max-width: 1440px !important;
+}
+
+.cinefy-topbar__inner,
+.cinefy-footer-shell__inner {
+  border-color: rgb(var(--theme-outline-rgb) / 0.46) !important;
+}
+
+.cinefy-mobile-nav {
+  z-index: 72;
+}
+
+.cinefy-mobile-nav a {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.cinefy-profile-avatar {
+  flex-shrink: 0;
+}
+
+.cinefy-notifications-panel {
+  overflow: hidden;
+}
+
+.cinefy-footer-shell {
+  margin-top: clamp(2.25rem, 5vw, 4rem);
+}
+
+@media (min-width: 1024px) {
+  .glass-card,
+  .glass-panel,
+  .section-shell,
+  .soft-card,
+  .auth-shell {
+    border-radius: 2.25rem !important;
+  }
+}
+
 @media (max-width: 767px) {
   .glass-card,
   .glass-panel,
   .section-shell,
   .auth-shell {
     box-shadow: 0 18px 44px rgb(0 0 0 / 0.24) !important;
+  }
+
+  body[data-page="home"] main,
+  body[data-page="buscar"] main,
+  body[data-page="lista"] main,
+  body[data-page="perfil"] main,
+  body[data-page="amigos"] main,
+  body[data-page="modoleitor"] main,
+  body[data-page="404"] main {
+    width: min(100%, calc(100vw - 1rem));
+  }
+
+  .cinefy-topbar {
+    padding: 0.7rem 0.75rem 0 !important;
+  }
+
+  .cinefy-topbar__inner {
+    min-height: 4.6rem;
+    padding-inline: 0.95rem !important;
+    border-radius: 1.6rem !important;
+  }
+
+  .cinefy-brand {
+    font-size: 2rem !important;
+  }
+
+  .cinefy-topbar__actions {
+    gap: 0.6rem !important;
+  }
+
+  .cinefy-notifications-button {
+    padding: 0.78rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .cinefy-profile-link {
+    padding: 0.28rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .cinefy-profile-avatar {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+  }
+
+  .cinefy-notifications-panel {
+    position: fixed !important;
+    top: 5.7rem !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    width: auto !important;
+    max-height: min(62vh, 32rem) !important;
+    margin-top: 0 !important;
+    border-radius: 1.6rem !important;
+    z-index: 85;
+  }
+
+  .cinefy-notifications-list {
+    max-height: min(46vh, 22rem) !important;
+  }
+
+  .cinefy-mobile-nav {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    bottom: calc(env(safe-area-inset-bottom) + 0.65rem) !important;
+    border-radius: 1.35rem !important;
+    padding: 0.6rem 0.25rem !important;
+  }
+
+  .cinefy-mobile-nav a {
+    padding-inline: 0.2rem !important;
+    padding-block: 0.2rem !important;
+  }
+
+  .cinefy-mobile-nav .material-symbols-outlined {
+    font-size: 1.35rem;
+  }
+
+  .cinefy-mobile-nav span:last-child {
+    font-size: 0.66rem !important;
+    line-height: 1.15;
+  }
+
+  .cinefy-footer-shell {
+    padding-top: 2.5rem !important;
   }
 
   .theme-choice {
@@ -600,5 +752,17 @@ body[data-page="cadastro"] {
 
   .theme-choice__desc {
     font-size: 0.84rem;
+  }
+}
+
+@media (min-width: 768px) {
+  body[data-page="home"] main,
+  body[data-page="buscar"] main,
+  body[data-page="lista"] main,
+  body[data-page="perfil"] main,
+  body[data-page="amigos"] main,
+  body[data-page="modoleitor"] main,
+  body[data-page="404"] main {
+    width: min(1480px, calc(100vw - 3rem));
   }
 }

@@ -30,29 +30,29 @@
 <body class="bg-background text-on-background min-h-screen flex flex-col" data-page="perfil">
 <header data-layout="navbar" aria-label="Cabecalho do site"></header>
 <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-28 md:pt-24 max-w-7xl mx-auto w-full">
-<section class="glass-card rounded-[2rem] overflow-hidden">
-<div class="h-36 md:h-44 bg-gradient-to-r from-red-700 via-red-600/50 to-zinc-900"></div>
-<div class="px-6 md:px-8 pb-8 -mt-16 relative z-10">
-<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+<section class="glass-card profile-hero-shell rounded-[2rem] overflow-hidden">
+<div class="profile-hero-cover h-36 md:h-44 bg-gradient-to-r from-red-700 via-red-600/50 to-zinc-900"></div>
+<div class="profile-hero-body px-6 md:px-8 pb-8 -mt-16 relative z-10">
+<div class="profile-hero-row flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
 <div class="flex flex-col sm:flex-row sm:items-end gap-5">
 <div class="relative">
-<img alt="Foto de perfil" class="h-24 w-24 rounded-[1.5rem] border-4 border-zinc-950 object-cover shadow-2xl shadow-black/40 md:h-32 md:w-32 md:rounded-[2rem]" id="profileAvatarPreview" src=""/>
-<label aria-label="Alterar foto de perfil" class="absolute -bottom-3 -right-3 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white text-black cursor-pointer shadow-lg shadow-black/40">
+<img alt="Foto de perfil" class="rounded-[1.5rem] border-4 border-zinc-950 object-cover shadow-2xl shadow-black/40 md:rounded-[2rem]" id="profileAvatarPreview" src=""/>
+<label aria-label="Alterar foto de perfil" class="profile-avatar-trigger absolute -bottom-3 -right-3 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white text-black cursor-pointer shadow-lg shadow-black/40">
 <span class="material-symbols-outlined">photo_camera</span>
 <input accept="image/*" class="hidden" id="profileAvatarInput" type="file"/>
 </label>
 </div>
-<div>
+<div class="profile-hero-copy">
 <h1 class="mt-2 text-3xl md:text-5xl font-bold text-white font-display" id="profileDisplayName">Felipe Martins</h1>
 <p class="mt-2 text-zinc-300 text-lg" id="profileUsername">@felipecine</p>
 <p class="mt-4 text-zinc-400 max-w-2xl leading-relaxed" id="profileBioText"></p>
-<div class="mt-4 flex flex-wrap gap-3 text-sm">
+<div class="profile-hero-chips mt-4 flex flex-wrap gap-3 text-sm">
 <span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200" id="profileLocation"></span>
 <span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200"><span id="friendCountBadge">0</span> amigos</span>
 </div>
 </div>
 </div>
-<div class="flex flex-wrap gap-3">
+<div class="profile-hero-actions flex flex-wrap gap-3">
 <button class="inline-flex items-center gap-2 rounded-full border border-red-500/40 text-red-200 hover:bg-red-500/10 px-5 py-3 font-bold transition-all active:scale-95" id="removeAvatarButton" type="button">
 <span class="material-symbols-outlined">delete</span>
 <span>Remover foto</span>

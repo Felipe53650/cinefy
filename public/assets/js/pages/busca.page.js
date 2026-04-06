@@ -115,12 +115,12 @@
                   <span class="mt-1 inline-block text-xs uppercase tracking-[0.2em] text-zinc-500">${releaseYear}</span>
                   <p class="mt-3 text-sm leading-relaxed text-zinc-400 ${currentView === "list" ? "line-clamp-4" : "line-clamp-3"}">${escapeHtml(movie.overview || "Sem sinopse disponivel no TMDB.")}</p>
                 </div>
-                <div class="mt-5 grid grid-cols-2 gap-2">
-                  <a class="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-white/[0.08]" href="detalhes.html?id=${encodeURIComponent(String(movie.id || ""))}">
+                <div class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <a class="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white transition hover:bg-white/[0.08]" href="detalhes.html?id=${encodeURIComponent(String(movie.id || ""))}">
                     <span class="material-symbols-outlined text-sm">open_in_new</span>
                     Detalhes
                   </a>
-                  <button class="flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-red-600" data-add-movie="${escapeAttribute(JSON.stringify(movie))}" type="button">
+                  <button class="flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-600" data-add-movie="${escapeAttribute(JSON.stringify(movie))}" type="button">
                     <span class="material-symbols-outlined text-sm">add</span>
                     Minha Lista
                   </button>
@@ -344,7 +344,7 @@
       function applyViewMode() {
         resultsGrid.className = currentView === "list"
           ? "mt-6 grid grid-cols-1 gap-4"
-          : "mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4";
+          : "mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3";
 
         updateViewButtonState(gridViewButton, currentView === "grid");
         updateViewButtonState(listViewButton, currentView === "list");

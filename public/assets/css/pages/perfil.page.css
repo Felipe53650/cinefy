@@ -15,3 +15,77 @@
         box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
       }
 
+      #profileAvatarPreview {
+        width: 8rem;
+        height: 8rem;
+      }
+
+      @media (min-width: 768px) {
+        #profileAvatarPreview {
+          width: 9rem;
+          height: 9rem;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .profile-hero-cover {
+          height: 6.75rem;
+        }
+
+        .profile-hero-body {
+          padding-inline: 1.35rem;
+          padding-bottom: 1.75rem;
+          margin-top: -3rem;
+        }
+
+        .profile-hero-row {
+          gap: 1.4rem;
+        }
+
+        .profile-hero-copy {
+          width: 100%;
+        }
+
+        #profileDisplayName {
+          font-size: clamp(2.1rem, 10vw, 2.9rem);
+          line-height: 0.98;
+        }
+
+        #profileUsername {
+          font-size: 1rem;
+        }
+
+        #profileBioText {
+          max-width: none;
+          font-size: 1rem;
+          line-height: 1.7;
+        }
+
+        .profile-hero-chips {
+          gap: 0.6rem;
+        }
+
+        .profile-hero-chips > span {
+          display: inline-flex;
+          align-items: center;
+          width: 100%;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .profile-hero-actions {
+          display: grid;
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+
+        .profile-hero-actions > * {
+          justify-content: center;
+        }
+
+        .profile-avatar-trigger {
+          width: 3rem;
+          height: 3rem;
+        }
+      }
+
