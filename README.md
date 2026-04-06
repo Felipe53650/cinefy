@@ -32,6 +32,17 @@ Hoje a aplicacao conta com autenticacao, perfil de usuario, multiplas listas, am
 - temas visuais personalizaveis
 - modo leitor para listas compartilhadas
 
+## Screenshots
+
+<p align="center">
+  <img src="public/assets/img/screenshots/home.png" alt="Home do CINEfy" width="90%">
+</p>
+
+<p align="center">
+  <img src="public/assets/img/screenshots/login.png" alt="Tela de login do CINEfy" width="44%">
+  <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do CINEfy" width="44%">
+</p>
+
 ## Stack
 
 - HTML, CSS e JavaScript vanilla
