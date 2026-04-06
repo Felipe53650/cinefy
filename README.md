@@ -1,18 +1,33 @@
-﻿# CINEfy
+# CINEfy
 
-CINEfy e uma aplicacao web para descobrir filmes, montar listas personalizadas, compartilhar recomendacoes e manter um perfil social com autenticacao via Firebase.
+<p align="center">
+  <img src="public/assets/img/logo.png" alt="Logo do CINEfy" width="180">
+</p>
 
-## Visao Geral
+<p align="center">
+  Plataforma web para descobrir filmes, montar listas personalizadas, compartilhar recomendacoes e manter um perfil social com autenticacao via Firebase.
+</p>
 
-O projeto combina curadoria pessoal com descoberta de filmes. O usuario pode navegar como anonimo na home, criar conta, montar listas proprias, compartilhar listas por link, gerenciar pedidos de amizade e personalizar o tema visual da experiencia.
+<p align="center">
+  <a href="https://cinefy3-83a9a.web.app">Demo online</a>
+  ·
+  <a href="https://github.com/Felipe53650/cinefy">Repositorio</a>
+</p>
 
-## Principais Funcionalidades
+## Sobre o projeto
 
-- autenticacao com email/senha, Google e Facebook
-- perfil de usuario com avatar, bio e preferencias
+O CINEfy combina curadoria pessoal com descoberta de filmes. A experiencia foi pensada para permitir que qualquer usuario entre pela home como anonimo, descubra a proposta do produto e, se quiser, siga para login, cadastro, criacao de listas e compartilhamento de recomendacoes.
+
+Hoje a aplicacao conta com autenticacao, perfil de usuario, multiplas listas, amizades, compartilhamento por link e integracao com o TMDB para busca e detalhes de filmes.
+
+## Destaques
+
+- autenticacao com email e senha, Google e Facebook
+- home publica com navegacao para usuarios anonimos
+- perfil com avatar, bio e preferencias
 - multiplas listas personalizadas por usuario
 - compartilhamento publico de listas por link
-- busca e detalhes de filmes com dados do TMDB
+- busca de filmes e detalhes via TMDB
 - sistema de amizades e pedidos entre usuarios
 - temas visuais personalizaveis
 - modo leitor para listas compartilhadas
@@ -26,11 +41,11 @@ O projeto combina curadoria pessoal com descoberta de filmes. O usuario pode nav
 - Cloud Firestore
 - TMDB API
 
-## Estrutura do Projeto
+## Estrutura
 
 ```text
 public/                 paginas e assets do front-end
-public/assets/js/       autenticacao, estado global, layout e paginas
+public/assets/js/       autenticacao, estado global, layout e scripts por pagina
 public/assets/css/      estilos globais, temas e CSS compilado
 functions/              base para funcoes serverless futuras
 firestore.rules         regras do Firestore
@@ -38,19 +53,22 @@ storage.rules           regras do Storage
 firebase.json           configuracao do Hosting e headers
 ```
 
-## Como Rodar Localmente
+## Rodando localmente
 
 1. Instale as dependencias:
+
 ```powershell
 npm install
 ```
 
 2. Gere o CSS:
+
 ```powershell
 npm run build:css
 ```
 
-3. Sirva a pasta `public` ou use o Firebase Emulator:
+3. Rode pelo Firebase Emulator:
+
 ```powershell
 firebase emulators:start --only hosting
 ```
@@ -65,11 +83,11 @@ Para publicar no Firebase Hosting:
 firebase deploy --only "hosting,firestore:rules"
 ```
 
-## Estado Atual da Arquitetura
+## Arquitetura atual
 
-Hoje o projeto usa Firebase como BaaS. Isso significa que ja existe autenticacao, banco e hospedagem, mas ainda nao ha um backend proprio ativo para encapsular chamadas externas como o TMDB. A base para Cloud Functions ja existe e pode ser ativada no futuro, especialmente se voce migrar para o plano Blaze.
+Hoje o projeto usa Firebase como BaaS. Isso significa que autenticacao, banco e hospedagem ja estao ativos sem um backend tradicional proprio. A base para Cloud Functions ja existe no repositorio e pode ser ativada no futuro para encapsular integracoes externas, como o TMDB, quando a infraestrutura migrar para Blaze.
 
-## Roadmap Tecnico Natural
+## Proximos passos naturais
 
 - mover a chave do TMDB para Cloud Functions
 - salvar imagens reais no Firebase Storage
