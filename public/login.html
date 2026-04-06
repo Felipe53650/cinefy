@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CINEfy - Login</title>
+  <meta name="description" content="Entre no CINEfy para acessar sua lista, perfil e descobertas de filmes."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="theme-color" content="#e83b24"/>
+  <link rel="canonical" href="https://cinefy3-83a9a.web.app/login"/>
+  <meta property="og:title" content="CINEfy - Login"/>
+  <meta property="og:description" content="Entre no CINEfy para acessar sua lista, perfil e descobertas de filmes."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://cinefy3-83a9a.web.app/login"/>
+  <meta property="og:image" content="/assets/img/logo.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="CINEfy - Login"/>
+  <meta name="twitter:description" content="Entre no CINEfy para acessar sua lista, perfil e descobertas de filmes."/>
+  <meta name="twitter:image" content="/assets/img/logo.png"/>
+  <link rel="icon" type="image/png" href="/assets/img/logo.png"/>
+  <script src="assets/js/theme.js"></script>
+  <link href="assets/css/tailwind.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700" rel="stylesheet"/>
+  <link href="assets/css/pages/login.page.css" rel="stylesheet"/>
+  <link href="assets/css/theme.css" rel="stylesheet"/>
+</head>
+<body class="text-cine-text font-body antialiased" data-page="login">
+  <main class="min-h-screen px-4 py-8 md:px-8 flex items-center justify-center">
+    <section class="auth-shell w-full max-w-5xl rounded-[2rem] overflow-hidden">
+      <div class="grid min-h-[720px] md:min-h-[680px] lg:grid-cols-[1.15fr,0.85fr]">
+        <div class="auth-stage relative flex items-end p-8 sm:p-10 lg:p-12">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+          <div class="relative z-10 max-w-md">
+            <a class="inline-block text-5xl sm:text-6xl font-extrabold italic tracking-tight text-red-600 font-display" href="index.html">CINEfy</a>
+            <div class="mt-10 space-y-3">
+              <p class="text-sm uppercase tracking-[0.35em] text-white/60">Boas-vindas</p>
+              <h1 class="text-4xl sm:text-5xl font-extrabold leading-none font-display" id="presentationTitle">Cinéfilo.</h1>
+              <p class="max-w-sm text-lg text-cine-muted leading-relaxed" id="presentationText">Organize listas, compartilhe recomendacoes e descubra filmes com uma experiencia mais refinada e cinematografica.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-panel px-6 py-8 sm:px-10 sm:py-10 lg:px-12 flex items-center">
+          <div class="w-full">
+            <div class="text-center">
+              <h2 class="mt-3 text-4xl sm:text-5xl font-bold font-display">Entrar</h2>
+            </div>
+
+            <form class="mt-10 space-y-4" id="loginForm">
+              <label class="field flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all">
+                <span class="sr-only">Email</span>
+                <span class="material-symbols-outlined text-white/72">mail</span>
+                <input autocomplete="email" class="w-full border-none bg-transparent p-0 text-base text-white placeholder:text-white/55 focus:outline-none focus:ring-0" id="email" placeholder="Email" required type="email"/>
+              </label>
+
+              <label class="field flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all">
+                <span class="sr-only">Senha</span>
+                <span class="material-symbols-outlined text-white/72">lock</span>
+                <input autocomplete="current-password" class="w-full border-none bg-transparent p-0 text-base text-white placeholder:text-white/55 focus:outline-none focus:ring-0" id="password" placeholder="Password" required type="password"/>
+                <button aria-label="Mostrar ou ocultar senha" class="toggle-password text-white/72 transition hover:text-white" data-target="password" type="button">
+                  <span class="material-symbols-outlined">visibility_off</span>
+                </button>
+              </label>
+
+              <div class="flex items-center justify-between gap-4 text-sm text-white/70">
+                <label class="inline-flex items-center gap-2">
+                  <input class="rounded border-white/20 bg-white/10 text-red-500 focus:ring-red-500" type="checkbox"/>
+                  <span>Lembrar meu acesso</span>
+                </label>
+                <button class="transition hover:text-white" id="forgotPasswordButton" type="button">Esqueci minha senha</button>
+              </div>
+
+              <p aria-live="polite" class="hidden rounded-2xl border border-red-300/20 bg-red-950/40 px-4 py-3 text-sm text-red-100" id="loginFeedback" role="status"></p>
+
+              <button class="w-full rounded-2xl bg-gradient-to-r from-cine-red to-cine-red-deep px-4 py-4 text-lg font-bold text-white transition hover:brightness-110 active:scale-[0.99]" type="submit">
+                Entrar
+              </button>
+            </form>
+
+            <div class="my-7 flex items-center gap-4 text-sm text-white/50">
+              <span class="h-px flex-1 bg-white/12"></span>
+              <span>ou continue com</span>
+              <span class="h-px flex-1 bg-white/12"></span>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <button class="social-button flex items-center justify-center gap-3 rounded-2xl px-4 py-3.5 font-semibold text-white transition" data-provider="google" type="button">
+                <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24">
+                  <path d="M21.805 10.023H12v3.955h5.62c-.242 1.29-.967 2.384-2.061 3.111v2.584h3.337c1.953-1.799 3.084-4.449 3.084-7.6 0-.688-.059-1.35-.175-2.05Z" fill="#4285F4"/>
+                  <path d="M12 22c2.805 0 5.159-.93 6.878-2.327l-3.337-2.584c-.928.623-2.113.995-3.541.995-2.723 0-5.03-1.838-5.855-4.307H2.698v2.664A9.997 9.997 0 0 0 12 22Z" fill="#34A853"/>
+                  <path d="M6.145 13.777A5.996 5.996 0 0 1 5.818 12c0-.617.109-1.217.327-1.777V7.559H2.698A9.996 9.996 0 0 0 2 12c0 1.61.386 3.13 1.07 4.441l3.075-2.664Z" fill="#FBBC05"/>
+                  <path d="M12 5.916c1.523 0 2.89.523 3.966 1.549l2.975-2.974C17.154 2.826 14.8 2 12 2A9.997 9.997 0 0 0 2.698 7.559l3.447 2.664C6.97 7.754 9.277 5.916 12 5.916Z" fill="#EA4335"/>
+                </svg>
+                <span>Google</span>
+              </button>
+              <button class="social-button flex items-center justify-center gap-3 rounded-2xl px-4 py-3.5 font-semibold text-white transition" data-provider="facebook" type="button">
+                <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24">
+                  <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.025 4.388 11.019 10.125 11.927v-8.437H7.078v-3.49h3.047V9.412c0-3.007 1.792-4.669 4.533-4.669 1.313 0 2.686.236 2.686.236v2.953h-1.514c-1.49 0-1.956.926-1.956 1.874v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.092 24 18.098 24 12.073Z" fill="#1877F2"/>
+                </svg>
+                <span>Facebook</span>
+              </button>
+            </div>
+
+            <p class="mt-8 text-center text-sm text-white/70">
+              Ainda nao tem conta?
+              <a class="font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:text-red-200" href="cadastro.html">Criar cadastro</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="assets/js/app-state.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/pages/login.page.js"></script>
+</body>
+</html>
+
+

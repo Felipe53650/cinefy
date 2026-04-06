@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CINEfy - Inicio</title>
+  <meta name="description" content="Organize listas, compartilhe recomendacoes e descubra filmes com uma experiencia premium no CINEfy."/>
+  <meta name="robots" content="index,follow"/>
+  <meta name="theme-color" content="#e83b24"/>
+  <link rel="canonical" href="https://cinefy3-83a9a.web.app/"/>
+  <meta property="og:title" content="CINEfy"/>
+  <meta property="og:description" content="Organize listas, compartilhe recomendacoes e descubra filmes com uma experiencia premium no CINEfy."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://cinefy3-83a9a.web.app/"/>
+  <meta property="og:image" content="/assets/img/logo.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="CINEfy"/>
+  <meta name="twitter:description" content="Organize listas, compartilhe recomendacoes e descubra filmes com uma experiencia premium no CINEfy."/>
+  <meta name="twitter:image" content="/assets/img/logo.png"/>
+  <link rel="icon" type="image/png" href="/assets/img/logo.png"/>
+  <script src="assets/js/theme.js"></script>
+  <link href="assets/css/tailwind.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="assets/css/pages/index.page.css" rel="stylesheet"/>
+  <link href="assets/css/theme.css" rel="stylesheet"/>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "CINEfy",
+      "url": "https://cinefy3-83a9a.web.app/",
+      "description": "Organize listas, compartilhe recomendacoes e descubra filmes com uma experiencia premium no CINEfy."
+    }
+  </script>
+</head>
+<body class="bg-background-dark font-body text-slate-100 antialiased" data-page="home">
+  <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+
+  <main class="mx-auto max-w-[1440px] px-4 pb-24 pt-24 md:px-8 md:pt-28">
+    <section class="relative mb-8 overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-950/80">
+      <img alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover" id="heroBackdrop" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80"/>
+      <div class="absolute inset-0 bg-gradient-to-r from-[#120808] via-[#120808]/72 to-[#120808]/20"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-[#120808] via-[#120808]/40 to-transparent"></div>
+      <div class="absolute right-[-5%] top-[-10%] h-72 w-72 rounded-full bg-red-500/15 blur-3xl"></div>
+      <div class="relative z-10 grid min-h-[620px] gap-8 px-6 pb-8 pt-24 md:px-10 lg:grid-cols-[1.1fr,0.9fr] lg:items-end">
+        <div class="max-w-3xl">
+          <div class="mb-5 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.26em]">
+            <span class="rounded-full bg-primary px-4 py-2 text-white">Em destaque</span>
+            <span class="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-zinc-200" id="heroMetaPrimary">TMDB</span>
+            <span class="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-zinc-200" id="heroMetaSecondary">Carregando</span>
+          </div>
+          <p class="text-sm uppercase tracking-[0.35em] text-zinc-400">Cinema em estado de vitrine</p>
+          <h1 class="mt-4 max-w-4xl font-display text-4xl font-extrabold leading-[0.95] text-white md:text-7xl" id="heroTitle">Carregando catalogo</h1>
+          <p class="mt-5 max-w-2xl text-base leading-relaxed text-zinc-300 md:text-xl" id="heroOverview">
+            Buscando os destaques mais recentes direto do TMDB para montar sua home em tempo real.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-deep px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110" href="busca.html" id="heroDetailsLink">
+              <span class="material-symbols-outlined fill-icon">play_arrow</span>
+              Ver detalhes
+            </a>
+            <button class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-7 py-3.5 text-sm font-bold text-white transition hover:bg-white/16" id="heroListButton" type="button">
+              <span class="material-symbols-outlined">add</span>
+              Adicionar a Minha Lista
+            </button>
+          </div>
+          <p aria-live="polite" class="mt-4 text-sm font-medium text-red-200" id="homeFeedback" role="status"></p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+          <div class="glass-panel rounded-[1.75rem] p-5">
+            <p class="text-xs uppercase tracking-[0.26em] text-zinc-500">Curadoria</p>
+            <p class="mt-3 text-2xl font-black text-white">12 coleções</p>
+            <p class="mt-2 text-sm leading-relaxed text-zinc-400">Destaques, favoritos e listas pessoais em um fluxo mais editorial.</p>
+          </div>
+          <div class="glass-panel rounded-[1.75rem] p-5">
+            <p class="text-xs uppercase tracking-[0.26em] text-zinc-500">Ritmo</p>
+            <p class="mt-3 text-2xl font-black text-white">Tempo real</p>
+            <p class="mt-2 text-sm leading-relaxed text-zinc-400">Integração com TMDB para explorar filmes com visual de plataforma premium.</p>
+          </div>
+          <div class="glass-panel rounded-[1.75rem] p-5">
+            <p class="text-xs uppercase tracking-[0.26em] text-zinc-500">Sua lista</p>
+            <p class="mt-3 text-2xl font-black text-white">Pronta para compartilhar</p>
+            <p class="mt-2 text-sm leading-relaxed text-zinc-400">Adicione filmes da home e transforme a navegação em uma curadoria própria.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-10 grid gap-4 lg:grid-cols-[1.3fr,0.7fr]">
+      <div class="section-shell rounded-[2rem] p-6 md:p-7">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Radar CINEfy</p>
+            <h2 class="mt-2 font-display text-2xl font-bold text-white">Uma home mais cinematografica e organizada</h2>
+          </div>
+          <span class="material-symbols-outlined rounded-2xl bg-white/5 p-3 text-red-300">theaters</span>
+        </div>
+        <p class="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-400">
+          Navegue pelos destaques da semana, acompanhe os melhores avaliados e mantenha sua curadoria sempre por perto sem sair da mesma atmosfera visual.
+        </p>
+      </div>
+      <div class="section-shell rounded-[2rem] p-6 md:p-7">
+        <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Atalho</p>
+        <a class="mt-3 inline-flex items-center gap-2 text-lg font-black text-white transition hover:text-red-300" href="busca.html">
+          <span class="material-symbols-outlined">travel_explore</span>
+          Buscar novos filmes
+        </a>
+        <p class="mt-3 text-sm leading-relaxed text-zinc-400">Quando quiser expandir sua lista, vá direto para a busca com o mesmo acabamento visual da home.</p>
+      </div>
+    </section>
+
+    <div class="space-y-10">
+      <section class="section-shell rounded-[2rem] p-5 md:p-6">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="h-7 w-1 rounded-full bg-primary"></div>
+            <div>
+              <h2 class="font-display text-2xl font-bold tracking-tight text-white">Em destaque</h2>
+              <p class="text-sm text-zinc-400">Selecao semanal em scroller horizontal</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-4 overflow-x-auto pb-3" id="featuredScroller"></div>
+      </section>
+
+      <section class="section-shell rounded-[2rem] p-5 md:p-6">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="h-7 w-1 rounded-full bg-primary"></div>
+            <div>
+              <h2 class="font-display text-2xl font-bold tracking-tight text-white">Melhores avaliados</h2>
+              <p class="text-sm text-zinc-400">Os filmes mais bem pontuados do TMDB</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-4 overflow-x-auto pb-3" id="topRatedScroller"></div>
+      </section>
+
+      <section class="section-shell rounded-[2rem] p-5 md:p-6">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="h-7 w-1 rounded-full bg-primary"></div>
+            <div>
+              <h2 class="font-display text-2xl font-bold tracking-tight text-white">Sua Lista</h2>
+              <p class="text-sm text-zinc-400">Os filmes que voce ja separou para rever, indicar ou guardar</p>
+            </div>
+          </div>
+          <a class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-red-200 transition hover:bg-white/10" href="lista.html">Gerenciar</a>
+        </div>
+        <div class="flex gap-4 overflow-x-auto pb-3" id="myListScroller"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer data-layout="footer" aria-label="Rodape do site"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="assets/js/app-state.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api-tmdb.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/pages/index.page.js"></script>
+</body>
+</html>
+
+

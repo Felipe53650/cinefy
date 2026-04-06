@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CINEfy - Perfil</title>
+<meta name="description" content="Gerencie seu perfil, bio, avatar e rede social de filmes no CINEfy."/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#e83b24"/>
+<link rel="canonical" href="https://cinefy3-83a9a.web.app/perfil"/>
+<meta property="og:title" content="CINEfy - Perfil"/>
+<meta property="og:description" content="Gerencie seu perfil, bio, avatar e rede social de filmes no CINEfy."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://cinefy3-83a9a.web.app/perfil"/>
+<meta property="og:image" content="/assets/img/logo.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="CINEfy - Perfil"/>
+<meta name="twitter:description" content="Gerencie seu perfil, bio, avatar e rede social de filmes no CINEfy."/>
+<meta name="twitter:image" content="/assets/img/logo.png"/>
+<link rel="icon" type="image/png" href="/assets/img/logo.png"/>
+<script src="assets/js/theme.js"></script>
+<link href="assets/css/tailwind.css" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="assets/css/pages/perfil.page.css" rel="stylesheet"/>
+<link href="assets/css/theme.css" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col" data-page="perfil">
+<header data-layout="navbar" aria-label="Cabecalho do site"></header>
+<main class="flex-grow pt-24 pb-28 px-4 md:px-8 max-w-7xl mx-auto w-full">
+<section class="glass-card rounded-[2rem] overflow-hidden">
+<div class="h-36 md:h-44 bg-gradient-to-r from-red-700 via-red-600/50 to-zinc-900"></div>
+<div class="px-6 md:px-8 pb-8 -mt-16 relative z-10">
+<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+<div class="flex flex-col sm:flex-row sm:items-end gap-5">
+<div class="relative">
+<img alt="Foto de perfil" class="w-32 h-32 rounded-[2rem] object-cover border-4 border-zinc-950 shadow-2xl shadow-black/40" id="profileAvatarPreview" src=""/>
+<label aria-label="Alterar foto de perfil" class="absolute -bottom-3 -right-3 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white text-black cursor-pointer shadow-lg shadow-black/40">
+<span class="material-symbols-outlined">photo_camera</span>
+<input accept="image/*" class="hidden" id="profileAvatarInput" type="file"/>
+</label>
+</div>
+<div>
+<h1 class="mt-2 text-3xl md:text-5xl font-bold text-white font-display" id="profileDisplayName">Felipe Martins</h1>
+<p class="mt-2 text-zinc-300 text-lg" id="profileUsername">@felipecine</p>
+<p class="mt-4 text-zinc-400 max-w-2xl leading-relaxed" id="profileBioText"></p>
+<div class="mt-4 flex flex-wrap gap-3 text-sm">
+<span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200" id="profileLocation"></span>
+<span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200"><span id="friendCountBadge">0</span> amigos</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="inline-flex items-center gap-2 rounded-full border border-red-500/40 text-red-200 hover:bg-red-500/10 px-5 py-3 font-bold transition-all active:scale-95" id="removeAvatarButton" type="button">
+<span class="material-symbols-outlined">delete</span>
+<span>Remover foto</span>
+</button>
+<a class="inline-flex items-center gap-2 rounded-full border border-zinc-700 text-zinc-100 hover:bg-zinc-800 px-5 py-3 font-bold transition-all active:scale-95" href="amigos.html">
+<span class="material-symbols-outlined">group</span>
+<span>Gerenciar amigos</span>
+</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-200 px-5 py-3 font-black transition-all active:scale-95" id="logoutButton" type="button">
+<span class="material-symbols-outlined">logout</span>
+<span>Sair</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+
+<section class="mt-8 grid items-start lg:grid-cols-[1.1fr,0.9fr] gap-6">
+<div class="glass-card self-start rounded-[2rem] p-6 md:p-8">
+<div class="flex items-center justify-between gap-4">
+<div>
+<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Editar perfil</p>
+<h2 class="mt-2 text-2xl font-black text-white">Suas informações públicas</h2>
+</div>
+<span class="material-symbols-outlined text-red-400 text-3xl">edit_square</span>
+</div>
+<form class="mt-6 grid gap-4 md:grid-cols-2" id="profileForm">
+<label>
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Nome de exibicao</span>
+<input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="displayNameInput" maxlength="40" required type="text"/>
+</label>
+<label>
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Nome de usuario</span>
+<input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="usernameInput" maxlength="24" required type="text"/>
+</label>
+<label class="md:col-span-2">
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Bio</span>
+<textarea class="mt-2 w-full min-h-28 rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="bioInput" maxlength="180"></textarea>
+</label>
+<label class="md:col-span-2">
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Localizacao</span>
+<input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="locationInput" list="brazilLocationSuggestions" maxlength="40" placeholder="Digite sua cidade" type="text"/>
+<datalist id="brazilLocationSuggestions"></datalist>
+</label>
+<div class="md:col-span-2 flex flex-wrap items-center gap-3">
+<button class="inline-flex items-center gap-2 rounded-full bg-red-600 hover:bg-red-700 text-white px-5 py-3 font-bold transition-all active:scale-95" type="submit">
+<span class="material-symbols-outlined">save</span>
+<span>Salvar perfil</span>
+</button>
+<p aria-live="polite" class="text-sm text-zinc-400" id="profileFeedback" role="status">As alteracoes ficam salvas neste navegador.</p>
+</div>
+</form>
+</div>
+
+<div class="space-y-6">
+<div class="glass-card rounded-[2rem] p-6">
+<div class="flex items-center justify-between gap-4">
+<div>
+<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Tema visual</p>
+<h2 class="mt-2 text-2xl font-black text-white">Mude a identidade do site</h2>
+</div>
+<span class="material-symbols-outlined text-red-300 text-3xl">palette</span>
+</div>
+<p class="mt-3 text-sm text-zinc-400">Escolha uma paleta pronta para atualizar gradiente, fundo, icones, fontes de apoio e botoes em toda a experiencia.</p>
+<div class="mt-5 grid gap-3 sm:grid-cols-2" id="themeSelectorGrid"></div>
+<p class="mt-4 text-sm text-zinc-400" id="themeFeedback">O tema ativo acompanha sua navegacao pela aplicacao.</p>
+</div>
+
+<div class="glass-card rounded-[2rem] p-6">
+<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Resumo social</p>
+<div class="mt-4 grid grid-cols-2 gap-4">
+<div class="rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4">
+<p class="text-sm text-zinc-500">Quantidade de amigos</p>
+<p class="mt-2 text-3xl font-black text-white" id="friendCountStat">0</p>
+</div>
+<div class="rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4">
+<p class="text-sm text-zinc-500">Perfil ativo</p>
+<p class="mt-2 text-3xl font-black text-white">100%</p>
+</div>
+</div>
+</div>
+
+<div class="glass-card rounded-[2rem] p-6">
+<div class="flex items-center justify-between gap-4">
+<div>
+<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Amigos recentes</p>
+<h2 class="mt-2 text-2xl font-black text-white">Sua rede no CINEfy</h2>
+</div>
+<a class="text-sm font-bold text-red-300 hover:text-red-200" href="amigos.html">Ver tudo</a>
+</div>
+<div class="mt-5 space-y-3" id="friendPreviewList"></div>
+<div class="hidden rounded-2xl bg-zinc-950/60 border border-zinc-800 p-6 text-center" id="emptyFriendPreview">
+<span class="material-symbols-outlined text-red-300 text-4xl">group_off</span>
+<p class="mt-3 text-zinc-300">Voce ainda nao adicionou amigos.</p>
+<a class="mt-4 inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 font-bold" href="amigos.html">
+<span class="material-symbols-outlined">person_add</span>
+<span>Encontrar usuarios</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer data-layout="footer" aria-label="Rodape do site"></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script src="assets/js/app-state.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/pages/perfil.page.js"></script>
+</body>
+</html>
+
+

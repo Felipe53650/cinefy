@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /cadastro
+Disallow: /perfil
+Disallow: /lista
+Disallow: /amigos
+Disallow: /404
+Disallow: /modoleitor
+
+Sitemap: https://cinefy3-83a9a.web.app/sitemap.xml

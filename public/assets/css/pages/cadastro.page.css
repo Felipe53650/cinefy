@@ -1,0 +1,50 @@
+﻿:root {
+      --cine-bg: url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80");
+    }
+
+    body {
+      font-family: "Outfit", sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.16), transparent 18%),
+        linear-gradient(135deg, rgba(9, 6, 6, 0.82), rgba(47, 10, 6, 0.72)),
+        var(--cine-bg) center/cover no-repeat fixed;
+    }
+
+    .auth-shell {
+      background: rgba(18, 8, 8, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 36px 90px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-stage {
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.5)),
+        var(--cine-bg) center/cover no-repeat;
+    }
+
+    .form-panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+      backdrop-filter: blur(22px);
+    }
+
+    .field {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .field:focus-within {
+      border-color: rgba(255, 193, 177, 0.7);
+      box-shadow: 0 0 0 3px rgba(223, 45, 24, 0.16);
+    }
+
+    .social-button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .social-button:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+

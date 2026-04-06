@@ -1,0 +1,69 @@
+﻿const loginForm = document.getElementById("loginForm");
+    const loginFeedback = document.getElementById("loginFeedback");
+    const forgotPasswordButton = document.getElementById("forgotPasswordButton");
+
+    function showFeedback(message, type = "error") {
+      loginFeedback.textContent = message;
+      loginFeedback.classList.remove("hidden", "border-red-300/20", "bg-red-950/40", "text-red-100", "border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100");
+
+      if (type === "success") {
+        loginFeedback.classList.add("border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100");
+      } else {
+        loginFeedback.classList.add("border-red-300/20", "bg-red-950/40", "text-red-100");
+      }
+    }
+
+    if (typeof window.consumeAuthFlash === "function") {
+      const authFlash = window.consumeAuthFlash();
+      if (authFlash && authFlash.message) {
+        showFeedback(authFlash.message, authFlash.type || "success");
+      }
+    }
+
+    document.querySelectorAll(".toggle-password").forEach((button) => {
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.target);
+        const icon = button.querySelector(".material-symbols-outlined");
+        const nextType = input.type === "password" ? "text" : "password";
+        input.type = nextType;
+        icon.textContent = nextType === "password" ? "visibility_off" : "visibility";
+      });
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginFeedback.classList.add("hidden");
+
+      try {
+        await window.login(
+          document.getElementById("email").value.trim(),
+          document.getElementById("password").value
+        );
+      } catch (error) {
+        showFeedback(error.message || "Nao foi possivel entrar agora.");
+      }
+    });
+
+    forgotPasswordButton.addEventListener("click", async () => {
+      loginFeedback.classList.add("hidden");
+
+      try {
+        await window.resetPassword(document.getElementById("email").value.trim());
+        showFeedback("Enviamos um e-mail com instrucoes para redefinir sua senha.", "success");
+      } catch (error) {
+        showFeedback(error.message || "Nao foi possivel iniciar a recuperacao de senha.");
+      }
+    });
+
+    document.querySelectorAll("[data-provider]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        loginFeedback.classList.add("hidden");
+
+        try {
+          await window.loginWithProvider(button.dataset.provider);
+        } catch (error) {
+          showFeedback(error.message || "Nao foi possivel autenticar com esse provedor.");
+        }
+      });
+    });
+

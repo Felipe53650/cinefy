@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CINEfy - Buscar</title>
+  <meta name="description" content="Busque filmes no TMDB, compare resultados e adicione titulos a sua lista no CINEfy."/>
+  <meta name="robots" content="index,follow"/>
+  <meta name="theme-color" content="#e83b24"/>
+  <link rel="canonical" href="https://cinefy3-83a9a.web.app/busca"/>
+  <meta property="og:title" content="CINEfy - Buscar Filmes"/>
+  <meta property="og:description" content="Busque filmes no TMDB, compare resultados e adicione titulos a sua lista no CINEfy."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://cinefy3-83a9a.web.app/busca"/>
+  <meta property="og:image" content="/assets/img/logo.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="CINEfy - Buscar Filmes"/>
+  <meta name="twitter:description" content="Busque filmes no TMDB, compare resultados e adicione titulos a sua lista no CINEfy."/>
+  <meta name="twitter:image" content="/assets/img/logo.png"/>
+  <link rel="icon" type="image/png" href="/assets/img/logo.png"/>
+  <script src="assets/js/theme.js"></script>
+  <link href="assets/css/tailwind.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="assets/css/pages/busca.page.css" rel="stylesheet"/>
+  <link href="assets/css/theme.css" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-background font-body text-ink" data-page="buscar">
+  <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+
+  <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-24 pt-24 md:px-8 md:pt-28">
+    <section class="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-950/85 px-6 py-8 md:px-10 md:py-10">
+      <div class="absolute inset-0 bg-gradient-to-r from-red-700/16 via-transparent to-white/5"></div>
+      <div class="absolute right-[-10%] top-[-20%] h-72 w-72 rounded-full bg-red-500/12 blur-3xl"></div>
+      <div class="relative z-10 grid gap-6 lg:grid-cols-[1.05fr,0.95fr] lg:items-end">
+        <div class="max-w-3xl">
+          <p class="text-xs uppercase tracking-[0.34em] text-red-200">Busca premium</p>
+          <h1 class="mt-4 font-display text-4xl font-extrabold leading-tight text-white md:text-6xl">Encontre o proximo filme para a sua curadoria.</h1>
+          <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-300 md:text-lg">
+            Explore o catalogo do TMDB, compare resultados em grade ou lista e adicione titulos manualmente sem sair da mesma atmosfera visual do CINEfy.
+          </p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="glass-card rounded-[1.6rem] p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Fonte</p>
+            <p class="mt-3 text-2xl font-black text-white">TMDB</p>
+          </div>
+          <div class="glass-card rounded-[1.6rem] p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Visual</p>
+            <p class="mt-3 text-2xl font-black text-white">Grid ou lista</p>
+          </div>
+          <div class="glass-card rounded-[1.6rem] p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Fallback</p>
+            <p class="mt-3 text-2xl font-black text-white">Manual</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid items-start gap-6 xl:grid-cols-[1.5fr,0.7fr]">
+      <div class="glass-card rounded-[2rem] p-6 md:p-8">
+        <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Pesquisa de catalogo</p>
+            <h2 class="mt-2 font-display text-2xl font-bold text-white">Busque por titulo e refine a descoberta</h2>
+          </div>
+          <div class="flex gap-2 self-start">
+            <button class="rounded-2xl border border-white/10 px-3 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white" data-view-toggle="grid" id="gridViewButton" type="button">
+              <span class="material-symbols-outlined">grid_view</span>
+            </button>
+            <button class="rounded-2xl border border-white/10 px-3 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white" data-view-toggle="list" id="listViewButton" type="button">
+              <span class="material-symbols-outlined">view_list</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-[1.75rem] border border-white/10 bg-black/20 p-3">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">search</span>
+            <label class="sr-only" for="movieSearchInput">Buscar filmes no TMDB</label>
+            <input class="w-full rounded-[1.35rem] border border-white/8 bg-white/[0.04] py-4 pl-12 pr-32 text-white placeholder:text-zinc-500 focus:border-red-500 focus:ring-red-500" id="movieSearchInput" placeholder="Buscar filmes no TMDB..." type="text"/>
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 rounded-[1rem] bg-gradient-to-r from-primary to-primary-deep px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-110" id="movieSearchButton" type="button">Buscar</button>
+          </div>
+        </div>
+
+        <p class="mt-4 flex items-center gap-2 text-sm text-zinc-400" id="searchStatus">
+          <span class="material-symbols-outlined text-base">info</span>
+          Integrado em tempo real com o banco de dados do TMDB.
+        </p>
+
+        <div class="mt-8 flex items-end justify-between gap-4">
+          <div>
+            <h3 class="text-xl font-black text-white">Resultados</h3>
+            <p class="text-zinc-500" id="resultsSubtitle">Exibindo os filmes mais populares</p>
+          </div>
+        </div>
+
+        <div class="mt-6 hidden rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-8 text-center" id="loadingState">
+          <span class="material-symbols-outlined animate-pulse text-5xl text-red-400">progress_activity</span>
+          <p class="mt-4 font-bold text-zinc-200">Buscando no TMDB...</p>
+        </div>
+
+        <div class="mt-6 hidden rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-8 text-center" id="emptyState">
+          <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
+          <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
+          <p class="mt-2 text-zinc-500">Tente outro titulo ou adicione manualmente ao lado.</p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" id="resultsGrid"></div>
+      </div>
+
+      <div class="glass-card h-fit self-start rounded-[2rem] p-6 md:p-8">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.24em] text-red-200">Manual</p>
+            <h2 class="mt-2 font-display text-2xl font-bold text-white">Adicionar filme fora do TMDB</h2>
+          </div>
+          <span class="material-symbols-outlined rounded-2xl bg-white/5 p-3 text-red-300">playlist_add</span>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-zinc-400">
+          Quando o titulo ainda nao estiver indexado, voce pode incluir manualmente e manter sua lista completa.
+        </p>
+
+        <form class="mt-6 space-y-4" id="manualMovieForm">
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Titulo</span>
+              <input class="mt-2 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="manualTitleInput" placeholder="Ex: Meu Filme Indie" required type="text"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Ano</span>
+              <input class="mt-2 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="manualYearInput" max="2100" min="1900" placeholder="2024" required type="number"/>
+            </label>
+          </div>
+          <label class="block">
+            <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Genero</span>
+            <input class="mt-2 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="manualGenreInput" placeholder="Drama" required type="text"/>
+          </label>
+          <label class="block">
+            <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Nota</span>
+            <input class="mt-2 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="manualRatingInput" max="5" min="0" placeholder="4.5" step="0.1" type="number"/>
+          </label>
+          <label class="block">
+            <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Comentario rapido</span>
+            <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="manualNoteInput" maxlength="180" placeholder="Descreva por que esse filme merece entrar na sua lista."></textarea>
+          </label>
+
+          <div class="soft-card rounded-[1.6rem] p-4">
+            <label class="block text-xs uppercase tracking-[0.2em] text-zinc-500">Poster</label>
+            <button aria-controls="manualPosterInput" class="mt-3 w-full rounded-[1.35rem] border-2 border-dashed border-white/10 p-8 text-center transition hover:border-red-500/40 focus-visible:border-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50" id="posterUploadBox" type="button">
+              <span class="material-symbols-outlined text-4xl text-zinc-500">cloud_upload</span>
+              <p class="mt-3 text-sm text-zinc-300">Arraste uma imagem ou <span class="text-red-300">clique aqui</span></p>
+              <p class="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">PNG, JPG ou WEBP</p>
+              <p class="mt-3 text-xs text-zinc-500" id="posterUploadFeedback">Nenhum poster selecionado.</p>
+            </button>
+            <input accept="image/png,image/jpeg,image/webp" class="hidden" id="manualPosterInput" type="file"/>
+          </div>
+
+          <p aria-live="polite" class="hidden rounded-2xl border border-emerald-300/20 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-100" id="manualMovieFeedback" role="status"></p>
+
+          <button class="w-full rounded-full bg-gradient-to-r from-primary to-primary-deep px-5 py-4 font-bold text-white transition hover:brightness-110" type="submit">
+            Salvar na Minha Lista
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer data-layout="footer" aria-label="Rodape do site"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+  <script src="assets/js/app-state.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api-tmdb.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/pages/busca.page.js"></script>
+</body>
+</html>
+
+

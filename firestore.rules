@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function hasNotificationRelationship(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId)/friend_requests/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/users/$(userId)/friends/$(request.auth.uid));
+    }
+
+    function isNotificationsPayload() {
+      return request.resource.data.keys().hasOnly(["value", "updatedAt"]) &&
+        request.resource.data.value is list &&
+        request.resource.data.value.size() <= 40;
+    }
+
+    match /users/{userId} {
+      allow create: if isSelf(userId);
+      allow read: if isSignedIn();
+      allow update, delete: if isSelf(userId);
+    }
+
+    match /users/{userId}/app_state/{documentId} {
+      allow read: if isSelf(userId);
+      allow write: if isSelf(userId);
+      allow write: if documentId == "notifications" &&
+        isSignedIn() &&
+        hasNotificationRelationship(userId) &&
+        isNotificationsPayload();
+    }
+
+    match /users/{userId}/friends/{friendId} {
+      allow read: if isSelf(userId);
+      allow create, update, delete: if isSignedIn() && (request.auth.uid == userId || request.auth.uid == friendId);
+    }
+
+    match /users/{userId}/friend_requests/{senderId} {
+      allow read: if isSelf(userId);
+      allow create: if isSignedIn() && request.auth.uid == senderId;
+      allow delete: if isSignedIn() && (
+        request.auth.uid == userId ||
+        request.auth.uid == senderId
+      );
+    }
+
+    match /users/{userId}/outgoing_requests/{recipientId} {
+      allow read: if isSelf(userId);
+      allow create, update: if isSelf(userId);
+      allow delete: if isSignedIn() && (
+        request.auth.uid == userId ||
+        request.auth.uid == recipientId
+      );
+    }
+
+    match /shared_lists/{shareId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn() &&
+        resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
