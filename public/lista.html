@@ -201,6 +201,16 @@
 <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="moviePosterUrl" placeholder="https://..." type="url"/>
 </label>
 </div>
+<div class="poster-preview-shell flex items-center gap-4 rounded-[1.35rem] border border-zinc-800 bg-black/20 p-3">
+<div class="poster-preview-frame overflow-hidden rounded-[1rem] border border-white/10 bg-zinc-900/90">
+<img alt="Previa do poster selecionado" class="h-full w-full object-cover" id="moviePosterPreviewImage" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80"/>
+</div>
+<div class="min-w-0 flex-1">
+<p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Previa do poster</p>
+<p class="mt-2 text-sm font-bold text-white" id="moviePosterPreviewTitle">Poster padrao</p>
+<p class="mt-1 text-sm text-zinc-400" id="moviePosterPreviewMeta">Sera usado se nenhuma imagem for enviada.</p>
+</div>
+</div>
 </div>
 </div>
 <p aria-live="polite" class="min-h-[1.25rem] text-sm text-zinc-400" id="movieFormFeedback" role="status"></p>
@@ -243,4 +253,3 @@
 <script src="assets/js/pages/lista.page.js"></script>
 </body>
 </html>
-

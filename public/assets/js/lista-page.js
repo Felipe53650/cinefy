@@ -27,11 +27,15 @@
   const moviePosterDropzone = document.getElementById("moviePosterDropzone");
   const moviePosterFeedback = document.getElementById("moviePosterFeedback");
   const movieFormFeedback = document.getElementById("movieFormFeedback");
+  const moviePosterPreviewImage = document.getElementById("moviePosterPreviewImage");
+  const moviePosterPreviewTitle = document.getElementById("moviePosterPreviewTitle");
+  const moviePosterPreviewMeta = document.getElementById("moviePosterPreviewMeta");
   const posterModeButtons = Array.from(document.querySelectorAll("[data-poster-mode]"));
   const posterPanels = Array.from(document.querySelectorAll("[data-poster-panel]"));
 
   let manualPosterMode = "upload";
   let manualPosterFile = null;
+  let manualPosterPreviewUrl = "";
 
   document.getElementById("copyShareButton").addEventListener("click", copyShareLink);
   document.getElementById("resetListButton").addEventListener("click", resetList);
@@ -53,8 +57,10 @@
   moviePosterDropzone.addEventListener("dragleave", handlePosterDragLeave);
   moviePosterDropzone.addEventListener("drop", handlePosterDrop);
   moviePosterFileInput.addEventListener("change", handlePosterInputChange);
+  moviePosterUrlInput.addEventListener("input", handlePosterUrlPreview);
 
   setPosterMode("upload");
+  updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
   render();
 
   function getCurrentProfile() {
@@ -475,6 +481,18 @@
     posterPanels.forEach((panel) => {
       panel.classList.toggle("hidden", panel.dataset.posterPanel !== manualPosterMode);
     });
+
+    if (manualPosterMode === "url") {
+      handlePosterUrlPreview();
+      return;
+    }
+
+    if (manualPosterFile && manualPosterPreviewUrl) {
+      updatePosterPreview(manualPosterPreviewUrl, "Arquivo selecionado", manualPosterFile.name);
+      return;
+    }
+
+    updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
   }
 
   function handlePosterInputChange(event) {
@@ -515,9 +533,12 @@
     manualPosterFile = file;
     moviePosterFeedback.textContent = `Poster selecionado: ${file.name}`;
     setMovieFormFeedback("");
+    setPosterMode("upload");
+    setPreviewFromFile(file);
   }
 
   function clearPosterSelection() {
+    resetPreviewObjectUrl();
     manualPosterFile = null;
     moviePosterFileInput.value = "";
     if (moviePosterUrlInput) {
@@ -525,6 +546,7 @@
     }
     moviePosterFeedback.textContent = "Nenhum poster selecionado.";
     moviePosterDropzone.classList.remove("border-red-500");
+    updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
   }
 
   async function resolveManualPoster() {
@@ -568,6 +590,37 @@
   function setMovieFormFeedback(message) {
     if (!movieFormFeedback) return;
     movieFormFeedback.textContent = message || "";
+  }
+
+  function handlePosterUrlPreview() {
+    if (manualPosterMode !== "url") return;
+
+    const posterUrl = sanitizePosterUrl(moviePosterUrlInput.value);
+    if (!posterUrl) {
+      updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Cole uma URL valida para ver a previa.");
+      return;
+    }
+
+    updatePosterPreview(posterUrl, "Poster por URL", "Previa carregada a partir do link informado.");
+  }
+
+  function setPreviewFromFile(file) {
+    resetPreviewObjectUrl();
+    manualPosterPreviewUrl = URL.createObjectURL(file);
+    updatePosterPreview(manualPosterPreviewUrl, "Arquivo selecionado", file.name);
+  }
+
+  function updatePosterPreview(src, title, meta) {
+    if (!moviePosterPreviewImage) return;
+    moviePosterPreviewImage.src = src || DEFAULT_POSTER;
+    moviePosterPreviewTitle.textContent = title || "Poster padrao";
+    moviePosterPreviewMeta.textContent = meta || "Sera usado se nenhuma imagem for enviada.";
+  }
+
+  function resetPreviewObjectUrl() {
+    if (!manualPosterPreviewUrl) return;
+    URL.revokeObjectURL(manualPosterPreviewUrl);
+    manualPosterPreviewUrl = "";
   }
 
   function sanitizePosterUrl(value) {

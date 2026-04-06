@@ -30,3 +30,9 @@
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018));
       }
 
+      .poster-preview-frame {
+        width: 4.5rem;
+        min-width: 4.5rem;
+        aspect-ratio: 2 / 3;
+      }
+
