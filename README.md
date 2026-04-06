@@ -1,7 +1,7 @@
 # CINEfy
 
 <p align="center">
-  <img src="public/assets/img/logo.png" alt="Logo do CINEfy" width="180">
+  <img src="public/assets/img/github-cover.svg" alt="Capa do projeto CINEfy" width="100%">
 </p>
 
 <p align="center">
@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://cinefy3-83a9a.web.app">Demo online</a>
-  ·
+  &middot;
   <a href="https://github.com/Felipe53650/cinefy">Repositorio</a>
 </p>
 
@@ -19,6 +19,24 @@
 O CINEfy combina curadoria pessoal com descoberta de filmes. A experiencia foi pensada para permitir que qualquer usuario entre pela home como anonimo, descubra a proposta do produto e, se quiser, siga para login, cadastro, criacao de listas e compartilhamento de recomendacoes.
 
 Hoje a aplicacao conta com autenticacao, perfil de usuario, multiplas listas, amizades, compartilhamento por link e integracao com o TMDB para busca e detalhes de filmes.
+
+## Para recrutadores e avaliadores
+
+Este projeto demonstra:
+
+- construcao de produto completo com foco em experiencia do usuario, autenticacao e navegacao publica/privada
+- integracao real com Firebase Auth, Cloud Firestore, Hosting e login social
+- organizacao de front-end em JavaScript vanilla com estado global, scripts por pagina e temas customizaveis
+- evolucao tecnica continua com melhorias em acessibilidade, SEO tecnico, seguranca de front-end e estrutura de deploy
+- capacidade de transformar um prototipo em aplicacao mais consistente, com compartilhamento de listas, sistema social e documentacao de projeto
+
+## O que foi trabalhado tecnicamente
+
+- correcoes de fluxo de autenticacao e persistencia de sessao
+- implementacao de multiplas listas e compartilhamento por link
+- sistema de temas aplicado globalmente na interface
+- revisao de CSP, headers, semantica HTML, foco visivel e feedback acessivel
+- build local de Tailwind, organizacao de assets e melhoria do repositorio para apresentacao
 
 ## Destaques
 

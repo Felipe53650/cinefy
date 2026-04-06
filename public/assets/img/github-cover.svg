@@ -1,0 +1,57 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="92" y1="58" x2="1176" y2="604" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B1215"/>
+      <stop offset="0.52" stop-color="#16090C"/>
+      <stop offset="1" stop-color="#090506"/>
+    </linearGradient>
+    <radialGradient id="glowLeft" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(297 132) rotate(38.1) scale(398 247)">
+      <stop stop-color="#FF7A55" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#FF7A55" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowRight" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1027 486) rotate(180) scale(413 289)">
+      <stop stop-color="#CE2C1A" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#CE2C1A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F35D3D"/>
+      <stop offset="1" stop-color="#A61D10"/>
+    </linearGradient>
+    <filter id="blur" x="-120" y="-120" width="1520" height="880" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="640" rx="36" fill="url(#bg)"/>
+  <rect width="1280" height="640" rx="36" fill="url(#glowLeft)"/>
+  <rect width="1280" height="640" rx="36" fill="url(#glowRight)"/>
+
+  <g opacity="0.8" filter="url(#blur)">
+    <circle cx="1097" cy="145" r="102" fill="#2A0E12"/>
+    <circle cx="177" cy="520" r="128" fill="#391418"/>
+  </g>
+
+  <rect x="730" y="126" width="390" height="252" rx="28" fill="#14090A" fill-opacity="0.76" stroke="#FFFFFF" stroke-opacity="0.14"/>
+  <rect x="758" y="156" width="334" height="22" rx="11" fill="#261113"/>
+  <rect x="758" y="200" width="274" height="92" rx="22" fill="url(#accent)" fill-opacity="0.18" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <rect x="758" y="314" width="154" height="16" rx="8" fill="#F7E5DE" fill-opacity="0.92"/>
+  <rect x="758" y="342" width="214" height="12" rx="6" fill="#D5B6AE" fill-opacity="0.55"/>
+  <rect x="758" y="392" width="334" height="94" rx="22" fill="#12070A" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <rect x="786" y="420" width="128" height="36" rx="18" fill="url(#accent)"/>
+    <rect x="930" y="420" width="132" height="36" rx="18" fill="#231114" stroke="#FFFFFF" stroke-opacity="0.12"/>
+
+  <text x="92" y="158" fill="#F4F4F5" font-family="Segoe UI, Arial, sans-serif" font-size="24" letter-spacing="0.3em">CINEFY</text>
+  <text x="92" y="260" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="92" font-weight="700">Descoberta, listas</text>
+  <text x="92" y="354" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="92" font-weight="700">e recomendacao</text>
+  <text x="92" y="432" fill="#D8C3BD" font-family="Segoe UI, Arial, sans-serif" font-size="32">Uma plataforma web de filmes com autenticacao, listas compartilhaveis</text>
+  <text x="92" y="476" fill="#D8C3BD" font-family="Segoe UI, Arial, sans-serif" font-size="32">e experiencia social construida com Firebase e JavaScript vanilla.</text>
+
+  <g>
+    <rect x="92" y="530" width="180" height="44" rx="22" fill="url(#accent)"/>
+    <text x="182" y="559" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Firebase</text>
+    <rect x="286" y="530" width="212" height="44" rx="22" fill="#231114" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="392" y="559" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">JavaScript Vanilla</text>
+    <rect x="512" y="530" width="166" height="44" rx="22" fill="#231114" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="595" y="559" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">TMDB API</text>
+  </g>
+</svg>
