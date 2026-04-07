@@ -50,7 +50,7 @@
     #floatingMovieSearchInput:focus-visible,
     #floatingMovieSearchButton:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 2px rgba(232, 59, 36, 0.35);
+      box-shadow: 0 0 0 2px rgb(var(--theme-accent-rgb) / 0.35);
     }
 
     body[data-page="buscar"] .glass-card,
@@ -68,12 +68,12 @@
     .filter-dropdown-panel {
       background:
         linear-gradient(180deg, rgba(31, 14, 15, 0.88), rgba(31, 14, 15, 0.72)),
-        radial-gradient(circle at top right, rgba(232, 59, 36, 0.12), transparent 38%);
+        radial-gradient(circle at top right, rgb(var(--theme-accent-rgb) / 0.12), transparent 38%);
     }
 
     .filter-trigger.is-open {
-      border-color: rgba(232, 59, 36, 0.32);
-      background: rgba(232, 59, 36, 0.09);
+      border-color: rgb(var(--theme-accent-rgb) / 0.32);
+      background: rgb(var(--theme-accent-rgb) / 0.09);
       color: #fff;
     }
 
@@ -105,22 +105,22 @@
     }
 
     .filter-option:hover {
-      border-color: rgba(232, 59, 36, 0.28);
+      border-color: rgb(var(--theme-accent-rgb) / 0.28);
       background: rgba(255, 255, 255, 0.045);
       color: #fff;
       transform: translateY(-1px);
     }
 
     .filter-option:has(input:checked) {
-      border-color: rgba(232, 59, 36, 0.42);
-      background: rgba(232, 59, 36, 0.12);
+      border-color: rgb(var(--theme-accent-rgb) / 0.42);
+      background: rgb(var(--theme-accent-rgb) / 0.12);
       color: #fff;
     }
 
     .filter-option:has(input:checked)::after {
-      border-color: rgba(232, 59, 36, 0.9);
-      background: rgba(232, 59, 36, 0.18);
-      box-shadow: inset 0 0 0 0.25rem rgba(232, 59, 36, 1);
+      border-color: rgb(var(--theme-accent-rgb) / 0.9);
+      background: rgb(var(--theme-accent-rgb) / 0.18);
+      box-shadow: inset 0 0 0 0.25rem rgb(var(--theme-accent-rgb));
     }
 
     @media (max-width: 639px) {
