@@ -60,7 +60,6 @@
               </div>
             </div>
             <h3 class="line-clamp-1 text-base font-bold text-white transition group-hover:text-red-300">${escapeHtml(movie.title)}</h3>
-            <p class="mt-1 text-xs text-zinc-400 sm:text-sm">Selecao em destaque.</p>
           </a>
         </article>
       `).join("");
