@@ -5,9 +5,11 @@
     const heroListButtonIcon = document.getElementById("heroListButtonIcon");
     const heroListButtonLabel = document.getElementById("heroListButtonLabel");
     const homeFeedback = document.getElementById("homeFeedback");
+    const recommendationsSubtitle = document.getElementById("recommendationsSubtitle");
 
     heroListButton.addEventListener("click", toggleHeroMovieInList);
     window.addEventListener("cinefy:list-updated", handleListUpdated);
+    window.addEventListener("cinefy:reviews-updated", handleReviewsUpdated);
 
     loadHome();
 
@@ -30,6 +32,7 @@
         store.syncCatalogNotifications(featured.slice(0, 10));
         renderMovieScroller("featuredScroller", featured.slice(0, 12));
         renderMovieScroller("topRatedScroller", topRated.slice(0, 12));
+        await renderRecommendedScroller();
         renderMyListScroller(myList);
       } catch (error) {
         console.error("Erro ao carregar a home do TMDB:", error);
@@ -110,6 +113,127 @@
       }).join("");
     }
 
+    async function renderRecommendedScroller() {
+      const container = document.getElementById("recommendedScroller");
+      if (!container) return;
+
+      try {
+        const recommendations = await buildPersonalizedRecommendations();
+
+        if (!recommendations.length) {
+          recommendationsSubtitle.textContent = "Avalie ou adicione filmes para desbloquear sugestoes personalizadas.";
+          container.innerHTML = `
+            <div class="w-full rounded-[1.75rem] border border-dashed border-zinc-700 bg-zinc-950/50 p-8 text-center">
+              <p class="text-lg font-bold text-white">Sua home aprende com voce.</p>
+              <p class="mt-2 text-zinc-400">Salve filmes na lista ou avalie alguns titulos para eu sugerir proximos passos com mais personalidade.</p>
+              <a class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-black transition hover:bg-zinc-200" href="busca.html">
+                <span class="material-symbols-outlined">search</span>
+                Explorar catalogo
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        recommendationsSubtitle.textContent = "Sugestoes geradas com base nas suas notas mais altas e nos filmes da sua lista.";
+        renderMovieScroller("recommendedScroller", recommendations.slice(0, 12));
+      } catch (error) {
+        console.error("Erro ao montar recomendacoes personalizadas:", error);
+        recommendationsSubtitle.textContent = "Nao foi possivel montar recomendacoes agora.";
+        container.innerHTML = `
+          <div class="w-full rounded-[1.75rem] border border-dashed border-zinc-700 bg-zinc-950/50 p-8 text-center">
+            <p class="text-lg font-bold text-white">As recomendacoes nao puderam ser carregadas.</p>
+            <p class="mt-2 text-zinc-400">Tente novamente daqui a pouco enquanto consultamos o TMDB.</p>
+          </div>
+        `;
+      }
+    }
+
+    async function buildPersonalizedRecommendations() {
+      const listState = store.loadListState();
+      const reviews = store.loadReviews();
+      const savedMovies = Array.isArray(listState.movies) ? listState.movies : [];
+      const savedTmdbIds = new Set(
+        savedMovies
+          .map((movie) => String(movie.tmdbId || "").trim())
+          .filter(Boolean)
+      );
+
+      const seedScores = new Map();
+
+      savedMovies.forEach((movie) => {
+        const tmdbId = String(movie.tmdbId || "").trim();
+        if (!tmdbId) return;
+
+        const baseScore = 1.2 + Math.max(0, Number(movie.rating || 0)) * 0.35;
+        const noteBoost = movie.note ? Math.min(movie.note.length / 120, 0.55) : 0;
+        seedScores.set(tmdbId, (seedScores.get(tmdbId) || 0) + baseScore + noteBoost);
+      });
+
+      Object.entries(reviews || {}).forEach(([key, review]) => {
+        const match = /^tmdb-(\d+)$/.exec(String(key || ""));
+        if (!match) return;
+
+        const tmdbId = match[1];
+        const rating = Number(review && review.rating);
+        const commentBoost = review && review.comment ? Math.min(review.comment.length / 140, 0.75) : 0;
+        const normalizedRating = Number.isFinite(rating) ? rating : 0;
+        const reviewScore = normalizedRating >= 4
+          ? 2 + normalizedRating * 0.6 + commentBoost
+          : normalizedRating >= 3
+            ? 0.9 + normalizedRating * 0.25 + commentBoost * 0.5
+            : 0;
+
+        if (reviewScore > 0) {
+          seedScores.set(tmdbId, (seedScores.get(tmdbId) || 0) + reviewScore);
+        }
+      });
+
+      const sortedSeeds = [...seedScores.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4);
+
+      if (!sortedSeeds.length) {
+        return [];
+      }
+
+      const recommendationBuckets = await Promise.allSettled(
+        sortedSeeds.map(async ([tmdbId, weight]) => {
+          const movies = await window.TMDB.getMovieRecommendations(tmdbId);
+          return { weight, movies };
+        })
+      );
+
+      const combined = new Map();
+
+      recommendationBuckets
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .forEach(({ weight, movies }) => {
+        movies.forEach((movie, index) => {
+          if (!movie || !movie.id) return;
+          if (savedTmdbIds.has(String(movie.id))) return;
+
+          const positionScore = Math.max(0, 12 - index) * 0.22;
+          const ratingScore = Number(movie.vote_average || 0) * 0.16;
+          const recencyScore = getReleaseRecencyScore(movie.release_date);
+          const totalScore = weight + positionScore + ratingScore + recencyScore;
+          const existing = combined.get(movie.id);
+
+          if (!existing || totalScore > existing.score) {
+            combined.set(movie.id, {
+              movie,
+              score: totalScore
+            });
+          }
+        });
+      });
+
+      return [...combined.values()]
+        .sort((a, b) => b.score - a.score)
+        .map((entry) => entry.movie);
+    }
+
     function toggleHeroMovieInList() {
       if (!heroMovie) return;
 
@@ -168,6 +292,11 @@
 
       renderMyListScroller(state.movies || []);
       syncHeroListButtonState(state);
+      renderRecommendedScroller();
+    }
+
+    function handleReviewsUpdated() {
+      renderRecommendedScroller();
     }
 
     function formatYear(releaseDate) {
@@ -176,6 +305,15 @@
 
     function formatRating(voteAverage) {
       return typeof voteAverage === "number" ? voteAverage.toFixed(1) : "N/A";
+    }
+
+    function getReleaseRecencyScore(releaseDate) {
+      const year = Number(String(releaseDate || "").slice(0, 4));
+      if (!Number.isFinite(year)) return 0;
+
+      const currentYear = new Date().getFullYear();
+      const delta = Math.max(0, currentYear - year);
+      return Math.max(0, 1.1 - delta * 0.08);
     }
 
     function escapeHtml(value) {

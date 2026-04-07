@@ -111,6 +111,40 @@ html[data-cinefy-theme="golden-age"] {
   --theme-glow-rgb: 255 240 190;
 }
 
+html[data-cinefy-theme="noir"] .bg-gradient-to-r.from-primary.to-primary-deep,
+html[data-cinefy-theme="noir"] .bg-gradient-to-r.from-primary.to-red-900,
+html[data-cinefy-theme="noir"] .bg-primary.text-white,
+html[data-cinefy-theme="noir"] .bg-cine-red.text-white,
+html[data-cinefy-theme="noir"] .bg-red-600.text-white,
+html[data-cinefy-theme="noir"] .bg-red-700.text-white,
+html[data-cinefy-theme="noir"] .signin-submit-button,
+html[data-cinefy-theme="noir"] .hero-list-button.is-added,
+html[data-cinefy-theme="noir"] .details-list-button.is-added {
+  background-image: none !important;
+  background-color: rgb(102 102 109) !important;
+  border-color: rgb(244 244 245 / 0.22) !important;
+  color: rgb(255 255 255) !important;
+  box-shadow: 0 18px 36px rgb(0 0 0 / 0.22) !important;
+}
+
+html[data-cinefy-theme="noir"] .hover\:bg-red-500:hover,
+html[data-cinefy-theme="noir"] .hover\:bg-red-600:hover,
+html[data-cinefy-theme="noir"] .hover\:bg-red-700:hover,
+html[data-cinefy-theme="noir"] .bg-gradient-to-r.from-primary.to-primary-deep:hover,
+html[data-cinefy-theme="noir"] .bg-gradient-to-r.from-primary.to-red-900:hover,
+html[data-cinefy-theme="noir"] .bg-primary.text-white:hover,
+html[data-cinefy-theme="noir"] .bg-red-600.text-white:hover,
+html[data-cinefy-theme="noir"] .bg-red-700.text-white:hover,
+html[data-cinefy-theme="noir"] .signin-submit-button:hover,
+html[data-cinefy-theme="noir"] .hero-list-button.is-added:hover,
+html[data-cinefy-theme="noir"] .details-list-button.is-added:hover {
+  background-image: none !important;
+  background-color: rgb(124 124 132) !important;
+  border-color: rgb(255 255 255 / 0.32) !important;
+  color: rgb(255 255 255) !important;
+  filter: none !important;
+}
+
 html {
   color-scheme: dark;
 }

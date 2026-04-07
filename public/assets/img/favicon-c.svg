@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cinefyFaviconGradient" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e83b24"/>
+      <stop offset="1" stop-color="#9f170d"/>
+    </linearGradient>
+  </defs>
+  <text
+    x="32"
+    y="46"
+    text-anchor="middle"
+    font-family="Sora, Outfit, Arial, sans-serif"
+    font-size="44"
+    font-weight="800"
+    font-style="italic"
+    fill="url(#cinefyFaviconGradient)"
+  >C</text>
+</svg>

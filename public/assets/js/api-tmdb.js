@@ -88,6 +88,15 @@
     return tmdbFetch(`/movie/${movieId}/watch/providers`);
   }
 
+  async function getMovieRecommendations(movieId, page = 1) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    const data = await tmdbFetch(`/movie/${movieId}/recommendations`, { page });
+    return data.results || [];
+  }
+
   function getImageUrl(path, fallback = "") {
     return path ? `${TMDB_IMAGE_URL}${path}` : fallback;
   }
@@ -105,6 +114,7 @@
     getMovieCredits,
     getMovieReleaseDates,
     getMovieWatchProviders,
+    getMovieRecommendations,
     getImageUrl,
     getBackdropUrl
   };

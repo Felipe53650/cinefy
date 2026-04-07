@@ -55,29 +55,14 @@
       updateActiveFilterLabel();
       syncSearchInputs(searchInput.value);
       wireSearchHeaderBehavior();
-      loadPopularMovies();
-
-      async function loadPopularMovies() {
-        try {
-          setLoading(true);
-          const movies = await window.TMDB.getPopularMovies();
-          resultsSubtitle.textContent = "Exibindo os filmes mais populares";
-          searchStatus.textContent = "";
-          sourceMovies = movies;
-          await applyCurrentFilter();
-        } catch (error) {
-          handleSearchError(error);
-        } finally {
-          setLoading(false);
-        }
-      }
+      renderIdleState();
 
       async function runSearch(queryOverride) {
         const query = typeof queryOverride === "string" ? queryOverride.trim() : searchInput.value.trim();
         syncSearchInputs(query);
 
         if (!query) {
-          loadPopularMovies();
+          renderIdleState();
           return;
         }
 
@@ -103,6 +88,11 @@
         currentMovies = movies;
         if (!movies.length) {
           resultsGrid.innerHTML = "";
+          emptyState.innerHTML = `
+            <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
+            <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
+            <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
+          `;
           emptyState.classList.remove("hidden");
           return;
         }
@@ -207,10 +197,30 @@
         }
       }
 
+      function renderIdleState() {
+        sourceMovies = [];
+        currentMovies = [];
+        resultsGrid.innerHTML = "";
+        loadingState.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+        emptyState.innerHTML = `
+          <span class="material-symbols-outlined text-5xl text-zinc-500">search</span>
+          <p class="mt-4 font-bold text-zinc-200">Digite um filme para comecar a busca.</p>
+          <p class="mt-2 text-zinc-500">Os resultados aparecem aqui assim que voce pesquisar no catalogo do TMDB.</p>
+        `;
+        resultsSubtitle.textContent = "Aguardando sua pesquisa";
+        searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Pesquise por titulo para ver resultados.';
+      }
+
       function handleSearchError(error) {
         console.error("Erro na busca TMDB:", error);
         resultsGrid.innerHTML = "";
         emptyState.classList.remove("hidden");
+        emptyState.innerHTML = `
+          <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
+          <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
+          <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
+        `;
         resultsSubtitle.textContent = "Nao foi possivel carregar resultados";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Falha ao consultar o TMDB. Verifique a chave, CORS ou conexao.';
       }
