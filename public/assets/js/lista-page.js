@@ -30,13 +30,20 @@
   const moviePosterPreviewImage = document.getElementById("moviePosterPreviewImage");
   const moviePosterPreviewTitle = document.getElementById("moviePosterPreviewTitle");
   const moviePosterPreviewMeta = document.getElementById("moviePosterPreviewMeta");
+  const openPosterPreviewButton = document.getElementById("openPosterPreviewButton");
   const clearPosterSelectionButton = document.getElementById("clearPosterSelectionButton");
+  const posterPreviewModal = document.getElementById("posterPreviewModal");
+  const posterPreviewModalImage = document.getElementById("posterPreviewModalImage");
+  const posterPreviewDialogTitle = document.getElementById("posterPreviewDialogTitle");
+  const posterPreviewDialogMeta = document.getElementById("posterPreviewDialogMeta");
+  const posterPreviewCloseButtons = Array.from(document.querySelectorAll("[data-poster-preview-close]"));
   const posterModeButtons = Array.from(document.querySelectorAll("[data-poster-mode]"));
   const posterPanels = Array.from(document.querySelectorAll("[data-poster-panel]"));
 
   let manualPosterMode = "upload";
   let manualPosterFile = null;
   let manualPosterPreviewUrl = "";
+  let isPosterPreviewOpen = false;
 
   document.getElementById("copyShareButton").addEventListener("click", copyShareLink);
   document.getElementById("resetListButton").addEventListener("click", resetList);
@@ -59,11 +66,17 @@
   moviePosterDropzone.addEventListener("drop", handlePosterDrop);
   moviePosterFileInput.addEventListener("change", handlePosterInputChange);
   moviePosterUrlInput.addEventListener("input", handlePosterUrlPreview);
+  openPosterPreviewButton.addEventListener("click", openPosterPreviewModal);
   clearPosterSelectionButton.addEventListener("click", handleClearPosterSelection);
+  posterPreviewCloseButtons.forEach((button) => {
+    button.addEventListener("click", closePosterPreviewModal);
+  });
+  document.addEventListener("keydown", handlePosterPreviewKeydown);
 
   setPosterMode("upload");
   updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
   updateClearPosterButtonState();
+  updatePosterPreviewButtonState();
   render();
 
   function getCurrentProfile() {
@@ -493,11 +506,13 @@
     if (manualPosterFile && manualPosterPreviewUrl) {
       updatePosterPreview(manualPosterPreviewUrl, "Arquivo selecionado", manualPosterFile.name);
       updateClearPosterButtonState();
+      updatePosterPreviewButtonState();
       return;
     }
 
     updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
     updateClearPosterButtonState();
+    updatePosterPreviewButtonState();
   }
 
   function handlePosterInputChange(event) {
@@ -541,6 +556,7 @@
     setPosterMode("upload");
     setPreviewFromFile(file);
     updateClearPosterButtonState();
+    updatePosterPreviewButtonState();
   }
 
   function clearPosterSelection() {
@@ -554,6 +570,7 @@
     moviePosterDropzone.classList.remove("border-red-500");
     updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
     updateClearPosterButtonState();
+    updatePosterPreviewButtonState();
   }
 
   function handleClearPosterSelection() {
@@ -616,11 +633,13 @@
     if (!posterUrl) {
       updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Cole uma URL valida para ver a previa.");
       updateClearPosterButtonState();
+      updatePosterPreviewButtonState();
       return;
     }
 
     updatePosterPreview(posterUrl, "Poster por URL", "Previa carregada a partir do link informado.");
     updateClearPosterButtonState();
+    updatePosterPreviewButtonState();
   }
 
   function setPreviewFromFile(file) {
@@ -631,9 +650,23 @@
 
   function updatePosterPreview(src, title, meta) {
     if (!moviePosterPreviewImage) return;
-    moviePosterPreviewImage.src = src || DEFAULT_POSTER;
-    moviePosterPreviewTitle.textContent = title || "Poster padrao";
-    moviePosterPreviewMeta.textContent = meta || "Sera usado se nenhuma imagem for enviada.";
+    const safeSrc = src || DEFAULT_POSTER;
+    const safeTitle = title || "Poster padrao";
+    const safeMeta = meta || "Sera usado se nenhuma imagem for enviada.";
+
+    moviePosterPreviewImage.src = safeSrc;
+    moviePosterPreviewTitle.textContent = safeTitle;
+    moviePosterPreviewMeta.textContent = safeMeta;
+
+    if (posterPreviewModalImage) {
+      posterPreviewModalImage.src = safeSrc;
+    }
+    if (posterPreviewDialogTitle) {
+      posterPreviewDialogTitle.textContent = safeTitle;
+    }
+    if (posterPreviewDialogMeta) {
+      posterPreviewDialogMeta.textContent = safeMeta;
+    }
   }
 
   function hasCustomPosterSelection() {
@@ -644,6 +677,36 @@
   function updateClearPosterButtonState() {
     if (!clearPosterSelectionButton) return;
     clearPosterSelectionButton.disabled = !hasCustomPosterSelection();
+  }
+
+  function updatePosterPreviewButtonState() {
+    if (!openPosterPreviewButton) return;
+    openPosterPreviewButton.disabled = !moviePosterPreviewImage || !moviePosterPreviewImage.src;
+  }
+
+  function openPosterPreviewModal() {
+    if (!posterPreviewModal || !moviePosterPreviewImage || !moviePosterPreviewImage.src) return;
+
+    posterPreviewModal.classList.remove("hidden");
+    posterPreviewModal.classList.add("flex");
+    posterPreviewModal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("overflow-hidden");
+    isPosterPreviewOpen = true;
+  }
+
+  function closePosterPreviewModal() {
+    if (!posterPreviewModal || !isPosterPreviewOpen) return;
+
+    posterPreviewModal.classList.add("hidden");
+    posterPreviewModal.classList.remove("flex");
+    posterPreviewModal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("overflow-hidden");
+    isPosterPreviewOpen = false;
+  }
+
+  function handlePosterPreviewKeydown(event) {
+    if (event.key !== "Escape") return;
+    closePosterPreviewModal();
   }
 
   function resetPreviewObjectUrl() {
