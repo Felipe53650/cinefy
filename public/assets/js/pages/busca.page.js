@@ -19,10 +19,14 @@
       const emptyState = document.getElementById("emptyState");
       const gridViewButton = document.getElementById("gridViewButton");
       const listViewButton = document.getElementById("listViewButton");
+      const filterMenuButton = document.getElementById("filterMenuButton");
+      const activeFilterLabel = document.getElementById("activeFilterLabel");
+      const filterDropdownPanel = document.getElementById("filterDropdownPanel");
       const filterForm = document.getElementById("filterForm");
       const topbar = document.querySelector(".cinefy-topbar");
       let lastScrollY = window.scrollY;
       let isCompactSearchVisible = false;
+      let isFilterMenuOpen = false;
 
       searchButton.addEventListener("click", runSearch);
       searchInput.addEventListener("keydown", (event) => {
@@ -42,9 +46,13 @@
       floatingSearchInput.addEventListener("input", () => syncSearchInputs(floatingSearchInput.value));
       gridViewButton.addEventListener("click", () => setView("grid"));
       listViewButton.addEventListener("click", () => setView("list"));
+      filterMenuButton.addEventListener("click", toggleFilterMenu);
       filterForm.addEventListener("submit", handleApplyFilter);
+      document.addEventListener("click", handleOutsideFilterMenuClick);
+      document.addEventListener("keydown", handleFilterMenuKeydown);
 
       applyViewMode();
+      updateActiveFilterLabel();
       syncSearchInputs(searchInput.value);
       wireSearchHeaderBehavior();
       loadPopularMovies();
@@ -189,6 +197,7 @@
         event.preventDefault();
         appliedFilter = loadSelectedFilter();
         await applyCurrentFilter();
+        setFilterMenuVisibility(false);
       }
 
       function setLoading(isLoading) {
@@ -255,6 +264,32 @@
         isCompactSearchVisible = isVisible;
       }
 
+      function toggleFilterMenu() {
+        setFilterMenuVisibility(!isFilterMenuOpen);
+      }
+
+      function setFilterMenuVisibility(isVisible) {
+        if (!filterDropdownPanel || !filterMenuButton) return;
+
+        isFilterMenuOpen = isVisible;
+        filterDropdownPanel.classList.toggle("hidden", !isVisible);
+        filterMenuButton.classList.toggle("is-open", isVisible);
+        filterMenuButton.setAttribute("aria-expanded", String(isVisible));
+      }
+
+      function handleOutsideFilterMenuClick(event) {
+        if (!isFilterMenuOpen) return;
+        if (filterDropdownPanel.contains(event.target) || filterMenuButton.contains(event.target)) {
+          return;
+        }
+        setFilterMenuVisibility(false);
+      }
+
+      function handleFilterMenuKeydown(event) {
+        if (event.key !== "Escape") return;
+        setFilterMenuVisibility(false);
+      }
+
       async function applyCurrentFilter() {
         const normalizedFilter = appliedFilter || "az";
         const movies = Array.isArray(sourceMovies) ? [...sourceMovies] : [];
@@ -272,6 +307,7 @@
 
         currentMovies = sortMoviesByFilter(movies, normalizedFilter);
         renderMovies(currentMovies);
+        updateActiveFilterLabel();
         searchStatus.innerHTML = `<span class="material-symbols-outlined text-base">filter_alt</span> Filtro aplicado: ${escapeHtml(getFilterLabel(normalizedFilter))}.`;
       }
 
@@ -335,6 +371,11 @@
           default:
             return "A - Z";
         }
+      }
+
+      function updateActiveFilterLabel() {
+        if (!activeFilterLabel) return;
+        activeFilterLabel.textContent = `Filtro aplicado: ${getFilterLabel(appliedFilter)}`;
       }
 
       function getMovieYear(movie) {
