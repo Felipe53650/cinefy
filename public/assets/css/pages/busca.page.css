@@ -41,8 +41,9 @@
     }
 
     .cinefy-search-sprite {
+      position: fixed !important;
       transform: translateY(-0.5rem);
-      z-index: 110;
+      z-index: 210 !important;
       isolation: isolate;
     }
 
@@ -52,7 +53,9 @@
       box-shadow: 0 0 0 2px rgba(232, 59, 36, 0.35);
     }
 
-    body[data-page="buscar"] main {
+    body[data-page="buscar"] .glass-card,
+    body[data-page="buscar"] #resultsGrid,
+    body[data-page="buscar"] #resultsGrid article {
       position: relative;
       z-index: 1;
     }

@@ -16,13 +16,7 @@
       const emptyState = document.getElementById("emptyState");
       const gridViewButton = document.getElementById("gridViewButton");
       const listViewButton = document.getElementById("listViewButton");
-      const manualMovieForm = document.getElementById("manualMovieForm");
-      const manualMovieFeedback = document.getElementById("manualMovieFeedback");
-      const posterUploadBox = document.getElementById("posterUploadBox");
-      const manualPosterInput = document.getElementById("manualPosterInput");
-      const posterUploadFeedback = document.getElementById("posterUploadFeedback");
       const topbar = document.querySelector(".cinefy-topbar");
-      let manualPosterFile = null;
       let lastScrollY = window.scrollY;
       let isCompactSearchVisible = false;
 
@@ -44,12 +38,6 @@
       floatingSearchInput.addEventListener("input", () => syncSearchInputs(floatingSearchInput.value));
       gridViewButton.addEventListener("click", () => setView("grid"));
       listViewButton.addEventListener("click", () => setView("list"));
-      manualMovieForm.addEventListener("submit", handleManualMovieSubmit);
-      posterUploadBox.addEventListener("click", () => manualPosterInput.click());
-      posterUploadBox.addEventListener("dragover", handlePosterDragOver);
-      posterUploadBox.addEventListener("dragleave", handlePosterDragLeave);
-      posterUploadBox.addEventListener("drop", handlePosterDrop);
-      manualPosterInput.addEventListener("change", handlePosterInputChange);
 
       applyViewMode();
       syncSearchInputs(searchInput.value);
@@ -190,61 +178,6 @@
         return true;
       }
 
-      function readFileAsDataUrl(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("Nao foi possivel ler o poster selecionado."));
-          reader.readAsDataURL(file);
-        });
-      }
-
-      async function handleManualMovieSubmit(event) {
-        event.preventDefault();
-
-        try {
-          let posterUrl = SEARCH_PLACEHOLDER_POSTER;
-
-          if (manualPosterFile) {
-            if (window.CinefyStorage && typeof window.CinefyStorage.uploadUserImage === "function") {
-              try {
-                showManualFeedback("Enviando poster personalizado...", "success");
-                posterUrl = await window.CinefyStorage.uploadUserImage(manualPosterFile, "posters");
-              } catch (uploadError) {
-                posterUrl = await readFileAsDataUrl(manualPosterFile);
-                showManualFeedback("Poster salvo localmente. Assim que o Firebase Storage for configurado, o upload em nuvem sera usado.", "success");
-              }
-            } else {
-              posterUrl = await readFileAsDataUrl(manualPosterFile);
-            }
-          }
-
-          const customMovie = {
-            id: `manual-${Date.now()}`,
-            title: document.getElementById("manualTitleInput").value.trim(),
-            genre: document.getElementById("manualGenreInput").value.trim(),
-            year: Number(document.getElementById("manualYearInput").value),
-            rating: Number(document.getElementById("manualRatingInput").value || 0),
-            note: document.getElementById("manualNoteInput").value.trim() || "Adicionado manualmente na busca.",
-            poster: posterUrl
-          };
-
-          const state = store.loadListState();
-          state.movies.unshift(customMovie);
-          state.updatedAt = new Date().toISOString();
-          store.saveListState(state);
-
-          manualMovieForm.reset();
-          manualPosterFile = null;
-          manualPosterInput.value = "";
-          posterUploadFeedback.textContent = "Nenhum poster selecionado.";
-          showManualFeedback(`${customMovie.title} foi adicionado manualmente a sua lista.`);
-          searchStatus.innerHTML = `<span class="material-symbols-outlined text-base">check_circle</span> ${escapeHtml(customMovie.title)} foi adicionado manualmente a sua lista.`;
-        } catch (error) {
-          showManualFeedback(error.message || "Nao foi possivel salvar o filme manual agora.", "error");
-        }
-      }
-
       function setLoading(isLoading) {
         loadingState.classList.toggle("hidden", !isLoading);
         if (isLoading) {
@@ -258,45 +191,6 @@
         emptyState.classList.remove("hidden");
         resultsSubtitle.textContent = "Nao foi possivel carregar resultados";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Falha ao consultar o TMDB. Verifique a chave, CORS ou conexao.';
-      }
-
-      function handlePosterInputChange(event) {
-        const [file] = event.target.files;
-        if (!file) return;
-        loadPosterFile(file);
-      }
-
-      function handlePosterDragOver(event) {
-        event.preventDefault();
-        posterUploadBox.classList.add("border-red-600");
-      }
-
-      function handlePosterDragLeave() {
-        posterUploadBox.classList.remove("border-red-600");
-      }
-
-      function handlePosterDrop(event) {
-        event.preventDefault();
-        posterUploadBox.classList.remove("border-red-600");
-        const [file] = Array.from(event.dataTransfer.files || []);
-        if (!file) return;
-        loadPosterFile(file);
-      }
-
-      function loadPosterFile(file) {
-        if (!file.type.startsWith("image/")) {
-          showManualFeedback("Selecione uma imagem PNG, JPG ou WEBP.", "error");
-          return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-          showManualFeedback("O poster precisa ter no maximo 5 MB.", "error");
-          return;
-        }
-
-        manualPosterFile = file;
-        posterUploadFeedback.textContent = `Poster selecionado: ${file.name}`;
-        manualMovieFeedback.classList.add("hidden");
       }
 
       function syncSearchInputs(value) {
@@ -346,16 +240,6 @@
 
         document.body.classList.toggle("busca-compact-search-active", isVisible);
         isCompactSearchVisible = isVisible;
-      }
-
-      function showManualFeedback(message, type = "success") {
-        manualMovieFeedback.textContent = message;
-        manualMovieFeedback.classList.remove("hidden", "border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100", "border-red-300/20", "bg-red-950/40", "text-red-100");
-        if (type === "error") {
-          manualMovieFeedback.classList.add("border-red-300/20", "bg-red-950/40", "text-red-100");
-        } else {
-          manualMovieFeedback.classList.add("border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100");
-        }
       }
 
       function escapeHtml(value) {
@@ -415,7 +299,7 @@
       function applyViewMode() {
         resultsGrid.className = currentView === "list"
           ? "mt-6 grid grid-cols-1 gap-4"
-          : "mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3";
+          : "mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5";
 
         updateViewButtonState(gridViewButton, currentView === "grid");
         updateViewButtonState(listViewButton, currentView === "list");
