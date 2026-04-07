@@ -1,8 +1,11 @@
 ﻿const store = window.CinefyStore;
       const SEARCH_PLACEHOLDER_POSTER = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80";
       const VIEW_STORAGE_KEY = "cinefy-search-view";
+      const runtimeCache = new Map();
       let currentView = loadViewPreference();
       let currentMovies = [];
+      let sourceMovies = [];
+      let appliedFilter = "az";
 
       const searchInput = document.getElementById("movieSearchInput");
       const searchButton = document.getElementById("movieSearchButton");
@@ -16,6 +19,7 @@
       const emptyState = document.getElementById("emptyState");
       const gridViewButton = document.getElementById("gridViewButton");
       const listViewButton = document.getElementById("listViewButton");
+      const filterForm = document.getElementById("filterForm");
       const topbar = document.querySelector(".cinefy-topbar");
       let lastScrollY = window.scrollY;
       let isCompactSearchVisible = false;
@@ -38,6 +42,7 @@
       floatingSearchInput.addEventListener("input", () => syncSearchInputs(floatingSearchInput.value));
       gridViewButton.addEventListener("click", () => setView("grid"));
       listViewButton.addEventListener("click", () => setView("list"));
+      filterForm.addEventListener("submit", handleApplyFilter);
 
       applyViewMode();
       syncSearchInputs(searchInput.value);
@@ -50,7 +55,8 @@
           const movies = await window.TMDB.getPopularMovies();
           resultsSubtitle.textContent = "Exibindo os filmes mais populares";
           searchStatus.textContent = "";
-          renderMovies(movies);
+          sourceMovies = movies;
+          await applyCurrentFilter();
         } catch (error) {
           handleSearchError(error);
         } finally {
@@ -72,7 +78,8 @@
           const movies = await window.TMDB.searchMovies(query);
           resultsSubtitle.textContent = `Resultados para "${escapeHtml(query)}"`;
           searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Busca concluida no TMDB.';
-          renderMovies(movies);
+          sourceMovies = movies;
+          await applyCurrentFilter();
         } catch (error) {
           handleSearchError(error);
         } finally {
@@ -178,6 +185,12 @@
         return true;
       }
 
+      async function handleApplyFilter(event) {
+        event.preventDefault();
+        appliedFilter = loadSelectedFilter();
+        await applyCurrentFilter();
+      }
+
       function setLoading(isLoading) {
         loadingState.classList.toggle("hidden", !isLoading);
         if (isLoading) {
@@ -240,6 +253,93 @@
 
         document.body.classList.toggle("busca-compact-search-active", isVisible);
         isCompactSearchVisible = isVisible;
+      }
+
+      async function applyCurrentFilter() {
+        const normalizedFilter = appliedFilter || "az";
+        const movies = Array.isArray(sourceMovies) ? [...sourceMovies] : [];
+
+        if (!movies.length) {
+          currentMovies = [];
+          renderMovies([]);
+          return;
+        }
+
+        if (normalizedFilter === "runtime") {
+          searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">filter_alt</span> Buscando duracao dos filmes para ordenar.';
+          await hydrateMoviesWithRuntime(movies);
+        }
+
+        currentMovies = sortMoviesByFilter(movies, normalizedFilter);
+        renderMovies(currentMovies);
+        searchStatus.innerHTML = `<span class="material-symbols-outlined text-base">filter_alt</span> Filtro aplicado: ${escapeHtml(getFilterLabel(normalizedFilter))}.`;
+      }
+
+      async function hydrateMoviesWithRuntime(movies) {
+        await Promise.all(movies.map(async (movie) => {
+          if (!movie || !movie.id || runtimeCache.has(movie.id)) {
+            if (movie && movie.id && runtimeCache.has(movie.id)) {
+              movie.runtime = runtimeCache.get(movie.id);
+            }
+            return;
+          }
+
+          try {
+            const details = await window.TMDB.getMovieDetails(movie.id);
+            const runtime = Number(details && details.runtime) || 0;
+            runtimeCache.set(movie.id, runtime);
+            movie.runtime = runtime;
+          } catch (error) {
+            runtimeCache.set(movie.id, 0);
+            movie.runtime = 0;
+          }
+        }));
+      }
+
+      function sortMoviesByFilter(movies, filter) {
+        switch (filter) {
+          case "popular":
+            return movies.sort((a, b) => Number(b.popularity || 0) - Number(a.popularity || 0));
+          case "year":
+            return movies.sort((a, b) => getMovieYear(b) - getMovieYear(a));
+          case "runtime":
+            return movies.sort((a, b) => Number(b.runtime || runtimeCache.get(b.id) || 0) - Number(a.runtime || runtimeCache.get(a.id) || 0));
+          case "rating-desc":
+            return movies.sort((a, b) => Number(b.vote_average || 0) - Number(a.vote_average || 0));
+          case "rating-asc":
+            return movies.sort((a, b) => Number(a.vote_average || 0) - Number(b.vote_average || 0));
+          case "az":
+          default:
+            return movies.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "pt-BR", { sensitivity: "base" }));
+        }
+      }
+
+      function loadSelectedFilter() {
+        const selectedOption = filterForm.querySelector('input[name="searchSortFilter"]:checked');
+        return selectedOption ? selectedOption.value : "az";
+      }
+
+      function getFilterLabel(filter) {
+        switch (filter) {
+          case "popular":
+            return "Mais populares";
+          case "year":
+            return "Ano";
+          case "runtime":
+            return "Duracao";
+          case "rating-desc":
+            return "Melhor avaliacao";
+          case "rating-asc":
+            return "Pior avaliacao";
+          case "az":
+          default:
+            return "A - Z";
+        }
+      }
+
+      function getMovieYear(movie) {
+        if (!movie || !movie.release_date) return 0;
+        return Number(String(movie.release_date).slice(0, 4)) || 0;
       }
 
       function escapeHtml(value) {

@@ -55,7 +55,7 @@
       </div>
     </section>
 
-    <section class="mt-8">
+    <section class="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr),20rem]">
       <div class="glass-card rounded-[2rem] p-6 md:p-8">
         <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
@@ -98,11 +98,43 @@
         <div class="mt-6 hidden rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-8 text-center" id="emptyState">
           <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
           <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
-          <p class="mt-2 text-zinc-500">Tente outro titulo ou adicione manualmente ao lado.</p>
+          <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
         </div>
 
         <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5" id="resultsGrid"></div>
       </div>
+      <aside class="glass-card busca-filter-panel h-fit rounded-[2rem] p-6 md:p-7 xl:sticky xl:top-28" aria-label="Painel de filtros">
+        <p class="text-xs uppercase tracking-[0.26em] text-red-200">Filtrar por:</p>
+        <form class="mt-5 space-y-3" id="filterForm">
+          <label class="filter-option">
+            <input checked class="sr-only" name="searchSortFilter" type="radio" value="az"/>
+            <span>A - Z</span>
+          </label>
+          <label class="filter-option">
+            <input class="sr-only" name="searchSortFilter" type="radio" value="popular"/>
+            <span>Mais populares</span>
+          </label>
+          <label class="filter-option">
+            <input class="sr-only" name="searchSortFilter" type="radio" value="year"/>
+            <span>Ano</span>
+          </label>
+          <label class="filter-option">
+            <input class="sr-only" name="searchSortFilter" type="radio" value="runtime"/>
+            <span>Duração</span>
+          </label>
+          <label class="filter-option">
+            <input class="sr-only" name="searchSortFilter" type="radio" value="rating-desc"/>
+            <span>Melhor avaliação</span>
+          </label>
+          <label class="filter-option">
+            <input class="sr-only" name="searchSortFilter" type="radio" value="rating-asc"/>
+            <span>Pior avaliação</span>
+          </label>
+          <button class="mt-5 w-full rounded-full bg-gradient-to-r from-primary to-primary-deep px-5 py-3.5 text-sm font-bold text-white transition hover:brightness-110" id="applyFilterButton" type="submit">
+            Aplicar filtro
+          </button>
+        </form>
+      </aside>
     </section>
   </main>
 
