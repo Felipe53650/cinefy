@@ -29,6 +29,16 @@
 </head>
 <body class="min-h-screen bg-background font-body text-ink" data-page="buscar">
   <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+  <div aria-label="Busca compacta fixa" class="cinefy-search-sprite fixed inset-x-0 top-0 z-[82] px-3 pt-3 opacity-0 pointer-events-none transition-all duration-300 md:px-6 md:pt-4" id="floatingSearchSprite">
+    <div class="mx-auto w-full max-w-[1120px] rounded-[1.35rem] border border-white/10 bg-zinc-950/88 px-3 py-3 shadow-[0_24px_60px_rgba(0,0,0,0.42)] backdrop-blur-xl md:px-4">
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">search</span>
+        <label class="sr-only" for="floatingMovieSearchInput">Buscar filmes no TMDB</label>
+        <input class="w-full rounded-[1.1rem] border border-white/8 bg-white/[0.04] py-3 pl-12 pr-28 text-white placeholder:text-zinc-500 focus:border-red-500 focus:ring-red-500 md:pr-32" id="floatingMovieSearchInput" placeholder="Buscar um filme..." type="text"/>
+        <button class="absolute right-2 top-1/2 -translate-y-1/2 rounded-[0.9rem] bg-gradient-to-r from-primary to-primary-deep px-4 py-2 text-sm font-bold text-white transition hover:brightness-110 md:px-5" id="floatingMovieSearchButton" type="button">Buscar</button>
+      </div>
+    </div>
+  </div>
 
   <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-20 pt-20 md:px-8 md:pb-24 md:pt-28">
     <section class="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-zinc-950/85 px-5 py-7 md:rounded-[2.25rem] md:px-10 md:py-10">
@@ -163,5 +173,3 @@
   <script src="assets/js/pages/busca.page.js"></script>
 </body>
 </html>
-
-

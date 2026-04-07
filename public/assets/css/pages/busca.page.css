@@ -23,3 +23,24 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
+    body[data-page="buscar"] .cinefy-topbar {
+      transition: transform 280ms ease, opacity 220ms ease;
+      will-change: transform, opacity;
+    }
+
+    body[data-page="buscar"].busca-compact-search-active .cinefy-topbar {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-140%);
+    }
+
+    body[data-page="buscar"].busca-compact-search-active .cinefy-search-sprite {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .cinefy-search-sprite {
+      transform: translateY(-0.5rem);
+    }
+

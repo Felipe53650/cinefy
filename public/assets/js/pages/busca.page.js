@@ -6,6 +6,9 @@
 
       const searchInput = document.getElementById("movieSearchInput");
       const searchButton = document.getElementById("movieSearchButton");
+      const floatingSearchInput = document.getElementById("floatingMovieSearchInput");
+      const floatingSearchButton = document.getElementById("floatingMovieSearchButton");
+      const floatingSearchSprite = document.getElementById("floatingSearchSprite");
       const searchStatus = document.getElementById("searchStatus");
       const resultsSubtitle = document.getElementById("resultsSubtitle");
       const resultsGrid = document.getElementById("resultsGrid");
@@ -18,7 +21,10 @@
       const posterUploadBox = document.getElementById("posterUploadBox");
       const manualPosterInput = document.getElementById("manualPosterInput");
       const posterUploadFeedback = document.getElementById("posterUploadFeedback");
+      const topbar = document.querySelector(".cinefy-topbar");
       let manualPosterFile = null;
+      let lastScrollY = window.scrollY;
+      let isCompactSearchVisible = false;
 
       searchButton.addEventListener("click", runSearch);
       searchInput.addEventListener("keydown", (event) => {
@@ -27,6 +33,15 @@
           runSearch();
         }
       });
+      searchInput.addEventListener("input", () => syncSearchInputs(searchInput.value));
+      floatingSearchButton.addEventListener("click", runSearchFromFloatingSprite);
+      floatingSearchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          runSearchFromFloatingSprite();
+        }
+      });
+      floatingSearchInput.addEventListener("input", () => syncSearchInputs(floatingSearchInput.value));
       gridViewButton.addEventListener("click", () => setView("grid"));
       listViewButton.addEventListener("click", () => setView("list"));
       manualMovieForm.addEventListener("submit", handleManualMovieSubmit);
@@ -37,6 +52,8 @@
       manualPosterInput.addEventListener("change", handlePosterInputChange);
 
       applyViewMode();
+      syncSearchInputs(searchInput.value);
+      wireSearchHeaderBehavior();
       loadPopularMovies();
 
       async function loadPopularMovies() {
@@ -53,8 +70,9 @@
         }
       }
 
-      async function runSearch() {
-        const query = searchInput.value.trim();
+      async function runSearch(queryOverride) {
+        const query = typeof queryOverride === "string" ? queryOverride.trim() : searchInput.value.trim();
+        syncSearchInputs(query);
 
         if (!query) {
           loadPopularMovies();
@@ -72,6 +90,10 @@
         } finally {
           setLoading(false);
         }
+      }
+
+      function runSearchFromFloatingSprite() {
+        runSearch(floatingSearchInput.value);
       }
 
       function renderMovies(movies) {
@@ -275,6 +297,55 @@
         manualPosterFile = file;
         posterUploadFeedback.textContent = `Poster selecionado: ${file.name}`;
         manualMovieFeedback.classList.add("hidden");
+      }
+
+      function syncSearchInputs(value) {
+        const nextValue = String(value || "");
+        if (searchInput && searchInput.value !== nextValue) {
+          searchInput.value = nextValue;
+        }
+        if (floatingSearchInput && floatingSearchInput.value !== nextValue) {
+          floatingSearchInput.value = nextValue;
+        }
+      }
+
+      function wireSearchHeaderBehavior() {
+        if (!topbar || !floatingSearchSprite) return;
+
+        updateSearchChrome(window.scrollY);
+        window.addEventListener("scroll", handleSearchScroll, { passive: true });
+      }
+
+      function handleSearchScroll() {
+        const currentScrollY = window.scrollY;
+        const scrollingDown = currentScrollY > lastScrollY;
+        const hasMovedEnough = Math.abs(currentScrollY - lastScrollY) > 10;
+
+        if (!hasMovedEnough) {
+          return;
+        }
+
+        if (currentScrollY <= 72) {
+          setCompactSearchVisibility(false);
+        } else if (scrollingDown && currentScrollY > 140) {
+          setCompactSearchVisibility(true);
+        } else if (!scrollingDown) {
+          setCompactSearchVisibility(false);
+        }
+
+        lastScrollY = currentScrollY;
+      }
+
+      function updateSearchChrome(scrollY) {
+        setCompactSearchVisibility(scrollY > 140);
+        lastScrollY = scrollY;
+      }
+
+      function setCompactSearchVisibility(isVisible) {
+        if (isCompactSearchVisible === isVisible) return;
+
+        document.body.classList.toggle("busca-compact-search-active", isVisible);
+        isCompactSearchVisible = isVisible;
       }
 
       function showManualFeedback(message, type = "success") {
