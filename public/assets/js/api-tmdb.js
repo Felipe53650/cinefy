@@ -72,6 +72,22 @@
     return tmdbFetch(`/movie/${movieId}/credits`);
   }
 
+  async function getMovieReleaseDates(movieId) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    return tmdbFetch(`/movie/${movieId}/release_dates`);
+  }
+
+  async function getMovieWatchProviders(movieId) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    return tmdbFetch(`/movie/${movieId}/watch/providers`);
+  }
+
   function getImageUrl(path, fallback = "") {
     return path ? `${TMDB_IMAGE_URL}${path}` : fallback;
   }
@@ -87,6 +103,8 @@
     getTrendingMovies,
     getMovieDetails,
     getMovieCredits,
+    getMovieReleaseDates,
+    getMovieWatchProviders,
     getImageUrl,
     getBackdropUrl
   };
