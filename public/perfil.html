@@ -94,8 +94,13 @@
 </label>
 <label class="md:col-span-2">
 <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Localizacao</span>
-<input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="locationInput" list="brazilLocationSuggestions" maxlength="40" placeholder="Digite sua cidade" type="text"/>
-<datalist id="brazilLocationSuggestions"></datalist>
+<div class="profile-location-shell mt-2">
+<input aria-autocomplete="list" aria-controls="locationSuggestionsList" aria-expanded="false" aria-haspopup="listbox" autocomplete="off" class="w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="locationInput" maxlength="60" placeholder="Digite sua cidade ou estado" role="combobox" type="text"/>
+<div class="profile-location-panel hidden" id="locationSuggestionsPanel">
+<p class="profile-location-hint" id="locationSuggestionsHint">Busque por municipio ou UF.</p>
+<div class="profile-location-list" id="locationSuggestionsList" role="listbox"></div>
+</div>
+</div>
 </label>
 <div class="md:col-span-2 flex flex-wrap items-center gap-3">
 <button class="inline-flex items-center gap-2 rounded-full bg-red-600 hover:bg-red-700 text-white px-5 py-3 font-bold transition-all active:scale-95" type="submit">
@@ -151,6 +156,7 @@
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/layout.js"></script>
+<script src="assets/js/data/brazil-municipalities.js"></script>
 <script src="assets/js/pages/perfil.page.js"></script>
 </body>
 </html>

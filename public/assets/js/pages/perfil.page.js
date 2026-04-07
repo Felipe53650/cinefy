@@ -13,68 +13,35 @@
       const themeSelectorGrid = document.getElementById("themeSelectorGrid");
       const themeFeedback = document.getElementById("themeFeedback");
       const locationInput = document.getElementById("locationInput");
-      const locationSuggestions = document.getElementById("brazilLocationSuggestions");
+      const locationSuggestionsPanel = document.getElementById("locationSuggestionsPanel");
+      const locationSuggestionsList = document.getElementById("locationSuggestionsList");
+      const locationSuggestionsHint = document.getElementById("locationSuggestionsHint");
       const availableThemes = themeManager && typeof themeManager.getThemes === "function"
         ? themeManager.getThemes()
         : [];
-      const brazilLocations = [
-        "Aracaju - SE, BR",
-        "Belem - PA, BR",
-        "Belo Horizonte - MG, BR",
-        "Boa Vista - RR, BR",
-        "Brasilia - DF, BR",
-        "Campinas - SP, BR",
-        "Campo Grande - MS, BR",
-        "Curitiba - PR, BR",
-        "Cuiaba - MT, BR",
-        "Florianopolis - SC, BR",
-        "Fortaleza - CE, BR",
-        "Goiania - GO, BR",
-        "Joao Pessoa - PB, BR",
-        "Macapa - AP, BR",
-        "Maceio - AL, BR",
-        "Manaus - AM, BR",
-        "Natal - RN, BR",
-        "Palmas - TO, BR",
-        "Porto Alegre - RS, BR",
-        "Porto Velho - RO, BR",
-        "Recife - PE, BR",
-        "Rio Branco - AC, BR",
-        "Rio de Janeiro - RJ, BR",
-        "Salvador - BA, BR",
-        "Santa Cruz do Sul - RS, BR",
-        "Santa Maria - RS, BR",
-        "Santa Rita - PB, BR",
-        "Santo Andre - SP, BR",
-        "Santos - SP, BR",
-        "Sao Bernardo do Campo - SP, BR",
-        "Sao Caetano do Sul - SP, BR",
-        "Sao Carlos - SP, BR",
-        "Sao Goncalo - RJ, BR",
-        "Sao Joao de Meriti - RJ, BR",
-        "Sao Jose - SC, BR",
-        "Sao Jose dos Campos - SP, BR",
-        "Sao Leopoldo - RS, BR",
-        "Sao Luis - MA, BR",
-        "Sao Luis Gonzaga - RS, BR",
-        "Sao Paulo - SP, BR",
-        "Sao Vicente - SP, BR",
-        "Teresina - PI, BR",
-        "Vitoria - ES, BR"
-      ];
+      const brazilMunicipalities = Array.isArray(window.CINEFY_BRAZIL_MUNICIPALITIES)
+        ? window.CINEFY_BRAZIL_MUNICIPALITIES
+        : [];
+      const preparedMunicipalities = brazilMunicipalities.map(prepareMunicipality);
+      let activeLocationIndex = -1;
+      let visibleLocationSuggestions = [];
 
       profile.theme = resolveTheme(profile.theme);
 
       hydrateForm();
       renderProfile();
-      updateLocationSuggestions(locationInput.value);
 
       profileForm.addEventListener("submit", handleProfileSubmit);
       avatarInput.addEventListener("change", handleAvatarChange);
       removeAvatarButton.addEventListener("click", removeAvatar);
       logoutButton.addEventListener("click", handleLogout);
-      locationInput.addEventListener("input", () => updateLocationSuggestions(locationInput.value));
-      locationInput.addEventListener("focus", () => updateLocationSuggestions(locationInput.value));
+      locationInput.addEventListener("input", handleLocationInput);
+      locationInput.addEventListener("focus", handleLocationFocus);
+      locationInput.addEventListener("keydown", handleLocationKeydown);
+      locationInput.addEventListener("blur", handleLocationBlur);
+      locationSuggestionsList.addEventListener("mousedown", handleLocationOptionMouseDown);
+      locationSuggestionsList.addEventListener("click", handleLocationOptionClick);
+      document.addEventListener("click", handleLocationOutsideClick);
       if (themeSelectorGrid) {
         themeSelectorGrid.addEventListener("click", handleThemeGridClick);
       }
@@ -134,7 +101,7 @@
           profile.displayName = document.getElementById("displayNameInput").value.trim();
           profile.username = sanitizeUsername(document.getElementById("usernameInput").value);
           profile.bio = document.getElementById("bioInput").value.trim();
-          profile.location = document.getElementById("locationInput").value.trim();
+          profile.location = canonicalizeLocation(document.getElementById("locationInput").value.trim());
           if (typeof window.saveCurrentProfile === "function") {
             await window.saveCurrentProfile(profile);
           } else {
@@ -304,14 +271,241 @@
         return themeManager.resolveTheme(themeId);
       }
 
-      function updateLocationSuggestions(query) {
-        const normalizedQuery = normalizeText(query);
-        const matches = brazilLocations.filter((location) => {
-          if (!normalizedQuery) return true;
-          return normalizeText(location).includes(normalizedQuery);
-        }).slice(0, 8);
+      function prepareMunicipality(entry) {
+        const city = String(entry.city || "").trim();
+        const state = String(entry.state || "").trim();
+        const stateName = String(entry.stateName || "").trim();
+        const label = String(entry.label || `${city} - ${state}, BR`).trim();
+        const normalizedCity = normalizeText(city);
+        const normalizedState = normalizeText(state);
+        const normalizedStateName = normalizeText(stateName);
+        const normalizedLabel = normalizeText(label);
 
-        locationSuggestions.innerHTML = matches.map((location) => `<option value="${escapeAttribute(location)}"></option>`).join("");
+        return {
+          ...entry,
+          city,
+          state,
+          stateName,
+          label,
+          normalizedCity,
+          normalizedState,
+          normalizedStateName,
+          normalizedLabel,
+          tokens: normalizedCity.split(/\s+/).filter(Boolean)
+        };
+      }
+
+      function handleLocationInput() {
+        activeLocationIndex = -1;
+        updateLocationSuggestions(locationInput.value, { openPanel: true });
+      }
+
+      function handleLocationFocus() {
+        updateLocationSuggestions(locationInput.value, { openPanel: true });
+      }
+
+      function handleLocationBlur() {
+        window.setTimeout(() => {
+          setLocationPanelVisibility(false);
+          const canonicalLocation = canonicalizeLocation(locationInput.value);
+          if (canonicalLocation !== locationInput.value.trim()) {
+            locationInput.value = canonicalLocation;
+          }
+        }, 140);
+      }
+
+      function handleLocationOutsideClick(event) {
+        if (!event.target.closest(".profile-location-shell")) {
+          setLocationPanelVisibility(false);
+        }
+      }
+
+      function handleLocationOptionMouseDown(event) {
+        const option = event.target.closest("[data-location-index]");
+        if (option) {
+          event.preventDefault();
+        }
+      }
+
+      function handleLocationOptionClick(event) {
+        const option = event.target.closest("[data-location-index]");
+        if (!option) return;
+
+        const index = Number(option.dataset.locationIndex);
+        selectLocationSuggestion(index);
+      }
+
+      function handleLocationKeydown(event) {
+        if (!visibleLocationSuggestions.length && event.key !== "Escape") {
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          activeLocationIndex = Math.min(activeLocationIndex + 1, visibleLocationSuggestions.length - 1);
+          renderLocationSuggestions();
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          activeLocationIndex = Math.max(activeLocationIndex - 1, 0);
+          renderLocationSuggestions();
+          return;
+        }
+
+        if (event.key === "Enter" && activeLocationIndex >= 0) {
+          event.preventDefault();
+          selectLocationSuggestion(activeLocationIndex);
+          return;
+        }
+
+        if (event.key === "Escape") {
+          setLocationPanelVisibility(false);
+        }
+      }
+
+      function updateLocationSuggestions(query, options = {}) {
+        const normalizedQuery = normalizeText(query);
+        const shouldOpen = options.openPanel !== false;
+
+        if (!normalizedQuery) {
+          visibleLocationSuggestions = [];
+          activeLocationIndex = -1;
+          renderLocationSuggestions("Digite pelo menos 2 letras para buscar entre os municipios.");
+          setLocationPanelVisibility(false);
+          return;
+        }
+
+        if (normalizedQuery.length < 2) {
+          visibleLocationSuggestions = [];
+          activeLocationIndex = -1;
+          renderLocationSuggestions("Continue digitando para refinar os municipios.");
+          setLocationPanelVisibility(shouldOpen);
+          return;
+        }
+
+        visibleLocationSuggestions = searchMunicipalities(normalizedQuery).slice(0, 8);
+        activeLocationIndex = visibleLocationSuggestions.length ? 0 : -1;
+        renderLocationSuggestions();
+        setLocationPanelVisibility(shouldOpen);
+      }
+
+      function searchMunicipalities(normalizedQuery) {
+        const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+        return preparedMunicipalities
+          .map((entry) => ({
+            entry,
+            score: scoreMunicipality(entry, normalizedQuery, queryTokens)
+          }))
+          .filter((item) => item.score > 0)
+          .sort((left, right) => {
+            if (right.score !== left.score) return right.score - left.score;
+            return left.entry.label.localeCompare(right.entry.label, "pt-BR");
+          })
+          .map((item) => item.entry);
+      }
+
+      function scoreMunicipality(entry, normalizedQuery, queryTokens) {
+        let score = 0;
+
+        if (entry.normalizedLabel === normalizedQuery) score += 1200;
+        if (entry.normalizedCity === normalizedQuery) score += 1100;
+        if (`${entry.normalizedCity} ${entry.normalizedState}` === normalizedQuery) score += 1080;
+        if (`${entry.normalizedCity} ${entry.normalizedStateName}` === normalizedQuery) score += 1060;
+
+        if (queryTokens.length === 1) {
+          const token = queryTokens[0];
+
+          if (entry.normalizedCity.startsWith(token)) score += 320;
+          if (entry.tokens.some((candidate) => candidate.startsWith(token))) score += 180;
+          if (entry.normalizedState === token) score += 150;
+          if (entry.normalizedStateName.startsWith(token)) score += 140;
+
+          if (token.length >= 3 && entry.normalizedCity.includes(token)) score += 70;
+          if (token.length >= 4 && entry.normalizedLabel.includes(token)) score += 25;
+        } else {
+          const cityStartsWithAll = queryTokens.every((token) => entry.tokens.some((candidate) => candidate.startsWith(token)));
+          const cityContainsAll = queryTokens.every((token) => entry.normalizedCity.includes(token));
+          const labelContainsAll = queryTokens.every((token) => entry.normalizedLabel.includes(token));
+          const stateMatches = queryTokens.some((token) => token === entry.normalizedState || entry.normalizedStateName.startsWith(token));
+
+          if (cityStartsWithAll) score += 360;
+          if (cityContainsAll) score += 220;
+          if (labelContainsAll) score += 110;
+          if (stateMatches) score += 80;
+        }
+
+        if (entry.tokens[0] && queryTokens[0] && entry.tokens[0].startsWith(queryTokens[0])) {
+          score += 40;
+        }
+
+        return score;
+      }
+
+      function renderLocationSuggestions(customHint) {
+        locationSuggestionsHint.textContent = customHint || "Busque por municipio ou UF.";
+
+        if (!visibleLocationSuggestions.length) {
+          locationSuggestionsList.innerHTML = '<div class="profile-location-empty">Nenhum municipio encontrado com esse criterio.</div>';
+          locationInput.setAttribute("aria-expanded", locationSuggestionsPanel.classList.contains("hidden") ? "false" : "true");
+          locationInput.removeAttribute("aria-activedescendant");
+          return;
+        }
+
+        locationSuggestionsList.innerHTML = visibleLocationSuggestions.map((item, index) => `
+          <button aria-selected="${index === activeLocationIndex ? "true" : "false"}" class="profile-location-option" data-active="${index === activeLocationIndex ? "true" : "false"}" data-location-index="${index}" id="location-option-${index}" role="option" type="button">
+            <span class="profile-location-option__copy">
+              <span class="profile-location-option__city">${escapeHtml(item.city)}</span>
+              <span class="profile-location-option__meta">${escapeHtml(item.stateName)} • ${escapeHtml(item.label)}</span>
+            </span>
+            <span class="profile-location-option__uf">${escapeHtml(item.state)}</span>
+          </button>
+        `).join("");
+
+        if (activeLocationIndex >= 0) {
+          locationInput.setAttribute("aria-activedescendant", `location-option-${activeLocationIndex}`);
+        } else {
+          locationInput.removeAttribute("aria-activedescendant");
+        }
+      }
+
+      function selectLocationSuggestion(index) {
+        const selected = visibleLocationSuggestions[index];
+        if (!selected) return;
+
+        locationInput.value = selected.label;
+        setLocationPanelVisibility(false);
+        locationInput.focus();
+      }
+
+      function setLocationPanelVisibility(isVisible) {
+        locationSuggestionsPanel.classList.toggle("hidden", !isVisible);
+        locationInput.setAttribute("aria-expanded", isVisible ? "true" : "false");
+        if (!isVisible) {
+          locationInput.removeAttribute("aria-activedescendant");
+        }
+      }
+
+      function canonicalizeLocation(value) {
+        const normalizedValue = normalizeText(value);
+        if (!normalizedValue || normalizedValue.length < 2) {
+          return value;
+        }
+
+        const candidates = searchMunicipalities(normalizedValue);
+        if (!candidates.length) {
+          return value;
+        }
+
+        const best = candidates[0];
+        const exactEnough = best.normalizedCity === normalizedValue
+          || best.normalizedLabel === normalizedValue
+          || `${best.normalizedCity} ${best.normalizedState}` === normalizedValue
+          || `${best.normalizedCity} ${best.normalizedStateName}` === normalizedValue;
+
+        return exactEnough ? best.label : value;
       }
 
       function normalizeText(value) {
