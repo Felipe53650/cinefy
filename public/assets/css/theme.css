@@ -705,6 +705,28 @@ body[data-page="modoleitor"] .max-w-7xl {
   min-width: 0;
 }
 
+.cinefy-topbar__actions {
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.cinefy-profile-link {
+  flex: 0 1 auto;
+  width: fit-content;
+  max-width: min(28rem, 38vw);
+  min-width: 0;
+}
+
+.cinefy-profile-meta {
+  min-width: 0;
+  max-width: min(20rem, 26vw);
+}
+
+.cinefy-profile-name,
+.cinefy-profile-secondary {
+  min-width: 0;
+}
+
 .cinefy-profile-avatar {
   flex-shrink: 0;
 }
@@ -769,6 +791,7 @@ body[data-page="modoleitor"] .max-w-7xl {
   }
 
   .cinefy-profile-link {
+    max-width: none;
     padding: 0.28rem !important;
     border-radius: 1rem !important;
   }

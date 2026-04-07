@@ -110,9 +110,9 @@
             ${session ? `
             <a class="cinefy-profile-link flex min-w-0 items-center gap-2 rounded-[999px] border border-[#6c3437] bg-[#2a1516] px-1 py-1 transition hover:border-red-500/30 hover:bg-[#341a1b] md:gap-3 md:py-1.5 md:pl-1.5 md:pr-4" href="perfil.html" aria-label="Perfil">
               <img alt="Avatar do usuario" class="cinefy-profile-avatar h-9 w-9 rounded-full object-cover ring-1 ring-red-400/30" decoding="async" src="${escapeAttribute(safeAvatarUrl(profile ? profile.avatar : defaultAvatar))}" />
-              <div class="hidden min-w-0 md:block">
-                <span class="block truncate text-sm font-semibold text-white">${escapeHtml(profile ? profile.displayName : "Perfil")}</span>
-                <span class="block truncate text-[11px] text-zinc-500">${escapeHtml(profile ? profile.email || `@${profile.username}` : "@cinefy")}</span>
+              <div class="cinefy-profile-meta hidden min-w-0 md:block">
+                <span class="cinefy-profile-name block truncate text-sm font-semibold text-white">${escapeHtml(profile ? profile.displayName : "Perfil")}</span>
+                <span class="cinefy-profile-secondary block truncate text-[11px] text-zinc-500">${escapeHtml(profile ? profile.email || `@${profile.username}` : "@cinefy")}</span>
               </div>
             </a>
             ` : `
