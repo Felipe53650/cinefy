@@ -255,14 +255,13 @@ function getCurrentListEntry(state = store.loadListState()) {
 
 function syncAddButtonState() {
   const isAdded = Boolean(getCurrentListEntry());
-  addToListButton.classList.remove("from-primary", "to-red-900", "shadow-red-950/30", "from-emerald-500", "to-emerald-700", "shadow-emerald-950/30");
   if (isAdded) {
-    addToListButton.classList.add("from-emerald-500", "to-emerald-700", "shadow-emerald-950/30");
+    addToListButton.classList.add("is-added");
     addToListButtonIcon.textContent = "check";
     addToListButtonLabel.textContent = "Adicionado";
     addToListButton.setAttribute("aria-pressed", "true");
   } else {
-    addToListButton.classList.add("from-primary", "to-red-900", "shadow-red-950/30");
+    addToListButton.classList.remove("is-added");
     addToListButtonIcon.textContent = "add";
     addToListButtonLabel.textContent = "Adicionar a Minha Lista";
     addToListButton.setAttribute("aria-pressed", "false");

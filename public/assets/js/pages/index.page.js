@@ -1,11 +1,13 @@
 ﻿const store = window.CinefyStore;
     const fallbackPoster = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80";
     let heroMovie = null;
+    const heroListButton = document.getElementById("heroListButton");
+    const heroListButtonIcon = document.getElementById("heroListButtonIcon");
+    const heroListButtonLabel = document.getElementById("heroListButtonLabel");
+    const homeFeedback = document.getElementById("homeFeedback");
 
-    document.getElementById("heroListButton").addEventListener("click", () => {
-      if (!heroMovie) return;
-      addMovieToList(heroMovie);
-    });
+    heroListButton.addEventListener("click", toggleHeroMovieInList);
+    window.addEventListener("cinefy:list-updated", handleListUpdated);
 
     loadHome();
 
@@ -21,6 +23,8 @@
 
         if (heroMovie) {
           renderHero(heroMovie);
+        } else {
+          syncHeroListButtonState();
         }
 
         store.syncCatalogNotifications(featured.slice(0, 10));
@@ -41,6 +45,7 @@
       document.getElementById("heroMetaPrimary").textContent = `${formatYear(movie.release_date)} • Nota ${formatRating(movie.vote_average)}`;
       document.getElementById("heroMetaSecondary").textContent = "Tendencia da semana";
       document.getElementById("heroDetailsLink").href = `detalhes.html?id=${movie.id}`;
+      syncHeroListButtonState();
     }
 
     function renderMovieScroller(containerId, movies) {
@@ -105,29 +110,64 @@
       }).join("");
     }
 
-    function addMovieToList(movie) {
-      const state = store.loadListState();
-      const movieId = `tmdb-${movie.id}`;
+    function toggleHeroMovieInList() {
+      if (!heroMovie) return;
 
-      if (state.movies.some((item) => item.id === movieId)) {
-        document.getElementById("homeFeedback").textContent = "Esse filme ja esta na sua lista.";
+      const state = store.loadListState();
+      const existingEntry = getHeroMovieEntry(state);
+
+      if (existingEntry) {
+        state.movies = state.movies.filter((item) => item.id !== existingEntry.id);
+        state.updatedAt = new Date().toISOString();
+        store.saveListState(state);
+        renderMyListScroller(state.movies);
+        homeFeedback.textContent = `${heroMovie.title} foi removido da sua lista.`;
+        syncHeroListButtonState(state);
         return;
       }
 
       state.movies.unshift({
-        id: movieId,
-        tmdbId: movie.id,
-        title: movie.title,
+        id: `tmdb-${heroMovie.id}`,
+        tmdbId: heroMovie.id,
+        title: heroMovie.title,
         genre: "TMDB",
-        year: formatYear(movie.release_date),
-        rating: Number(movie.vote_average || 0) / 2,
-        note: movie.overview || "Adicionado pela home.",
-        poster: window.TMDB.getImageUrl(movie.poster_path, fallbackPoster)
+        year: formatYear(heroMovie.release_date),
+        rating: Number(heroMovie.vote_average || 0) / 2,
+        note: heroMovie.overview || "Adicionado pela home.",
+        poster: window.TMDB.getImageUrl(heroMovie.poster_path, fallbackPoster)
       });
       state.updatedAt = new Date().toISOString();
       store.saveListState(state);
       renderMyListScroller(state.movies);
-      document.getElementById("homeFeedback").textContent = `${movie.title} foi adicionado a sua lista.`;
+      homeFeedback.textContent = `${heroMovie.title} foi adicionado a sua lista.`;
+      syncHeroListButtonState(state);
+    }
+
+    function getHeroMovieEntry(state = store.loadListState()) {
+      if (!heroMovie || !state || !Array.isArray(state.movies)) {
+        return null;
+      }
+
+      return state.movies.find((item) => item.id === `tmdb-${heroMovie.id}` || String(item.tmdbId) === String(heroMovie.id)) || null;
+    }
+
+    function syncHeroListButtonState(state = store.loadListState()) {
+      const isAdded = Boolean(getHeroMovieEntry(state));
+
+      heroListButton.classList.toggle("is-added", isAdded);
+      heroListButton.setAttribute("aria-pressed", isAdded ? "true" : "false");
+      heroListButton.disabled = !heroMovie;
+      heroListButtonIcon.textContent = isAdded ? "check" : "add";
+      heroListButtonLabel.textContent = isAdded ? "Adicionado" : "Adicionar a Minha Lista";
+    }
+
+    function handleListUpdated(event) {
+      const state = event && event.detail && Array.isArray(event.detail.movies)
+        ? event.detail
+        : store.loadListState();
+
+      renderMyListScroller(state.movies || []);
+      syncHeroListButtonState(state);
     }
 
     function formatYear(releaseDate) {

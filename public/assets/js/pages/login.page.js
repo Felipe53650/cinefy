@@ -4,12 +4,12 @@
 
     function showFeedback(message, type = "error") {
       loginFeedback.textContent = message;
-      loginFeedback.classList.remove("hidden", "border-red-300/20", "bg-red-950/40", "text-red-100", "border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100");
+      loginFeedback.classList.remove("hidden", "is-error", "is-success");
 
       if (type === "success") {
-        loginFeedback.classList.add("border-emerald-300/20", "bg-emerald-950/40", "text-emerald-100");
+        loginFeedback.classList.add("is-success");
       } else {
-        loginFeedback.classList.add("border-red-300/20", "bg-red-950/40", "text-red-100");
+        loginFeedback.classList.add("is-error");
       }
     }
 

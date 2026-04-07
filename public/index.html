@@ -61,9 +61,9 @@
             <a class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-deep px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" href="busca.html" id="heroDetailsLink">
               Ver detalhes
             </a>
-            <button class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/16 md:px-7 md:py-3.5" id="heroListButton" type="button">
-              <span class="material-symbols-outlined">add</span>
-              Adicionar a Minha Lista
+            <button aria-pressed="false" class="hero-list-button inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition md:px-7 md:py-3.5" id="heroListButton" type="button">
+              <span class="material-symbols-outlined" id="heroListButtonIcon">add</span>
+              <span id="heroListButtonLabel">Adicionar a Minha Lista</span>
             </button>
           </div>
           <p aria-live="polite" class="mt-4 text-sm font-medium text-red-200" id="homeFeedback" role="status"></p>
@@ -127,4 +127,3 @@
   <script src="assets/js/pages/index.page.js"></script>
 </body>
 </html>
-
