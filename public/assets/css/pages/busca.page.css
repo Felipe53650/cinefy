@@ -42,5 +42,18 @@
 
     .cinefy-search-sprite {
       transform: translateY(-0.5rem);
+      z-index: 110;
+      isolation: isolate;
+    }
+
+    #floatingMovieSearchInput:focus-visible,
+    #floatingMovieSearchButton:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(232, 59, 36, 0.35);
+    }
+
+    body[data-page="buscar"] main {
+      position: relative;
+      z-index: 1;
     }
 
