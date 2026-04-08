@@ -30,21 +30,57 @@
 <body class="min-h-screen bg-background text-on-background flex flex-col" data-page="modoleitor">
   <header data-layout="navbar" aria-label="Cabecalho do site"></header>
 
-  <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-16 md:pt-24 max-w-7xl mx-auto w-full">
-    <section class="mb-8 relative overflow-hidden rounded-[1.5rem] border border-zinc-800 bg-zinc-900 p-5 shadow-xl md:mb-10 md:rounded-[1.75rem] md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-transparent pointer-events-none"></div>
-      <div class="section-heading relative z-10">
-        <p class="text-xs uppercase tracking-[0.24em] text-red-300">Modo leitor</p>
-        <h1 class="mt-3 text-2xl font-black text-white md:text-3xl" id="readerTitle">Visualizando uma lista compartilhada</h1>
-        <p class="mt-2 max-w-2xl text-sm text-zinc-400 md:text-base" id="readerDescription">A mesma curadoria salva em "Minha Lista" aparece aqui em modo somente leitura.</p>
-      </div>
-      <div class="relative z-10 flex flex-wrap items-center gap-2">
-        <span class="px-3 py-1 bg-zinc-800 text-zinc-300 text-xs rounded-full border border-zinc-700">Somente leitura</span>
-        <span class="px-3 py-1 bg-zinc-800 text-zinc-300 text-xs rounded-full border border-zinc-700"><span id="readerMovieCount">0</span> filmes</span>
+  <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-24 md:pt-24 max-w-7xl mx-auto w-full">
+    <section class="reader-hero glass-card relative mb-8 overflow-hidden rounded-[1.8rem] md:mb-10 md:rounded-[2.2rem]">
+      <div class="reader-hero__glow absolute inset-0 pointer-events-none"></div>
+      <div class="relative z-10 grid gap-6 p-5 md:p-8 xl:grid-cols-[1.45fr,0.95fr] xl:items-end">
+        <div class="space-y-5">
+          <div class="section-heading">
+            <p class="text-xs uppercase tracking-[0.24em] text-red-300">Modo leitor</p>
+            <h1 class="mt-3 text-3xl font-black text-white md:text-4xl xl:text-5xl" id="readerTitle">Visualizando uma lista compartilhada</h1>
+            <p class="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base" id="readerDescription">A mesma curadoria salva em "Minha Lista" aparece aqui em modo somente leitura.</p>
+          </div>
+          <div class="reader-owner-card">
+            <div class="reader-owner-avatar-shell">
+              <img alt="Avatar do criador da lista" class="reader-owner-avatar" id="readerOwnerAvatar" src="/assets/img/logo.png"/>
+            </div>
+            <div class="min-w-0">
+              <p class="reader-owner-label">Lista compartilhada por</p>
+              <p class="reader-owner-name" id="readerOwnerName">Cinefilo</p>
+              <p class="reader-owner-handle" id="readerOwnerHandle">@cinefyuser</p>
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3 xl:grid-cols-2">
+          <div class="reader-stat-card">
+            <p class="reader-stat-label">Status</p>
+            <p class="reader-stat-value">Somente leitura</p>
+          </div>
+          <div class="reader-stat-card">
+            <p class="reader-stat-label">Filmes</p>
+            <p class="reader-stat-value"><span id="readerMovieCount">0</span></p>
+          </div>
+          <div class="reader-stat-card sm:col-span-3 xl:col-span-2">
+            <p class="reader-stat-label">Experiencia</p>
+            <p class="reader-stat-copy">Explore a curadoria, abra detalhes e descubra os titulos sem alterar a lista original.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="readerGrid"></section>
+    <section class="space-y-6">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div class="section-heading">
+          <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Curadoria compartilhada</p>
+          <h2 class="text-2xl md:text-3xl font-black text-white">Filmes desta lista</h2>
+        </div>
+        <div class="inline-flex items-center gap-2 self-start rounded-full border border-zinc-700 bg-zinc-950/70 px-4 py-2 text-sm text-zinc-300">
+          <span class="material-symbols-outlined text-base">visibility</span>
+          <span><span id="readerMovieCountInline">0</span> filmes visiveis</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5" id="readerGrid"></div>
+    </section>
   </main>
 
   <footer data-layout="footer" aria-label="Rodape do site"></footer>

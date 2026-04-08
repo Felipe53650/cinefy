@@ -8,7 +8,8 @@
     let currentShareId = shareId || "";
     let activeOwner = {
       username: profile.username || "cinefyuser",
-      displayName: profile.displayName || "Cinefilo"
+      displayName: profile.displayName || "Cinefilo",
+      avatar: profile.avatar || "/assets/img/logo.png"
     };
     let activeListState = localListState;
 
@@ -45,7 +46,8 @@
         currentShareId = data.shareId || shareId;
         activeOwner = {
           username: data.ownerUsername || "cinefyuser",
-          displayName: data.ownerDisplayName || "Cinefilo"
+          displayName: data.ownerDisplayName || "Cinefilo",
+          avatar: data.ownerAvatar || "/assets/img/logo.png"
         };
         activeListState = {
           title: data.title || "Lista compartilhada",
@@ -66,11 +68,16 @@
         : `Voce esta visualizando a lista de @${activeOwner.username}`;
       document.getElementById("readerDescription").textContent = activeListState.description || "Uma curadoria compartilhada em modo somente leitura.";
       document.getElementById("readerMovieCount").textContent = activeListState.movies.length;
+      document.getElementById("readerMovieCountInline").textContent = activeListState.movies.length;
+      document.getElementById("readerOwnerName").textContent = activeOwner.displayName || "Cinefilo";
+      document.getElementById("readerOwnerHandle").textContent = `@${activeOwner.username || "cinefyuser"}`;
+      document.getElementById("readerOwnerAvatar").src = safeAvatarUrl(activeOwner.avatar);
 
       const grid = document.getElementById("readerGrid");
       if (!activeListState.movies.length) {
         grid.innerHTML = `
-          <div class="col-span-full rounded-[1.75rem] border border-dashed border-zinc-700 bg-zinc-950/60 p-10 text-center">
+          <div class="reader-empty-state">
+            <span class="material-symbols-outlined text-5xl text-red-400">local_movies</span>
             <p class="text-xl font-black text-white">Nenhum filme compartilhado ainda.</p>
             <p class="mt-2 text-zinc-400">Assim que houver filmes publicados nessa lista, eles aparecerao aqui automaticamente.</p>
           </div>
@@ -79,21 +86,28 @@
       }
 
       grid.innerHTML = activeListState.movies.map((movie) => `
-        <article class="group relative flex flex-col gap-3 rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2">
-          <a class="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg border border-zinc-800 block" href="${escapeAttribute(getMovieDetailsHref(movie))}">
-            <img alt="${escapeHtml(movie.title)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" decoding="async" loading="lazy" src="${escapeAttribute(safePosterUrl(movie.poster || defaultPoster))}"/>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-              <span class="w-full bg-white text-black font-bold py-2 rounded-lg text-sm text-center">Ver detalhes</span>
+        <article class="reader-card group glass-card rounded-3xl transition-all duration-300 hover:-translate-y-1">
+          <div class="reader-card__poster">
+            <a href="${escapeAttribute(getMovieDetailsHref(movie))}">
+              <img alt="${escapeHtml(movie.title)}" decoding="async" loading="lazy" src="${escapeAttribute(safePosterUrl(movie.poster || defaultPoster))}"/>
+            </a>
+            <div class="reader-card__overlay"></div>
+            <div class="reader-card__rating">
+              <span class="material-symbols-outlined fill-icon text-yellow-500 text-sm">star</span>
+              <span class="text-sm font-bold">${formatRating(movie.rating)}</span>
             </div>
-            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded border border-white/10 flex items-center gap-1">
-              <span class="material-symbols-outlined fill-icon text-yellow-500 text-xs">star</span>
-              <span class="text-white text-xs font-bold">${formatRating(movie.rating)}</span>
+            <a class="reader-card__cta" href="${escapeAttribute(getMovieDetailsHref(movie))}">
+              <span class="material-symbols-outlined text-base">open_in_new</span>
+              <span>Ver detalhes</span>
+            </a>
+          </div>
+          <div class="reader-card__body">
+            <a class="reader-card__title" href="${escapeAttribute(getMovieDetailsHref(movie))}">${escapeHtml(movie.title)}</a>
+            <div class="reader-card__meta">
+              <span class="reader-card__pill">${escapeHtml(movie.genre || "Filme")}</span>
+              <span class="reader-card__pill">${escapeHtml(String(movie.year || "Sem ano"))}</span>
             </div>
-          </a>
-          <div class="px-1">
-            <a class="font-bold text-white text-sm line-clamp-1 hover:text-red-300 transition-colors" href="${escapeAttribute(getMovieDetailsHref(movie))}">${escapeHtml(movie.title)}</a>
-            <p class="text-zinc-500 text-xs mt-1">${escapeHtml(movie.genre || "Filme")} • ${escapeHtml(String(movie.year || "Sem ano"))}</p>
-            <p class="text-zinc-400 text-xs mt-2 line-clamp-2">${escapeHtml(movie.note || "Sem comentario adicional.")}</p>
+            <p class="reader-card__note line-clamp-3">${escapeHtml(movie.note || "Sem comentario adicional.")}</p>
           </div>
         </article>
       `).join("");
@@ -104,8 +118,13 @@
       document.getElementById("readerTitle").textContent = "Lista compartilhada indisponivel";
       document.getElementById("readerDescription").textContent = message;
       document.getElementById("readerMovieCount").textContent = "0";
+      document.getElementById("readerMovieCountInline").textContent = "0";
+      document.getElementById("readerOwnerName").textContent = "CINEfy";
+      document.getElementById("readerOwnerHandle").textContent = "@cinefy";
+      document.getElementById("readerOwnerAvatar").src = "/assets/img/logo.png";
       document.getElementById("readerGrid").innerHTML = `
-        <div class="col-span-full rounded-[1.75rem] border border-dashed border-zinc-700 bg-zinc-950/60 p-10 text-center">
+        <div class="reader-empty-state">
+          <span class="material-symbols-outlined text-5xl text-red-400">error</span>
           <p class="text-xl font-black text-white">Nao foi possivel abrir essa lista.</p>
           <p class="mt-2 text-zinc-400">${escapeHtml(message)}</p>
         </div>
@@ -167,5 +186,25 @@
       }
 
       return defaultPoster;
+    }
+
+    function safeAvatarUrl(value) {
+      const candidate = String(value || "").trim();
+      if (!candidate) return "/assets/img/logo.png";
+
+      if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+        return candidate;
+      }
+
+      try {
+        const parsedUrl = new URL(candidate, window.location.origin);
+        if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+          return parsedUrl.href;
+        }
+      } catch (error) {
+        return "/assets/img/logo.png";
+      }
+
+      return "/assets/img/logo.png";
     }
 
