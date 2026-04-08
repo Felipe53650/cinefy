@@ -45,10 +45,20 @@
       document.getElementById("heroBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
       document.getElementById("heroTitle").textContent = movie.title;
       document.getElementById("heroOverview").textContent = movie.overview || "Sem sinopse disponivel.";
-      document.getElementById("heroMetaPrimary").textContent = `${formatYear(movie.release_date)} • Nota ${formatRating(movie.vote_average)}`;
+      updateHeroMetaPrimary(movie);
       document.getElementById("heroMetaSecondary").textContent = "Tendencia da semana";
       document.getElementById("heroDetailsLink").href = `detalhes.html?id=${movie.id}`;
       syncHeroListButtonState();
+      hydrateHeroCertification(movie);
+    }
+
+    function updateHeroMetaPrimary(movie) {
+      const parts = [formatYear(movie.release_date)];
+      if (movie.certificationLabel) {
+        parts.push(movie.certificationLabel);
+      }
+      parts.push(`Nota ${formatRating(movie.vote_average)}`);
+      document.getElementById("heroMetaPrimary").textContent = parts.join(" • ");
     }
 
     function renderMovieScroller(containerId, movies) {
@@ -270,6 +280,29 @@
       }));
 
       return hasUpdates;
+    }
+
+    async function hydrateHeroCertification(movie) {
+      if (!movie || !movie.id || movie.certificationLabel) {
+        updateHeroMetaPrimary(movie || {});
+        return;
+      }
+
+      if (!window.TMDB || typeof window.TMDB.getMovieCertificationLabel !== "function") {
+        return;
+      }
+
+      try {
+        const certificationLabel = await window.TMDB.getMovieCertificationLabel(movie.id);
+        if (certificationLabel) {
+          movie.certificationLabel = certificationLabel;
+          if (heroMovie && String(heroMovie.id) === String(movie.id)) {
+            updateHeroMetaPrimary(movie);
+          }
+        }
+      } catch (error) {
+        movie.certificationLabel = "";
+      }
     }
 
     function toggleHeroMovieInList() {
