@@ -430,12 +430,14 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
                 <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
                 <div class="min-w-0">
                   <p class="truncate text-base font-semibold text-white">${escapeHtml(review.authorName)}</p>
-                  <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)}</p>
+                  <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)} • ${escapeHtml(review.updatedLabel)}</p>
                 </div>
               </div>
-              ${review.isOwn
-                ? '<span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">Sua review</span>'
-                : ''}
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              ${review.tags.map((tag) => `
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white">${escapeHtml(tag)}</span>
+              `).join("")}
             </div>
             <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(review.comment)}</p>
           </article>
@@ -464,13 +466,19 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
                   <img alt="${escapeHtml(review.author || "Autor desconhecido")}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(avatar || fallbackPoster)}"/>
                   <div class="min-w-0">
                     <p class="truncate text-base font-semibold text-white">${escapeHtml(review.author || "Autor desconhecido")}</p>
-                    <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">TMDB • ${escapeHtml(rating)}</p>
+                    <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">TMDB • ${escapeHtml(rating)} • ${escapeHtml(formatReviewDate(review.created_at || review.updated_at))}</p>
                   </div>
                 </div>
                 <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-white/12" href="${escapeHtml(review.url || "#")}" rel="noopener noreferrer" target="_blank">
                   Ler review
                   <span class="material-symbols-outlined text-sm">open_in_new</span>
                 </a>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white">Review publica</span>
+                ${isRecentReview(review.created_at || review.updated_at)
+                  ? '<span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white">Recente</span>'
+                  : ''}
               </div>
               <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(content)}</p>
             </article>
@@ -775,8 +783,51 @@ function normalizeCinefyReviewRecord(review) {
     updatedAt: review.updatedAt || "",
     sourceLabel: review.sourceLabel || "Review no CINEfy",
     isOwn: Boolean(review.isOwn),
-    ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota"
+    ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota",
+    updatedLabel: formatReviewDate(review.updatedAt),
+    tags: buildReviewTags(review)
   };
+}
+
+function buildReviewTags(review) {
+  const tags = [];
+
+  if (review.isOwn) {
+    tags.push("Sua review");
+  } else if (review.sourceLabel === "Amigo no CINEfy") {
+    tags.push("Amigo");
+  } else {
+    tags.push("Comunidade");
+  }
+
+  if (isRecentReview(review.updatedAt)) {
+    tags.push("Recente");
+  }
+
+  return tags;
+}
+
+function isRecentReview(dateValue) {
+  const timestamp = new Date(dateValue).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return false;
+  }
+
+  const daysDiff = (Date.now() - timestamp) / (1000 * 60 * 60 * 24);
+  return daysDiff <= 14;
+}
+
+function formatReviewDate(dateValue) {
+  const timestamp = new Date(dateValue);
+  if (Number.isNaN(timestamp.getTime())) {
+    return "Sem data";
+  }
+
+  return timestamp.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
 }
 
 function getReviewStorageKey() {
