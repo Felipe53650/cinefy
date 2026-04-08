@@ -117,6 +117,22 @@
                 <input class="sr-only" name="searchSortFilter" type="radio" value="rating-asc"/>
                 <span>Pior avaliação</span>
               </label>
+              <label class="filter-option">
+                <input class="sr-only" name="searchSortFilter" type="radio" value="certification"/>
+                <span>Classificação etária</span>
+              </label>
+              <div class="filter-extra-group hidden" id="certificationFilterGroup">
+                <label class="filter-extra-label" for="certificationFilterSelect">Faixa desejada</label>
+                <select class="filter-extra-select" id="certificationFilterSelect">
+                  <option value="all">Qualquer classificação</option>
+                  <option value="L">Livre</option>
+                  <option value="10">10 anos</option>
+                  <option value="12">12 anos</option>
+                  <option value="14">14 anos</option>
+                  <option value="16">16 anos</option>
+                  <option value="18">18 anos</option>
+                </select>
+              </div>
               <button class="mt-5 w-full rounded-full bg-gradient-to-r from-primary to-primary-deep px-5 py-3.5 text-sm font-bold text-white transition hover:brightness-110" id="applyFilterButton" type="submit">
                 Aplicar filtro
               </button>

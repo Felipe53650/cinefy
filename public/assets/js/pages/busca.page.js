@@ -2,6 +2,7 @@
       const SEARCH_PLACEHOLDER_POSTER = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80";
       const VIEW_STORAGE_KEY = "cinefy-search-view";
       const runtimeCache = new Map();
+      const certificationCache = new Map();
       let currentView = loadViewPreference();
       let currentMovies = [];
       let sourceMovies = [];
@@ -23,6 +24,8 @@
       const activeFilterLabel = document.getElementById("activeFilterLabel");
       const filterDropdownPanel = document.getElementById("filterDropdownPanel");
       const filterForm = document.getElementById("filterForm");
+      const certificationFilterGroup = document.getElementById("certificationFilterGroup");
+      const certificationFilterSelect = document.getElementById("certificationFilterSelect");
       const topbar = document.querySelector(".cinefy-topbar");
       let lastScrollY = window.scrollY;
       let isCompactSearchVisible = false;
@@ -48,10 +51,12 @@
       listViewButton.addEventListener("click", () => setView("list"));
       filterMenuButton.addEventListener("click", toggleFilterMenu);
       filterForm.addEventListener("submit", handleApplyFilter);
+      filterForm.addEventListener("change", handleFilterFormChange);
       document.addEventListener("click", handleOutsideFilterMenuClick);
       document.addEventListener("keydown", handleFilterMenuKeydown);
 
       applyViewMode();
+      updateFilterAuxControls();
       updateActiveFilterLabel();
       syncSearchInputs(searchInput.value);
       wireSearchHeaderBehavior();
@@ -112,6 +117,9 @@
           const contentClass = currentView === "list"
             ? "flex flex-1 flex-col justify-between p-5"
             : "flex flex-1 flex-col justify-between p-5";
+          const certificationMarkup = movie.certificationLabel
+            ? `<span class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-200">${escapeHtml(movie.certificationLabel)}</span>`
+            : "";
 
           return `
             <article class="${articleClass}">
@@ -127,7 +135,10 @@
               <div class="${contentClass}">
                 <div>
                   <h4 class="text-base font-bold text-white ${currentView === "list" ? "" : "line-clamp-1"}">${escapeHtml(movie.title)}</h4>
-                  <span class="mt-1 inline-block text-xs uppercase tracking-[0.2em] text-zinc-500">${releaseYear}</span>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="inline-block text-xs uppercase tracking-[0.2em] text-zinc-500">${releaseYear}</span>
+                    ${certificationMarkup}
+                  </div>
                   <p class="mt-3 text-sm leading-relaxed text-zinc-400 ${currentView === "list" ? "line-clamp-4" : "line-clamp-3"}">${escapeHtml(movie.overview || "Sem sinopse disponivel no TMDB.")}</p>
                 </div>
                 <div class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -186,8 +197,15 @@
       async function handleApplyFilter(event) {
         event.preventDefault();
         appliedFilter = loadSelectedFilter();
+        updateFilterAuxControls();
         await applyCurrentFilter();
         setFilterMenuVisibility(false);
+      }
+
+      function handleFilterFormChange(event) {
+        if (event.target && event.target.name === "searchSortFilter") {
+          updateFilterAuxControls();
+        }
       }
 
       function setLoading(isLoading) {
@@ -315,6 +333,11 @@
           await hydrateMoviesWithRuntime(movies);
         }
 
+        if (normalizedFilter === "certification") {
+          searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">filter_alt</span> Carregando classificacao etaria dos filmes.';
+          await hydrateMoviesWithCertification(movies);
+        }
+
         currentMovies = sortMoviesByFilter(movies, normalizedFilter);
         renderMovies(currentMovies);
         updateActiveFilterLabel();
@@ -342,6 +365,27 @@
         }));
       }
 
+      async function hydrateMoviesWithCertification(movies) {
+        await Promise.all(movies.map(async (movie) => {
+          if (!movie || !movie.id || certificationCache.has(movie.id)) {
+            if (movie && movie.id && certificationCache.has(movie.id)) {
+              movie.certificationLabel = certificationCache.get(movie.id);
+            }
+            return;
+          }
+
+          try {
+            const releaseDates = await window.TMDB.getMovieReleaseDates(movie.id);
+            const certificationLabel = extractMovieCertificationLabel(releaseDates);
+            certificationCache.set(movie.id, certificationLabel);
+            movie.certificationLabel = certificationLabel;
+          } catch (error) {
+            certificationCache.set(movie.id, "");
+            movie.certificationLabel = "";
+          }
+        }));
+      }
+
       function sortMoviesByFilter(movies, filter) {
         switch (filter) {
           case "popular":
@@ -350,6 +394,8 @@
             return movies.sort((a, b) => getMovieYear(b) - getMovieYear(a));
           case "runtime":
             return movies.sort((a, b) => Number(b.runtime || runtimeCache.get(b.id) || 0) - Number(a.runtime || runtimeCache.get(a.id) || 0));
+          case "certification":
+            return filterMoviesByCertification(movies);
           case "rating-desc":
             return movies.sort((a, b) => Number(b.vote_average || 0) - Number(a.vote_average || 0));
           case "rating-asc":
@@ -373,6 +419,8 @@
             return "Ano";
           case "runtime":
             return "Duracao";
+          case "certification":
+            return `Classificacao etaria${getSelectedCertificationLabel() === "Qualquer classificação" ? "" : `: ${getSelectedCertificationLabel()}`}`;
           case "rating-desc":
             return "Melhor avaliacao";
           case "rating-asc":
@@ -386,6 +434,77 @@
       function updateActiveFilterLabel() {
         if (!activeFilterLabel) return;
         activeFilterLabel.textContent = `Filtro aplicado: ${getFilterLabel(appliedFilter)}`;
+      }
+
+      function updateFilterAuxControls() {
+        if (!certificationFilterGroup) return;
+        certificationFilterGroup.classList.toggle("hidden", loadSelectedFilter() !== "certification");
+      }
+
+      function getSelectedCertificationLabel() {
+        const value = certificationFilterSelect ? certificationFilterSelect.value : "all";
+        if (value === "all") return "Qualquer classificação";
+        return value;
+      }
+
+      function filterMoviesByCertification(movies) {
+        const certificationValue = certificationFilterSelect ? certificationFilterSelect.value : "all";
+        const filteredMovies = certificationValue === "all"
+          ? movies
+          : movies.filter((movie) => String(movie.certificationLabel || "").trim() === certificationValue);
+
+        return filteredMovies.sort((a, b) =>
+          String(a.title || "").localeCompare(String(b.title || ""), "pt-BR", { sensitivity: "base" })
+        );
+      }
+
+      function extractMovieCertificationLabel(releaseDatesPayload) {
+        const results = Array.isArray(releaseDatesPayload && releaseDatesPayload.results)
+          ? releaseDatesPayload.results
+          : [];
+        const prioritizedEntries = [
+          results.find((item) => item.iso_3166_1 === "BR"),
+          results.find((item) => item.iso_3166_1 === "US"),
+          ...results
+        ].filter(Boolean);
+
+        for (const entry of prioritizedEntries) {
+          const releaseDates = Array.isArray(entry.release_dates) ? entry.release_dates : [];
+          for (const releaseDate of releaseDates) {
+            const normalizedCertification = normalizeCertificationLabel(releaseDate.certification, entry.iso_3166_1);
+            if (normalizedCertification) {
+              return normalizedCertification;
+            }
+          }
+        }
+
+        return "";
+      }
+
+      function normalizeCertificationLabel(value, countryCode) {
+        const rawValue = String(value || "").trim().toUpperCase();
+        if (!rawValue) return "";
+
+        if (countryCode === "BR") {
+          if (rawValue === "L" || rawValue === "LIVRE") return "L";
+          if (["10", "12", "14", "16", "18"].includes(rawValue)) return rawValue;
+        }
+
+        if (rawValue === "G" || rawValue === "TV-G" || rawValue === "L") return "L";
+        if (rawValue === "PG" || rawValue === "TV-PG" || rawValue === "10") return "10";
+        if (rawValue === "PG-13" || rawValue === "TV-14" || rawValue === "12" || rawValue === "13") return "12";
+        if (rawValue === "14") return "14";
+        if (rawValue === "15" || rawValue === "16" || rawValue === "M") return "16";
+        if (rawValue === "17" || rawValue === "18" || rawValue === "R" || rawValue === "NC-17" || rawValue === "TV-MA") return "18";
+
+        const numericValue = Number(rawValue.replace(/[^\d]/g, ""));
+        if (!Number.isFinite(numericValue)) return "";
+        if (numericValue <= 0) return "L";
+        if (numericValue <= 10) return "10";
+        if (numericValue <= 12) return "12";
+        if (numericValue <= 14) return "14";
+        if (numericValue <= 16) return "16";
+        return "18";
       }
 
       function getMovieYear(movie) {
