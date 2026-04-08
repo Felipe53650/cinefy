@@ -1,5 +1,6 @@
 (function () {
   const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+  const ALLOWED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
   function getFirebaseStorage() {
     return window.CinefyFirebase && window.CinefyFirebase.storage
@@ -21,8 +22,8 @@
       throw new Error("Selecione uma imagem antes de continuar.");
     }
 
-    if (!file.type || !file.type.startsWith("image/")) {
-      throw new Error("Selecione um arquivo de imagem valido.");
+    if (!file.type || !ALLOWED_IMAGE_TYPES.has(file.type)) {
+      throw new Error("Selecione uma imagem PNG, JPG ou WEBP valida.");
     }
 
     if (file.size > MAX_IMAGE_BYTES) {
@@ -60,7 +61,11 @@
     }
 
     const safeFolder = String(folder || "misc").replace(/[^a-z0-9_-]/gi, "") || "misc";
-    const extension = sanitizeFileName(file.name).split(".").pop();
+    const extension = file.type === "image/png"
+      ? "png"
+      : file.type === "image/webp"
+        ? "webp"
+        : "jpg";
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${extension || "jpg"}`;
     const path = `user_uploads/${userId}/${safeFolder}/${fileName}`;
     const ref = storage.ref().child(path);

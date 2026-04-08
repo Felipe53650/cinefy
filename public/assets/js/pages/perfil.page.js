@@ -19,6 +19,7 @@
       const availableThemes = themeManager && typeof themeManager.getThemes === "function"
         ? themeManager.getThemes()
         : [];
+      const allowedImageTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
       const brazilMunicipalities = Array.isArray(window.CINEFY_BRAZIL_MUNICIPALITIES)
         ? window.CINEFY_BRAZIL_MUNICIPALITIES
         : [];
@@ -128,6 +129,12 @@
         if (!file) return;
 
         try {
+          if (!allowedImageTypes.has(file.type)) {
+            throw new Error("Selecione uma imagem PNG, JPG ou WEBP valida.");
+          }
+          if (file.size > 5 * 1024 * 1024) {
+            throw new Error("A imagem precisa ter no maximo 5 MB.");
+          }
           if (window.CinefyStorage && typeof window.CinefyStorage.uploadUserImage === "function") {
             feedback.textContent = "Enviando foto de perfil...";
             profile.avatar = await window.CinefyStorage.uploadUserImage(file, "avatars");
@@ -536,7 +543,7 @@
         const candidate = String(value || "").trim();
         if (!candidate) return fallbackAvatar;
 
-        if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+        if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
           return candidate;
         }
 

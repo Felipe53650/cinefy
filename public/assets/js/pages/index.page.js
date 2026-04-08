@@ -36,8 +36,8 @@
         renderMyListScroller(myList);
       } catch (error) {
         console.error("Erro ao carregar a home do TMDB:", error);
-        document.getElementById("heroTitle").textContent = "Nao foi possivel carregar o TMDB";
-        document.getElementById("heroOverview").textContent = "Verifique sua conexao ou a chave da API para exibir o catalogo real.";
+        document.getElementById("heroTitle").textContent = "Nao foi possivel carregar o catalogo agora";
+        document.getElementById("heroOverview").textContent = "Tente novamente em instantes enquanto restabelecemos a consulta dos filmes.";
       }
     }
 
@@ -333,7 +333,7 @@
       const candidate = String(value || "").trim();
       if (!candidate) return fallbackPoster;
 
-      if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+      if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
         return candidate;
       }
 

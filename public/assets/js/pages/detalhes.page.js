@@ -202,8 +202,8 @@ function hydrateReview() {
 async function saveReview() {
   const reviews = loadReviews();
   const reviewPayload = {
-    rating: document.getElementById("ratingInput").value,
-    comment: document.getElementById("commentInput").value.trim(),
+    rating: sanitizeReviewRating(document.getElementById("ratingInput").value),
+    comment: sanitizeReviewComment(document.getElementById("commentInput").value),
     updatedAt: new Date().toISOString()
   };
 
@@ -751,14 +751,14 @@ async function syncPublicReviewForCurrentMovie(reviewPayload) {
   await docRef.set({
     movieKey: `tmdb-${movieId}`,
     tmdbId: String(movieId),
-    title: currentMovie && currentMovie.title ? currentMovie.title : "",
-    poster: currentMovie && currentMovie.poster_path ? window.TMDB.getImageUrl(currentMovie.poster_path, fallbackPoster) : "",
+    title: truncateText(currentMovie && currentMovie.title ? currentMovie.title : "", 120),
+    poster: truncateText(currentMovie && currentMovie.poster_path ? window.TMDB.getImageUrl(currentMovie.poster_path, fallbackPoster) : "", 2048),
     authorUid: currentProfile.uid,
-    authorName: currentProfile.displayName || currentProfile.username || "Cinefilo",
-    authorUsername: currentProfile.username || "",
-    authorAvatar: currentProfile.avatar || fallbackPoster,
-    rating: reviewPayload.rating || "",
-    comment: String(reviewPayload.comment || "").trim(),
+    authorName: truncateText(currentProfile.displayName || currentProfile.username || "Cinefilo", 80),
+    authorUsername: truncateText(currentProfile.username || "", 24),
+    authorAvatar: truncateText(currentProfile.avatar || fallbackPoster, 2048),
+    rating: sanitizeReviewRating(reviewPayload.rating),
+    comment: sanitizeReviewComment(reviewPayload.comment),
     updatedAt: reviewPayload.updatedAt || new Date().toISOString()
   }, { merge: true });
 }
@@ -843,4 +843,21 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function sanitizeReviewRating(value) {
+  const candidate = String(value ?? "").trim();
+  if (!candidate) return "";
+
+  const parsedValue = Number(candidate);
+  if (!Number.isFinite(parsedValue)) return "";
+  return String(Math.min(5, Math.max(0, parsedValue)));
+}
+
+function sanitizeReviewComment(value) {
+  return truncateText(String(value ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim(), 1600);
+}
+
+function truncateText(value, maxLength) {
+  return String(value ?? "").slice(0, maxLength);
 }

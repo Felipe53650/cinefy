@@ -39,6 +39,7 @@
   const posterPreviewCloseButtons = Array.from(document.querySelectorAll("[data-poster-preview-close]"));
   const posterModeButtons = Array.from(document.querySelectorAll("[data-poster-mode]"));
   const posterPanels = Array.from(document.querySelectorAll("[data-poster-panel]"));
+  const allowedImageTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
 
   let manualPosterMode = "upload";
   let manualPosterFile = null;
@@ -540,7 +541,7 @@
   }
 
   function loadPosterFile(file) {
-    if (!file.type.startsWith("image/")) {
+    if (!allowedImageTypes.has(file.type)) {
       throwPosterError("Selecione uma imagem PNG, JPG ou WEBP.");
       return;
     }
@@ -719,7 +720,7 @@
     const candidate = String(value || "").trim();
     if (!candidate) return "";
 
-    if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
       return candidate;
     }
 

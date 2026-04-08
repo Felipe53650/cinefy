@@ -1,5 +1,6 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
+const crypto = require("node:crypto");
 
 const tmdbApiKey = defineSecret("TMDB_API_KEY");
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -32,9 +33,11 @@ const ALLOWED_QUERY_PARAMS = new Set([
   "language",
   "page",
   "query",
-  "include_adult",
-  "append_to_response"
+  "include_adult"
 ]);
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 90;
+const requestBuckets = new Map();
 
 function isAllowedOrigin(origin) {
   return !origin || ALLOWED_ORIGINS.has(origin);
@@ -57,6 +60,67 @@ function isAllowedTmdbPath(pathname) {
   return ALLOWED_EXACT_OR_REGEX.some((pattern) => pattern.test(pathname));
 }
 
+function getClientIp(req) {
+  const forwardedFor = req.get("x-forwarded-for");
+  if (forwardedFor) {
+    return String(forwardedFor).split(",")[0].trim();
+  }
+
+  return req.ip || req.socket?.remoteAddress || "unknown";
+}
+
+function hashIdentifier(value) {
+  return crypto.createHash("sha256").update(String(value || "unknown")).digest("hex").slice(0, 16);
+}
+
+function isRateLimited(clientIp) {
+  const now = Date.now();
+  const bucketKey = hashIdentifier(clientIp);
+
+  if (requestBuckets.size > 500) {
+    for (const [key, value] of requestBuckets.entries()) {
+      if (now - value.startedAt >= RATE_LIMIT_WINDOW_MS) {
+        requestBuckets.delete(key);
+      }
+    }
+  }
+
+  const bucket = requestBuckets.get(bucketKey);
+
+  if (!bucket || now - bucket.startedAt >= RATE_LIMIT_WINDOW_MS) {
+    requestBuckets.set(bucketKey, { count: 1, startedAt: now });
+    return false;
+  }
+
+  bucket.count += 1;
+  requestBuckets.set(bucketKey, bucket);
+  return bucket.count > RATE_LIMIT_MAX_REQUESTS;
+}
+
+function sanitizeQueryParam(key, value) {
+  const stringValue = String(value ?? "").trim();
+  if (!stringValue) return "";
+
+  if (key === "page") {
+    const page = Number(stringValue);
+    return Number.isInteger(page) && page >= 1 && page <= 20 ? String(page) : "";
+  }
+
+  if (key === "query") {
+    return stringValue.length <= 120 ? stringValue : stringValue.slice(0, 120);
+  }
+
+  if (key === "include_adult") {
+    return stringValue === "true" ? "true" : "false";
+  }
+
+  if (key === "language") {
+    return /^[a-z]{2}(?:-[A-Z]{2})?$/.test(stringValue) ? stringValue : "";
+  }
+
+  return "";
+}
+
 exports.tmdbProxy = onRequest(
   {
     region: "southamerica-east1",
@@ -65,6 +129,7 @@ exports.tmdbProxy = onRequest(
   },
   async (req, res) => {
     const origin = req.get("origin") || "";
+    const clientIp = getClientIp(req);
 
     if (origin && isAllowedOrigin(origin)) {
       res.set("Access-Control-Allow-Origin", origin);
@@ -73,6 +138,8 @@ exports.tmdbProxy = onRequest(
 
     res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Referrer-Policy", "no-referrer");
 
     if (req.method === "OPTIONS") {
       res.status(204).send("");
@@ -85,12 +152,21 @@ exports.tmdbProxy = onRequest(
     }
 
     if (!isAllowedOrigin(origin)) {
+      console.warn("TMDB proxy blocked disallowed origin", { origin, client: hashIdentifier(clientIp) });
       res.status(403).json({ error: "Origin not allowed" });
+      return;
+    }
+
+    if (isRateLimited(clientIp)) {
+      console.warn("TMDB proxy rate limited request", { client: hashIdentifier(clientIp), origin });
+      res.set("Retry-After", "60");
+      res.status(429).json({ error: "Rate limit exceeded" });
       return;
     }
 
     const tmdbPath = resolveTmdbPath(req.path);
     if (!isAllowedTmdbPath(tmdbPath)) {
+      console.warn("TMDB proxy blocked unsupported route", { path: tmdbPath, client: hashIdentifier(clientIp) });
       res.status(400).json({ error: "Unsupported TMDB route" });
       return;
     }
@@ -106,15 +182,17 @@ exports.tmdbProxy = onRequest(
 
       if (Array.isArray(value)) {
         value.forEach((entry) => {
-          if (entry !== undefined && entry !== null && entry !== "") {
-            url.searchParams.append(key, String(entry));
+          const sanitizedEntry = sanitizeQueryParam(key, entry);
+          if (sanitizedEntry) {
+            url.searchParams.append(key, sanitizedEntry);
           }
         });
         return;
       }
 
-      if (value !== undefined && value !== null && value !== "") {
-        url.searchParams.set(key, String(value));
+      const sanitizedValue = sanitizeQueryParam(key, value);
+      if (sanitizedValue) {
+        url.searchParams.set(key, sanitizedValue);
       }
     });
 

@@ -9,26 +9,268 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function validShortText(value, maxLength) {
+      return value is string && value.size() <= maxLength;
+    }
+
+    function validTheme(value) {
+      return value == "ember" ||
+        value == "ocean" ||
+        value == "emerald" ||
+        value == "aurora" ||
+        value == "sunset" ||
+        value == "rose" ||
+        value == "noir" ||
+        value == "golden-age";
+    }
+
     function hasNotificationRelationship(userId) {
       return exists(/databases/$(database)/documents/users/$(userId)/friend_requests/$(request.auth.uid)) ||
         exists(/databases/$(database)/documents/users/$(userId)/friends/$(request.auth.uid));
     }
 
-    function isNotificationsPayload() {
+    function isValidUserDocument(userId) {
+      return request.resource.data.keys().hasOnly([
+          "uid",
+          "displayName",
+          "username",
+          "avatar",
+          "bio",
+          "location",
+          "theme",
+          "authProvider",
+          "updatedAt",
+          "createdAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "uid",
+          "displayName",
+          "username",
+          "avatar",
+          "bio",
+          "location",
+          "theme",
+          "authProvider"
+        ]) &&
+        request.resource.data.uid == userId &&
+        validShortText(request.resource.data.uid, 128) &&
+        validShortText(request.resource.data.displayName, 80) &&
+        validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.avatar, 2048) &&
+        validShortText(request.resource.data.bio, 280) &&
+        validShortText(request.resource.data.location, 120) &&
+        validTheme(request.resource.data.theme) &&
+        validShortText(request.resource.data.authProvider, 24);
+    }
+
+    function isAppStateBasePayload() {
       return request.resource.data.keys().hasOnly(["value", "updatedAt"]) &&
+        request.resource.data.updatedAt is string &&
+        request.resource.data.updatedAt.size() <= 40;
+    }
+
+    function isNotificationsPayload() {
+      return isAppStateBasePayload() &&
         request.resource.data.value is list &&
         request.resource.data.value.size() <= 40;
     }
 
+    function isFriendsPayload() {
+      return isAppStateBasePayload() &&
+        request.resource.data.value is list &&
+        request.resource.data.value.size() <= 80;
+    }
+
+    function isListPayload() {
+      return isAppStateBasePayload() &&
+        request.resource.data.value is map &&
+        request.resource.data.value.keys().hasOnly(["selectedListId", "items"]) &&
+        request.resource.data.value.keys().hasAll(["selectedListId", "items"]) &&
+        validShortText(request.resource.data.value.selectedListId, 160) &&
+        request.resource.data.value.items is list &&
+        request.resource.data.value.items.size() <= 25;
+    }
+
+    function isReviewsPayload() {
+      return isAppStateBasePayload() &&
+        request.resource.data.value is map &&
+        request.resource.data.value.keys().size() <= 250;
+    }
+
+    function isValidAppStatePayload(documentId) {
+      return (documentId == "notifications" && isNotificationsPayload()) ||
+        (documentId == "friends" && isFriendsPayload()) ||
+        (documentId == "list" && isListPayload()) ||
+        (documentId == "reviews" && isReviewsPayload());
+    }
+
+    function isValidFriendDoc(friendId) {
+      return request.resource.data.keys().hasOnly([
+          "id",
+          "name",
+          "displayName",
+          "username",
+          "avatar",
+          "favoriteGenre",
+          "location",
+          "createdAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "id",
+          "displayName",
+          "username",
+          "avatar",
+          "favoriteGenre",
+          "location"
+        ]) &&
+        request.resource.data.id == friendId &&
+        validShortText(request.resource.data.id, 128) &&
+        validShortText(request.resource.data.displayName, 80) &&
+        validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.avatar, 2048) &&
+        validShortText(request.resource.data.favoriteGenre, 60) &&
+        validShortText(request.resource.data.location, 120);
+    }
+
+    function isValidFriendRequestDoc(senderId) {
+      return request.resource.data.keys().hasOnly([
+          "senderUid",
+          "displayName",
+          "username",
+          "avatar",
+          "createdAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "senderUid",
+          "displayName",
+          "username",
+          "avatar"
+        ]) &&
+        request.resource.data.senderUid == senderId &&
+        validShortText(request.resource.data.senderUid, 128) &&
+        validShortText(request.resource.data.displayName, 80) &&
+        validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.avatar, 2048);
+    }
+
+    function isValidOutgoingRequestDoc(recipientId) {
+      return request.resource.data.keys().hasOnly([
+          "recipientUid",
+          "displayName",
+          "username",
+          "avatar",
+          "createdAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "recipientUid",
+          "displayName",
+          "username",
+          "avatar"
+        ]) &&
+        request.resource.data.recipientUid == recipientId &&
+        validShortText(request.resource.data.recipientUid, 128) &&
+        validShortText(request.resource.data.displayName, 80) &&
+        validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.avatar, 2048);
+    }
+
+    function isValidPublicReview(userId, reviewId) {
+      return reviewId.matches("^tmdb-[0-9]+$") &&
+        request.resource.data.keys().hasOnly([
+          "movieKey",
+          "tmdbId",
+          "title",
+          "poster",
+          "authorUid",
+          "authorName",
+          "authorUsername",
+          "authorAvatar",
+          "rating",
+          "comment",
+          "updatedAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "movieKey",
+          "tmdbId",
+          "authorUid",
+          "authorName",
+          "authorUsername",
+          "authorAvatar",
+          "rating",
+          "comment",
+          "updatedAt"
+        ]) &&
+        request.resource.data.movieKey == reviewId &&
+        request.resource.data.authorUid == userId &&
+        request.resource.data.tmdbId.matches("^[0-9]+$") &&
+        validShortText(request.resource.data.title, 120) &&
+        validShortText(request.resource.data.poster, 2048) &&
+        validShortText(request.resource.data.authorUid, 128) &&
+        validShortText(request.resource.data.authorName, 80) &&
+        validShortText(request.resource.data.authorUsername, 24) &&
+        validShortText(request.resource.data.authorAvatar, 2048) &&
+        validShortText(request.resource.data.rating, 4) &&
+        validShortText(request.resource.data.comment, 1600) &&
+        validShortText(request.resource.data.updatedAt, 40);
+    }
+
+    function isValidSharedList(shareId) {
+      return request.resource.data.keys().hasOnly([
+          "shareId",
+          "slug",
+          "ownerUid",
+          "ownerListId",
+          "ownerUsername",
+          "ownerDisplayName",
+          "ownerAvatar",
+          "title",
+          "description",
+          "privacy",
+          "updatedAt",
+          "createdAt",
+          "movies"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "shareId",
+          "ownerUid",
+          "ownerListId",
+          "ownerUsername",
+          "ownerDisplayName",
+          "ownerAvatar",
+          "title",
+          "description",
+          "privacy",
+          "updatedAt",
+          "createdAt",
+          "movies"
+        ]) &&
+        request.resource.data.shareId == shareId &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        validShortText(request.resource.data.shareId, 160) &&
+        validShortText(request.resource.data.slug, 120) &&
+        validShortText(request.resource.data.ownerUid, 128) &&
+        validShortText(request.resource.data.ownerListId, 160) &&
+        validShortText(request.resource.data.ownerUsername, 24) &&
+        validShortText(request.resource.data.ownerDisplayName, 80) &&
+        validShortText(request.resource.data.ownerAvatar, 2048) &&
+        validShortText(request.resource.data.title, 80) &&
+        validShortText(request.resource.data.description, 240) &&
+        (request.resource.data.privacy == "publica" || request.resource.data.privacy == "privada") &&
+        validShortText(request.resource.data.updatedAt, 40) &&
+        validShortText(request.resource.data.createdAt, 40) &&
+        request.resource.data.movies is list &&
+        request.resource.data.movies.size() <= 120;
+    }
+
     match /users/{userId} {
-      allow create: if isSelf(userId);
+      allow create, update: if isSelf(userId) && isValidUserDocument(userId);
       allow read: if isSignedIn();
-      allow update, delete: if isSelf(userId);
+      allow delete: if isSelf(userId);
     }
 
     match /users/{userId}/app_state/{documentId} {
       allow read: if isSelf(userId);
-      allow write: if isSelf(userId);
+      allow write: if isSelf(userId) && isValidAppStatePayload(documentId);
       allow write: if documentId == "notifications" &&
         isSignedIn() &&
         hasNotificationRelationship(userId) &&
@@ -37,12 +279,17 @@ service cloud.firestore {
 
     match /users/{userId}/friends/{friendId} {
       allow read: if isSelf(userId);
-      allow create, update, delete: if isSignedIn() && (request.auth.uid == userId || request.auth.uid == friendId);
+      allow create, update: if isSignedIn() &&
+        (request.auth.uid == userId || request.auth.uid == friendId) &&
+        isValidFriendDoc(friendId);
+      allow delete: if isSignedIn() && (request.auth.uid == userId || request.auth.uid == friendId);
     }
 
     match /users/{userId}/friend_requests/{senderId} {
       allow read: if isSelf(userId);
-      allow create: if isSignedIn() && request.auth.uid == senderId;
+      allow create: if isSignedIn() &&
+        request.auth.uid == senderId &&
+        isValidFriendRequestDoc(senderId);
       allow delete: if isSignedIn() && (
         request.auth.uid == userId ||
         request.auth.uid == senderId
@@ -51,7 +298,7 @@ service cloud.firestore {
 
     match /users/{userId}/outgoing_requests/{recipientId} {
       allow read: if isSelf(userId);
-      allow create, update: if isSelf(userId);
+      allow create, update: if isSelf(userId) && isValidOutgoingRequestDoc(recipientId);
       allow delete: if isSignedIn() && (
         request.auth.uid == userId ||
         request.auth.uid == recipientId
@@ -60,15 +307,13 @@ service cloud.firestore {
 
     match /users/{userId}/public_reviews/{reviewId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isSelf(userId);
+      allow create, update: if isSelf(userId) && isValidPublicReview(userId, reviewId);
+      allow delete: if isSelf(userId);
     }
 
     match /shared_lists/{shareId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update: if isSignedIn() &&
-        resource.data.ownerUid == request.auth.uid &&
-        request.resource.data.ownerUid == request.auth.uid;
+      allow create, update: if isSignedIn() && isValidSharedList(shareId);
       allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
     }
 

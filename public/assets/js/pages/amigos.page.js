@@ -264,7 +264,6 @@
             displayName: currentProfile.displayName,
             username: currentProfile.username,
             avatar: currentProfile.avatar,
-            email: currentProfile.email || "",
             createdAt: new Date().toISOString()
           };
 
@@ -440,7 +439,7 @@
         const candidate = String(value || "").trim();
         if (!candidate) return fallbackAvatar;
 
-        if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+        if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
           return candidate;
         }
 

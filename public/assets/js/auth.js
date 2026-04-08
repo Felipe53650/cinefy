@@ -5,6 +5,7 @@
   const PROFILE_KEY = "cinefy-user-profile";
   const AUTH_PAGES = new Set(["login", "cadastro"]);
   const PUBLIC_PAGES = new Set(["index", "busca", "detalhes", "404", "modoleitor"]);
+  let firebaseAuthResolved = false;
   const defaultAvatar =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
 
@@ -87,6 +88,24 @@
       .slice(0, 24) || "cinefyuser";
   }
 
+  function sanitizeEmail(value) {
+    const store = getStore();
+    if (store && typeof store.sanitizeEmail === "function") {
+      return store.sanitizeEmail(value);
+    }
+
+    return String(value || "").trim().toLowerCase().slice(0, 160);
+  }
+
+  function sanitizeProfilePayload(profile) {
+    const store = getStore();
+    if (store && typeof store.sanitizeProfile === "function") {
+      return store.sanitizeProfile(profile);
+    }
+
+    return createProfile(profile || {});
+  }
+
   function createProfile(data) {
     const store = getStore();
     const baseProfile = store ? clone(store.defaultProfile) : {
@@ -109,7 +128,7 @@
       avatar: data.avatar || baseProfile.avatar || defaultAvatar,
       location: data.location || baseProfile.location || "Brasil",
       theme: data.theme || baseProfile.theme || "ember",
-      email: data.email || "",
+      email: sanitizeEmail(data.email || ""),
       authProvider: data.authProvider || "email"
     };
   }
@@ -124,15 +143,16 @@
   }
 
   function startSession(profile) {
-    syncProfile(profile);
+    const safeProfile = sanitizeProfilePayload(profile);
+    syncProfile(safeProfile);
     saveSession({
-      uid: profile.uid || "",
-      displayName: profile.displayName,
-      email: profile.email || "",
-      avatar: profile.avatar || defaultAvatar,
-      authProvider: profile.authProvider || "email",
-      username: profile.username || "cinefyuser",
-      theme: profile.theme || "ember"
+      uid: safeProfile.uid || "",
+      displayName: safeProfile.displayName,
+      email: safeProfile.email || "",
+      avatar: safeProfile.avatar || defaultAvatar,
+      authProvider: safeProfile.authProvider || "email",
+      username: safeProfile.username || "cinefyuser",
+      theme: safeProfile.theme || "ember"
     });
   }
 
@@ -190,32 +210,34 @@
   }
 
   async function saveUserProfileToFirestore(profile) {
-    if (!hasFirestore() || !profile.uid) return profile;
+    const safeProfile = sanitizeProfilePayload(profile);
+    if (!hasFirestore() || !safeProfile.uid) return safeProfile;
 
     const firestore = getFirestore();
     const now = window.firebase.firestore.FieldValue.serverTimestamp();
-    const docRef = firestore.collection("users").doc(profile.uid);
+    const removeField = window.firebase.firestore.FieldValue.delete();
+    const docRef = firestore.collection("users").doc(safeProfile.uid);
     const existingSnapshot = await docRef.get();
     const existingData = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
 
     await docRef.set(
       {
-        uid: profile.uid,
-        displayName: profile.displayName,
-        username: profile.username,
-        email: profile.email || "",
-        avatar: profile.avatar || defaultAvatar,
-        bio: profile.bio || "",
-        location: profile.location || "Brasil",
-        theme: profile.theme || "ember",
-        authProvider: profile.authProvider || "email",
+        uid: safeProfile.uid,
+        displayName: safeProfile.displayName,
+        username: safeProfile.username,
+        email: removeField,
+        avatar: safeProfile.avatar || defaultAvatar,
+        bio: safeProfile.bio || "",
+        location: safeProfile.location || "Brasil",
+        theme: safeProfile.theme || "ember",
+        authProvider: safeProfile.authProvider || "email",
         updatedAt: now,
         createdAt: existingData.createdAt || now
       },
       { merge: true }
     );
 
-    return profile;
+    return safeProfile;
   }
 
   async function getUserProfileFromFirestore(uid) {
@@ -259,10 +281,14 @@
       throw new Error("Preencha nome, e-mail e senha.");
     }
 
+    if (String(password).length > 256) {
+      throw new Error("A senha informada excede o tamanho permitido.");
+    }
+
     requireFirebaseAuth();
 
     const auth = getFirebaseAuth();
-    const credential = await auth.createUserWithEmailAndPassword(email, password);
+    const credential = await auth.createUserWithEmailAndPassword(sanitizeEmail(email), password);
     const user = credential.user;
 
     if (user && typeof user.updateProfile === "function") {
@@ -288,10 +314,14 @@
       throw new Error("Informe e-mail e senha.");
     }
 
+    if (String(password).length > 256) {
+      throw new Error("A senha informada excede o tamanho permitido.");
+    }
+
     requireFirebaseAuth();
 
     const auth = getFirebaseAuth();
-    const credential = await auth.signInWithEmailAndPassword(email, password);
+    const credential = await auth.signInWithEmailAndPassword(sanitizeEmail(email), password);
     const user = credential.user;
 
     if (user && Object.prototype.hasOwnProperty.call(user, "emailVerified") && !user.emailVerified) {
@@ -329,7 +359,7 @@
       goToApp();
       return profile;
     } catch (error) {
-      console.error(`Erro no login com ${providerName}:`, error);
+      console.error(`Erro no login com ${providerName}:`, error && error.code ? { code: error.code } : error);
 
       if (error && error.code === "auth/invalid-credential") {
         error.cinefyMessage = providerName === "facebook"
@@ -347,7 +377,7 @@
     }
 
     requireFirebaseAuth();
-    await getFirebaseAuth().sendPasswordResetEmail(email);
+    await getFirebaseAuth().sendPasswordResetEmail(sanitizeEmail(email));
     return true;
   }
 
@@ -369,13 +399,15 @@
   }
 
   async function saveCurrentProfile(profile) {
+    const safeProfile = sanitizeProfilePayload(profile);
+
     if (hasFirebaseAuth()) {
       const currentUser = getFirebaseAuth().currentUser;
-      if (currentUser && currentUser.uid === profile.uid && typeof currentUser.updateProfile === "function") {
+      if (currentUser && currentUser.uid === safeProfile.uid && typeof currentUser.updateProfile === "function") {
         try {
           await currentUser.updateProfile({
-            displayName: profile.displayName || currentUser.displayName || "Cinefilo",
-            photoURL: profile.avatar || currentUser.photoURL || defaultAvatar
+            displayName: safeProfile.displayName || currentUser.displayName || "Cinefilo",
+            photoURL: safeProfile.avatar || currentUser.photoURL || defaultAvatar
           });
         } catch (error) {
           console.error("Erro ao atualizar o perfil no Firebase Auth:", error);
@@ -383,15 +415,15 @@
       }
     }
 
-    startSession(profile);
+    startSession(safeProfile);
 
-    if (hasFirestore() && profile.uid) {
-      await saveUserProfileToFirestore(profile);
+    if (hasFirestore() && safeProfile.uid) {
+      await saveUserProfileToFirestore(safeProfile);
     }
 
     await syncStoreFromCloud();
 
-    return profile;
+    return safeProfile;
   }
 
   function mapFirebaseError(error) {
@@ -429,10 +461,6 @@
     return PUBLIC_PAGES.has(getCurrentPath());
   }
 
-  function hasStoredSession() {
-    return Boolean(loadSession());
-  }
-
   function isProtectedPage() {
     return !isAuthPage() && !isPublicPage();
   }
@@ -445,13 +473,14 @@
       return;
     }
 
-    if (isProtectedPage() && !hasStoredSession()) {
+    if (isProtectedPage() && (!hasFirebaseAuth() || firebaseAuthResolved)) {
       redirectTo("login.html");
     }
   }
 
   if (hasFirebaseAuth()) {
     getFirebaseAuth().onAuthStateChanged(async (user) => {
+      firebaseAuthResolved = true;
       if (!user) {
         clearSession();
         enforceRouteAccess(null);

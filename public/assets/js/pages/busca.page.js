@@ -222,7 +222,7 @@
           <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
         `;
         resultsSubtitle.textContent = "Nao foi possivel carregar resultados";
-        searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Falha ao consultar o TMDB. Verifique a chave, CORS ou conexao.';
+        searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Nao foi possivel carregar resultados agora. Tente novamente em instantes.';
       }
 
       function syncSearchInputs(value) {
@@ -413,7 +413,7 @@
         const candidate = String(value || "").trim();
         if (!candidate) return SEARCH_PLACEHOLDER_POSTER;
 
-        if (candidate.startsWith("data:image/") || candidate.startsWith("blob:")) {
+        if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
           return candidate;
         }
 

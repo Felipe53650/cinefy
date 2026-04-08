@@ -6,6 +6,23 @@
   const LIST_KEY = "cinefy-user-list";
   const REVIEWS_KEY = "cinefy-movie-reviews";
   const LEGACY_DEFAULT_LIST_MOVIE_IDS = ["interstellar", "past-lives", "blade-runner-2049", "aftersun"];
+  const MAX_PROFILE_NAME_LENGTH = 80;
+  const MAX_USERNAME_LENGTH = 24;
+  const MAX_BIO_LENGTH = 280;
+  const MAX_LOCATION_LENGTH = 120;
+  const MAX_FRIENDS = 80;
+  const MAX_NOTIFICATIONS = 40;
+  const MAX_LISTS = 25;
+  const MAX_MOVIES_PER_LIST = 120;
+  const MAX_LIST_TITLE_LENGTH = 80;
+  const MAX_LIST_DESCRIPTION_LENGTH = 240;
+  const MAX_MOVIE_TITLE_LENGTH = 120;
+  const MAX_MOVIE_GENRE_LENGTH = 60;
+  const MAX_MOVIE_NOTE_LENGTH = 1200;
+  const MAX_MOVIE_OVERVIEW_LENGTH = 2000;
+  const MAX_REVIEW_COUNT = 250;
+  const MAX_REVIEW_COMMENT_LENGTH = 1600;
+  const ALLOWED_THEMES = new Set(["ember", "ocean", "emerald", "aurora", "sunset", "rose", "noir", "golden-age"]);
 
   const defaultProfile = {
     username: "felipecine",
@@ -114,6 +131,108 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function truncate(value, maxLength) {
+    return String(value ?? "").slice(0, maxLength);
+  }
+
+  function sanitizeText(value, maxLength) {
+    return truncate(String(value ?? "").replace(/\s+/g, " ").trim(), maxLength);
+  }
+
+  function sanitizeMultilineText(value, maxLength) {
+    return truncate(String(value ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim(), maxLength);
+  }
+
+  function sanitizeUsername(value) {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "")
+      .slice(0, MAX_USERNAME_LENGTH) || "cinefyuser";
+  }
+
+  function sanitizeEmail(value) {
+    return truncate(String(value ?? "").trim().toLowerCase(), 160);
+  }
+
+  function sanitizeTheme(value) {
+    const candidate = String(value ?? "").trim().toLowerCase();
+    return ALLOWED_THEMES.has(candidate) ? candidate : "ember";
+  }
+
+  function sanitizeIsoDate(value) {
+    const candidate = String(value ?? "").trim();
+    const timestamp = Date.parse(candidate);
+    return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : new Date().toISOString();
+  }
+
+  function sanitizeUrl(value) {
+    const candidate = truncate(String(value ?? "").trim(), 2048);
+    if (!candidate) return "";
+
+    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+      return candidate;
+    }
+
+    try {
+      const parsedUrl = new URL(candidate, window.location.origin);
+      if (parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:") {
+        return parsedUrl.href;
+      }
+    } catch (error) {
+      return "";
+    }
+
+    return "";
+  }
+
+  function sanitizeNotificationHref(value) {
+    const candidate = String(value ?? "").trim();
+    if (/^(index|lista|busca|amigos|perfil|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(candidate)) {
+      return candidate;
+    }
+
+    return "#";
+  }
+
+  function clampNumber(value, min, max, fallback) {
+    const parsedValue = Number(value);
+    if (!Number.isFinite(parsedValue)) return fallback;
+    return Math.min(max, Math.max(min, parsedValue));
+  }
+
+  function sanitizeProfile(profile) {
+    const safeProfile = profile && typeof profile === "object" ? profile : {};
+    return {
+      ...clone(defaultProfile),
+      ...safeProfile,
+      uid: truncate(String(safeProfile.uid || ""), 128),
+      username: sanitizeUsername(safeProfile.username || safeProfile.email || safeProfile.displayName || defaultProfile.username),
+      displayName: sanitizeText(safeProfile.displayName || safeProfile.name || defaultProfile.displayName, MAX_PROFILE_NAME_LENGTH) || defaultProfile.displayName,
+      bio: sanitizeMultilineText(safeProfile.bio || defaultProfile.bio, MAX_BIO_LENGTH) || defaultProfile.bio,
+      avatar: sanitizeUrl(safeProfile.avatar) || defaultProfile.avatar,
+      location: sanitizeText(safeProfile.location || defaultProfile.location, MAX_LOCATION_LENGTH) || defaultProfile.location,
+      theme: sanitizeTheme(safeProfile.theme || defaultProfile.theme),
+      email: sanitizeEmail(safeProfile.email),
+      authProvider: sanitizeText(safeProfile.authProvider || "email", 24) || "email"
+    };
+  }
+
+  function normalizeFriend(friend) {
+    const safeFriend = friend && typeof friend === "object" ? friend : {};
+    const username = sanitizeUsername(safeFriend.username || safeFriend.id || safeFriend.name || "cinefyuser");
+
+    return {
+      id: truncate(String(safeFriend.id || username), 128),
+      username,
+      name: sanitizeText(safeFriend.name || safeFriend.displayName || "Usuario", MAX_PROFILE_NAME_LENGTH) || "Usuario",
+      displayName: sanitizeText(safeFriend.displayName || safeFriend.name || "", MAX_PROFILE_NAME_LENGTH),
+      favoriteGenre: sanitizeText(safeFriend.favoriteGenre || "Cinema", 60) || "Cinema",
+      avatar: sanitizeUrl(safeFriend.avatar) || defaultProfile.avatar
+    };
+  }
+
   function loadJSON(key, fallback) {
     try {
       const raw = localStorage.getItem(key);
@@ -131,15 +250,16 @@
     const safeMovie = movie && typeof movie === "object" ? movie : {};
     return {
       ...safeMovie,
-      id: safeMovie.id || `movie-${Date.now()}`,
-      tmdbId: safeMovie.tmdbId || "",
-      title: safeMovie.title || "Titulo indisponivel",
-      genre: safeMovie.genre || "Filme",
-      year: safeMovie.year || "Sem ano",
-      rating: Number.isFinite(Number(safeMovie.rating)) ? Number(safeMovie.rating) : 0,
-      note: safeMovie.note || "",
-      poster: safeMovie.poster || "",
-      overview: safeMovie.overview || ""
+      id: truncate(String(safeMovie.id || `movie-${Date.now()}`), 160),
+      tmdbId: truncate(String(safeMovie.tmdbId || ""), 32).replace(/[^0-9]/g, ""),
+      sharedSourceId: truncate(String(safeMovie.sharedSourceId || ""), 180),
+      title: sanitizeText(safeMovie.title || "Titulo indisponivel", MAX_MOVIE_TITLE_LENGTH) || "Titulo indisponivel",
+      genre: sanitizeText(safeMovie.genre || "Filme", MAX_MOVIE_GENRE_LENGTH) || "Filme",
+      year: truncate(String(safeMovie.year || "Sem ano"), 12) || "Sem ano",
+      rating: clampNumber(safeMovie.rating, 0, 5, 0),
+      note: sanitizeMultilineText(safeMovie.note || "", MAX_MOVIE_NOTE_LENGTH),
+      poster: sanitizeUrl(safeMovie.poster),
+      overview: sanitizeMultilineText(safeMovie.overview || "", MAX_MOVIE_OVERVIEW_LENGTH)
     };
   }
 
@@ -153,11 +273,13 @@
       ...clone(defaultListState),
       ...safeList,
       id: safeList.id || (index === 0 ? defaultListState.id : createListId()),
-      title: safeList.title || defaultListState.title,
-      description: safeList.description || defaultListState.description,
+      shareId: truncate(String(safeList.shareId || ""), 160),
+      sharedCreatedAt: safeList.sharedCreatedAt ? sanitizeIsoDate(safeList.sharedCreatedAt) : "",
+      title: sanitizeText(safeList.title || defaultListState.title, MAX_LIST_TITLE_LENGTH) || defaultListState.title,
+      description: sanitizeMultilineText(safeList.description || defaultListState.description, MAX_LIST_DESCRIPTION_LENGTH) || defaultListState.description,
       privacy: safeList.privacy === "privada" ? "privada" : "publica",
-      updatedAt: safeList.updatedAt || new Date().toISOString(),
-      movies: Array.isArray(safeList.movies) ? safeList.movies.map(normalizeMovie) : []
+      updatedAt: sanitizeIsoDate(safeList.updatedAt || new Date().toISOString()),
+      movies: Array.isArray(safeList.movies) ? safeList.movies.slice(0, MAX_MOVIES_PER_LIST).map(normalizeMovie) : []
     };
   }
 
@@ -276,17 +398,19 @@
       const sameUser = !session || !storedProfile.uid || !session.uid || storedProfile.uid === session.uid;
 
       return {
-        ...clone(defaultProfile),
-        ...storedProfile,
-        ...(session ? {
-          uid: session.uid || storedProfile.uid,
-          email: session.email || storedProfile.email,
-          authProvider: session.authProvider || storedProfile.authProvider,
-          displayName: sameUser ? (storedProfile.displayName || session.displayName) : (session.displayName || storedProfile.displayName),
-          avatar: sameUser ? (storedProfile.avatar || session.avatar) : (session.avatar || storedProfile.avatar),
-          username: sameUser ? (storedProfile.username || session.username) : (session.username || storedProfile.username),
-          theme: sameUser ? (storedProfile.theme || session.theme) : (session.theme || storedProfile.theme)
-        } : {})
+        ...sanitizeProfile({
+          ...clone(defaultProfile),
+          ...storedProfile,
+          ...(session ? {
+            uid: session.uid || storedProfile.uid,
+            email: session.email || storedProfile.email,
+            authProvider: session.authProvider || storedProfile.authProvider,
+            displayName: sameUser ? (storedProfile.displayName || session.displayName) : (session.displayName || storedProfile.displayName),
+            avatar: sameUser ? (storedProfile.avatar || session.avatar) : (session.avatar || storedProfile.avatar),
+            username: sameUser ? (storedProfile.username || session.username) : (session.username || storedProfile.username),
+            theme: sameUser ? (storedProfile.theme || session.theme) : (session.theme || storedProfile.theme)
+          } : {})
+        })
       };
     } catch (error) {
       return clone(defaultProfile);
@@ -294,18 +418,23 @@
   }
 
   function saveProfile(profile) {
-    saveJSON(PROFILE_KEY, profile);
-    emitStoreEvent("cinefy:profile-updated", profile);
+    const normalized = sanitizeProfile(profile);
+    saveJSON(PROFILE_KEY, normalized);
+    emitStoreEvent("cinefy:profile-updated", normalized);
   }
 
   function loadFriends() {
-    return loadJSON(FRIENDS_KEY, defaultFriends);
+    const friends = loadJSON(FRIENDS_KEY, defaultFriends);
+    return Array.isArray(friends) ? friends.slice(0, MAX_FRIENDS).map(normalizeFriend) : clone(defaultFriends);
   }
 
   function saveFriends(friends) {
-    saveJSON(FRIENDS_KEY, friends);
-    queueCloudSave("friends", { value: friends });
-    emitStoreEvent("cinefy:friends-updated", friends);
+    const normalized = Array.isArray(friends)
+      ? friends.slice(0, MAX_FRIENDS).map(normalizeFriend)
+      : clone(defaultFriends);
+    saveJSON(FRIENDS_KEY, normalized);
+    queueCloudSave("friends", { value: normalized });
+    emitStoreEvent("cinefy:friends-updated", normalized);
   }
 
   function resetFriends() {
@@ -316,13 +445,13 @@
 
   function normalizeNotification(notification) {
     return {
-      id: notification.id || `notification-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-      type: notification.type || "general",
-      title: notification.title || "Atualizacao",
-      message: notification.message || "",
-      href: notification.href || "#",
+      id: truncate(String(notification.id || `notification-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`), 160),
+      type: sanitizeText(notification.type || "general", 40) || "general",
+      title: sanitizeText(notification.title || "Atualizacao", 100) || "Atualizacao",
+      message: sanitizeMultilineText(notification.message || "", 280),
+      href: sanitizeNotificationHref(notification.href),
       read: Boolean(notification.read),
-      createdAt: notification.createdAt || new Date().toISOString()
+      createdAt: sanitizeIsoDate(notification.createdAt || new Date().toISOString())
     };
   }
 
@@ -337,7 +466,7 @@
     const normalized = notifications
       .map(normalizeNotification)
       .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))
-      .slice(0, 40);
+      .slice(0, MAX_NOTIFICATIONS);
 
     saveJSON(
       NOTIFICATIONS_KEY,
@@ -537,23 +666,46 @@
   }
 
   function loadReviews() {
-    return loadJSON(REVIEWS_KEY, {});
+    return normalizeReviews(loadJSON(REVIEWS_KEY, {}));
   }
 
   function saveReviews(reviews) {
-    saveJSON(REVIEWS_KEY, reviews);
-    queueCloudSave("reviews", { value: reviews });
-    emitStoreEvent("cinefy:reviews-updated", reviews);
+    const normalized = normalizeReviews(reviews);
+    saveJSON(REVIEWS_KEY, normalized);
+    queueCloudSave("reviews", { value: normalized });
+    emitStoreEvent("cinefy:reviews-updated", normalized);
+  }
+
+  function normalizeReviews(reviews) {
+    const safeReviews = reviews && typeof reviews === "object" ? reviews : {};
+    const normalized = {};
+
+    Object.entries(safeReviews)
+      .slice(0, MAX_REVIEW_COUNT)
+      .forEach(([key, value]) => {
+        const hasRating = value && value.rating !== undefined && value.rating !== null && String(value.rating).trim() !== "";
+        const normalizedRating = hasRating
+          ? String(clampNumber(value.rating, 0, 5, 0))
+          : "";
+
+        normalized[truncate(String(key || ""), 160)] = {
+          rating: normalizedRating,
+          comment: sanitizeMultilineText(value && value.comment, MAX_REVIEW_COMMENT_LENGTH),
+          updatedAt: sanitizeIsoDate(value && value.updatedAt ? value.updatedAt : new Date().toISOString())
+        };
+      });
+
+    return normalized;
   }
 
   async function syncFromCloud() {
     if (!hasCloudStore()) return false;
 
     await Promise.all([
-      syncDoc("friends", loadFriends(), (value) => saveJSON(FRIENDS_KEY, Array.isArray(value) ? value : clone(defaultFriends))),
+      syncDoc("friends", loadFriends(), (value) => saveJSON(FRIENDS_KEY, Array.isArray(value) ? value.slice(0, MAX_FRIENDS).map(normalizeFriend) : clone(defaultFriends))),
       syncDoc("notifications", loadNotifications(), (value) => saveJSON(NOTIFICATIONS_KEY, Array.isArray(value) ? value.map(normalizeNotification) : clone(defaultNotifications))),
       syncDoc("list", loadListsState(), (value) => saveListsState(value)),
-      syncDoc("reviews", loadReviews(), (value) => saveJSON(REVIEWS_KEY, value && typeof value === "object" ? value : {}))
+      syncDoc("reviews", loadReviews(), (value) => saveJSON(REVIEWS_KEY, normalizeReviews(value)))
     ]);
 
     return true;
@@ -635,6 +787,9 @@
     suggestedUsers: clone(suggestedUsers),
     loadProfile,
     saveProfile,
+    sanitizeProfile,
+    sanitizeUsername,
+    sanitizeEmail,
     loadFriends,
     saveFriends,
     resetFriends,
