@@ -198,6 +198,35 @@ body[data-page="cadastro"] {
   border-radius: 2rem !important;
 }
 
+.section-heading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  padding-left: 1rem;
+}
+
+.section-heading::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.22rem;
+  width: 0.28rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(var(--theme-accent-soft-rgb)), rgb(var(--theme-accent-rgb)));
+  box-shadow: 0 0 0 1px rgb(var(--theme-accent-rgb) / 0.14), 0 10px 22px rgb(var(--theme-accent-rgb) / 0.22);
+}
+
+.section-heading > :is(h1, h2, h3) {
+  margin: 0;
+}
+
+.section-heading > p {
+  margin: 0;
+}
+
 .auth-shell {
   background: rgb(var(--theme-surface-rgb) / 0.64) !important;
   border-color: rgb(var(--theme-outline-rgb) / 0.22) !important;
@@ -884,6 +913,15 @@ body[data-page="modoleitor"] .max-w-7xl {
 
   .theme-choice__desc {
     font-size: 0.84rem;
+  }
+
+  .section-heading {
+    padding-left: 0.85rem;
+  }
+
+  .section-heading::before {
+    top: 0.16rem;
+    height: 1.65rem;
   }
 }
 
