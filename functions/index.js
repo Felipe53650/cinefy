@@ -7,7 +7,9 @@ const FUNCTION_PREFIX = "/api/tmdb";
 const ALLOWED_ORIGINS = new Set([
   "https://cinefy3-83a9a.web.app",
   "https://cinefy3-83a9a.firebaseapp.com",
+  "http://127.0.0.1:5000",
   "http://127.0.0.1:5500",
+  "http://localhost:5173",
   "http://localhost:5000",
   "http://localhost:5500"
 ]);
@@ -19,7 +21,12 @@ const ALLOWED_PREFIXES = [
 ];
 const ALLOWED_EXACT_OR_REGEX = [
   /^\/movie\/\d+$/,
-  /^\/movie\/\d+\/credits$/
+  /^\/movie\/\d+\/credits$/,
+  /^\/movie\/\d+\/release_dates$/,
+  /^\/movie\/\d+\/watch\/providers$/,
+  /^\/movie\/\d+\/recommendations$/,
+  /^\/movie\/\d+\/external_ids$/,
+  /^\/movie\/\d+\/reviews$/
 ];
 const ALLOWED_QUERY_PARAMS = new Set([
   "language",
@@ -57,12 +64,27 @@ exports.tmdbProxy = onRequest(
     secrets: [tmdbApiKey]
   },
   async (req, res) => {
+    const origin = req.get("origin") || "";
+
+    if (origin && isAllowedOrigin(origin)) {
+      res.set("Access-Control-Allow-Origin", origin);
+      res.set("Vary", "Origin");
+    }
+
+    res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     if (req.method !== "GET") {
       res.status(405).json({ error: "Method not allowed" });
       return;
     }
 
-    if (!isAllowedOrigin(req.get("origin"))) {
+    if (!isAllowedOrigin(origin)) {
       res.status(403).json({ error: "Origin not allowed" });
       return;
     }
@@ -74,7 +96,7 @@ exports.tmdbProxy = onRequest(
     }
 
     const url = new URL(`${TMDB_BASE_URL}${tmdbPath}`);
-    url.searchParams.set("api_key", tmdbApiKey.value());
+    url.searchParams.set("api_key", tmdbApiKey.value().trim());
     url.searchParams.set("language", "pt-BR");
 
     Object.entries(req.query || {}).forEach(([key, value]) => {

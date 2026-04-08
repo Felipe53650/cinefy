@@ -1,16 +1,12 @@
 // api-tmdb.js - Integracao com a API do TMDB
 (function () {
-  const TMDB_API_KEY = "001848de646b91395482c1af23be80a8";
-  const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+  const TMDB_PROXY_BASE_URL = resolveTmdbProxyBaseUrl();
   const TMDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500";
   const TMDB_BACKDROP_URL = "https://image.tmdb.org/t/p/original";
 
   async function tmdbFetch(path, params = {}) {
     const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
-    const url = new URL(`${TMDB_BASE_URL}${normalizedPath}`);
-
-    url.searchParams.set("api_key", TMDB_API_KEY);
-    url.searchParams.set("language", "pt-BR");
+    const url = new URL(`${TMDB_PROXY_BASE_URL}${normalizedPath}`);
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
@@ -25,6 +21,17 @@
     }
 
     return response.json();
+  }
+
+  function resolveTmdbProxyBaseUrl() {
+    const projectId = window.CinefyFirebase && window.CinefyFirebase.config
+      ? window.CinefyFirebase.config.projectId
+      : "cinefy3-83a9a";
+    const functionBaseUrl = `https://southamerica-east1-${projectId}.cloudfunctions.net/tmdbProxy`;
+    const hostname = String(window.location.hostname || "").toLowerCase();
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+
+    return isLocalHost ? functionBaseUrl : `${window.location.origin}/api/tmdb`;
   }
 
   async function searchMovies(query, page = 1) {

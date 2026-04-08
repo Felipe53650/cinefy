@@ -595,7 +595,7 @@
         setMovieFormFeedback("Enviando poster personalizado...");
         return await window.CinefyStorage.uploadUserImage(manualPosterFile, "posters");
       } catch (error) {
-        setMovieFormFeedback("Poster salvo localmente. O upload em nuvem sera usado quando estiver disponivel.");
+        setMovieFormFeedback("Poster salvo localmente. O upload em nuvem falhou nesta tentativa.");
       }
     }
 

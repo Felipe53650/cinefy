@@ -150,7 +150,7 @@
               store.saveProfile(profile);
             }
             renderProfile();
-            feedback.textContent = "Foto atualizada localmente. Assim que o Firebase Storage for configurado, o upload em nuvem sera usado.";
+            feedback.textContent = "Foto atualizada localmente. O upload em nuvem falhou nesta tentativa, mas o perfil foi preservado.";
           } catch (fallbackError) {
             feedback.textContent = fallbackError.message || error.message || "Nao foi possivel atualizar a foto agora.";
           }
