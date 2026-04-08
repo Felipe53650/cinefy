@@ -104,6 +104,10 @@
               <p class="text-zinc-500">Onde assistir</p>
               <p class="mt-2 font-bold text-white" id="movieProvidersSummary">-</p>
             </div>
+            <div class="col-span-2 rounded-2xl border border-white/6 bg-black/20 p-4">
+              <p class="text-zinc-500">Direcao</p>
+              <p class="mt-2 font-bold text-white" id="movieDirectors">-</p>
+            </div>
           </div>
         </div>
 
@@ -122,6 +126,14 @@
         </div>
 
         <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
+          <div class="section-heading">
+            <h3 class="font-display text-xl font-bold text-white">Ver tambem em</h3>
+            <p class="mt-1 text-sm text-zinc-400" id="externalLinksCaption">Atalhos rapidos para continuar a descoberta em outras comunidades e guias de cinema.</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-3" id="externalLinksGrid"></div>
+        </div>
+
+        <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <div class="flex items-center justify-between gap-4">
             <div class="section-heading">
               <h3 class="font-display text-xl font-bold text-white">Elenco principal</h3>
@@ -130,6 +142,22 @@
           </div>
           <div class="mt-5 grid grid-cols-2 gap-3" id="castGrid"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 pb-8 md:px-6 md:pb-14">
+      <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="section-heading">
+            <h2 class="font-display text-3xl font-bold text-white">Reviews da comunidade</h2>
+            <p class="mt-1 text-sm text-zinc-400" id="communityReviewsCaption">Leituras publicas para ajudar voce a decidir o proximo play.</p>
+          </div>
+          <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/12" href="#" id="communityReviewsLink" rel="noopener noreferrer" target="_blank">
+            <span class="material-symbols-outlined text-base">open_in_new</span>
+            Explorar no Letterboxd
+          </a>
+        </div>
+        <div class="mt-5 space-y-4" id="communityReviewsGrid"></div>
       </div>
     </section>
   </main>

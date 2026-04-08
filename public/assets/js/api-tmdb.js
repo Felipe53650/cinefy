@@ -97,6 +97,22 @@
     return data.results || [];
   }
 
+  async function getMovieExternalIds(movieId) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    return tmdbFetch(`/movie/${movieId}/external_ids`);
+  }
+
+  async function getMovieReviews(movieId, page = 1) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    return tmdbFetch(`/movie/${movieId}/reviews`, { page });
+  }
+
   function getImageUrl(path, fallback = "") {
     return path ? `${TMDB_IMAGE_URL}${path}` : fallback;
   }
@@ -115,6 +131,8 @@
     getMovieReleaseDates,
     getMovieWatchProviders,
     getMovieRecommendations,
+    getMovieExternalIds,
+    getMovieReviews,
     getImageUrl,
     getBackdropUrl
   };

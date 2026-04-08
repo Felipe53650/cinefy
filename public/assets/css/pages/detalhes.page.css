@@ -36,3 +36,8 @@
       filter: none;
     }
 
+    .external-link-chip:hover,
+    .community-review-card:hover {
+      box-shadow: 0 18px 38px rgb(var(--theme-accent-strong-rgb) / 0.14);
+    }
+

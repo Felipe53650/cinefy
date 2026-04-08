@@ -10,6 +10,7 @@ const addToListButton = document.getElementById("addToListButton");
 const addToListButtonIcon = document.getElementById("addToListButtonIcon");
 const addToListButtonLabel = document.getElementById("addToListButtonLabel");
 const watchProvidersLink = document.getElementById("watchProvidersLink");
+const communityReviewsLink = document.getElementById("communityReviewsLink");
 
 document.getElementById("saveReviewButton").addEventListener("click", saveReview);
 addToListButton.addEventListener("click", toggleCurrentMovieInList);
@@ -29,15 +30,17 @@ async function loadMovie() {
       }
 
   try {
-    const [movie, credits, releaseDates, watchProviders] = await Promise.all([
+    const [movie, credits, releaseDates, watchProviders, externalIds, reviews] = await Promise.all([
       window.TMDB.getMovieDetails(movieId),
       window.TMDB.getMovieCredits(movieId),
       window.TMDB.getMovieReleaseDates(movieId),
-      window.TMDB.getMovieWatchProviders(movieId)
+      window.TMDB.getMovieWatchProviders(movieId),
+      window.TMDB.getMovieExternalIds(movieId),
+      window.TMDB.getMovieReviews(movieId)
     ]);
 
     currentMovie = movie;
-    renderMovie(movie, credits.cast || [], releaseDates, watchProviders);
+    renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews);
     hydrateReview();
     syncAddButtonState();
   } catch (error) {
@@ -88,9 +91,13 @@ async function loadMovie() {
       return store.loadListState().movies.find((movie) => String(movie.id) === localMovieId);
     }
 
-function renderMovie(movie, cast, releaseDates, watchProviders) {
+function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews) {
   const certification = getMovieCertification(releaseDates);
   const providerData = getPreferredWatchProviders(watchProviders);
+  const cast = Array.isArray(credits && credits.cast) ? credits.cast : [];
+  const crew = Array.isArray(credits && credits.crew) ? credits.crew : [];
+  const directors = getMovieDirectors(crew);
+  const externalLinks = buildExternalLinks(movie, externalIds);
 
   document.title = `CINEfy - ${movie.title}`;
   document.getElementById("movieBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
@@ -102,6 +109,7 @@ function renderMovie(movie, cast, releaseDates, watchProviders) {
   document.getElementById("movieScore").textContent = typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "-";
   document.getElementById("movieCertification").textContent = certification || "Nao informado";
   document.getElementById("movieProvidersSummary").textContent = getProvidersSummary(providerData);
+  document.getElementById("movieDirectors").textContent = directors.length ? directors.join(", ") : "Nao informado";
   document.getElementById("movieBadges").innerHTML = `
         ${(movie.genres || []).slice(0, 3).map((genre) => `<span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(genre.name)}</span>`).join("")}
         <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano"}</span>
@@ -109,6 +117,8 @@ function renderMovie(movie, cast, releaseDates, watchProviders) {
         <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(certification || "Classificacao nao informada")}</span>
       `;
   renderWatchProviders(providerData);
+  renderExternalLinks(externalLinks);
+  renderCommunityReviews(reviews, externalLinks);
   document.getElementById("castGrid").innerHTML = cast.slice(0, 6).map((person) => `
         <article class="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
           <img alt="${escapeHtml(person.name)}" class="mb-3 h-16 w-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${person.profile_path ? window.TMDB.getImageUrl(person.profile_path, fallbackPoster) : fallbackPoster}" />
@@ -135,6 +145,7 @@ function renderLocalMovie(movie) {
   document.getElementById("movieScore").textContent = typeof movie.rating === "number" ? movie.rating.toFixed(1) : "-";
   document.getElementById("movieCertification").textContent = "Personalizado";
   document.getElementById("movieProvidersSummary").textContent = "Indisponivel";
+  document.getElementById("movieDirectors").textContent = "Nao informado";
   document.getElementById("movieBadges").innerHTML = `
         <span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(movie.genre || "Personalizado")}</span>
         <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(String(movie.year || "Sem ano"))}</span>
@@ -142,6 +153,8 @@ function renderLocalMovie(movie) {
         <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Classificacao personalizada</span>
       `;
   renderWatchProviders(null, true);
+  renderExternalLinks(buildExternalLinks(movie));
+  renderCommunityReviews(null, buildExternalLinks(movie), true);
   document.getElementById("castGrid").innerHTML = `
         <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
           Esse filme foi adicionado manualmente, entao nao ha elenco do TMDB disponivel para exibir aqui.
@@ -311,6 +324,90 @@ function renderWatchProviders(providerData, isManual = false) {
   `).join("");
 }
 
+function renderExternalLinks(externalLinks) {
+  const grid = document.getElementById("externalLinksGrid");
+  const caption = document.getElementById("externalLinksCaption");
+  const links = [externalLinks.imdb, externalLinks.letterboxd, externalLinks.adoroCinema].filter(Boolean);
+
+  if (!links.length) {
+    caption.textContent = "Nao encontramos atalhos externos confiaveis para este titulo no momento.";
+    grid.innerHTML = `
+      <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        Quando houver uma correspondencia mais clara entre este filme e as plataformas externas, os atalhos rapidos aparecem aqui.
+      </div>
+    `;
+    return;
+  }
+
+  caption.textContent = "Esses atalhos ajudam voce a continuar a pesquisa em outras comunidades e guias de cinema.";
+  grid.innerHTML = links.map((link) => `
+    <a class="external-link-chip inline-flex min-w-[12rem] flex-1 items-center justify-between gap-3 rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-left transition hover:border-white/16 hover:bg-white/[0.05]" href="${escapeHtml(link.href)}" rel="noopener noreferrer" target="_blank">
+      <span>
+        <span class="block text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(link.kicker)}</span>
+        <span class="mt-1 block text-sm font-semibold text-white">${escapeHtml(link.label)}</span>
+      </span>
+      <span class="material-symbols-outlined text-zinc-300">open_in_new</span>
+    </a>
+  `).join("");
+}
+
+function renderCommunityReviews(reviewsResponse, externalLinks, isManual = false) {
+  const grid = document.getElementById("communityReviewsGrid");
+  const caption = document.getElementById("communityReviewsCaption");
+  const letterboxdHref = externalLinks.letterboxd ? externalLinks.letterboxd.href : "#";
+  communityReviewsLink.href = letterboxdHref;
+  communityReviewsLink.classList.toggle("hidden", !externalLinks.letterboxd);
+
+  if (isManual) {
+    caption.textContent = "Itens manuais nao possuem reviews sincronizadas com bases externas.";
+    grid.innerHTML = `
+      <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        Esse titulo foi criado por voce, entao ainda nao existe uma trilha de reviews publicas vinculada a ele aqui no CINEfy.
+      </div>
+    `;
+    return;
+  }
+
+  const reviews = Array.isArray(reviewsResponse && reviewsResponse.results) ? reviewsResponse.results : [];
+
+  if (!reviews.length) {
+    caption.textContent = "O TMDB nao retornou reviews publicas para este filme agora.";
+    grid.innerHTML = `
+      <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        Ainda nao ha comentarios publicos aqui. Use os atalhos acima para continuar a leitura em comunidades como IMDb, Letterboxd e AdoroCinema.
+      </div>
+    `;
+    return;
+  }
+
+  caption.textContent = "Exibindo reviews publicas do TMDB e atalhos para seguir a conversa em outras comunidades.";
+  grid.innerHTML = reviews.slice(0, 4).map((review) => {
+    const authorDetails = review.author_details || {};
+    const rating = typeof authorDetails.rating === "number" ? `${authorDetails.rating.toFixed(1)}/10` : "Sem nota";
+    const content = truncateReview(review.content || "");
+    const avatar = normalizeAvatarUrl(authorDetails.avatar_path);
+
+    return `
+      <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <img alt="${escapeHtml(review.author || "Autor desconhecido")}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(avatar || fallbackPoster)}"/>
+            <div class="min-w-0">
+              <p class="truncate text-base font-semibold text-white">${escapeHtml(review.author || "Autor desconhecido")}</p>
+              <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">TMDB • ${escapeHtml(rating)}</p>
+            </div>
+          </div>
+          <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-white/12" href="${escapeHtml(review.url || "#")}" rel="noopener noreferrer" target="_blank">
+            Ler review
+            <span class="material-symbols-outlined text-sm">open_in_new</span>
+          </a>
+        </div>
+        <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(content)}</p>
+      </article>
+    `;
+  }).join("");
+}
+
 function getMovieCertification(releaseDates) {
   const results = Array.isArray(releaseDates && releaseDates.results) ? releaseDates.results : [];
   const preferredCountries = ["BR", "US", "PT"];
@@ -395,6 +492,86 @@ function getProvidersSummary(providerData) {
   const names = providerData.groups[0].providers.slice(0, 2).map((provider) => provider.provider_name);
   const suffix = providerData.groups[0].providers.length > 2 ? " e outras" : "";
   return `${names.join(", ")}${suffix}`;
+}
+
+function getMovieDirectors(crew) {
+  if (!Array.isArray(crew)) {
+    return [];
+  }
+
+  const seen = new Set();
+  return crew
+    .filter((person) => String(person.job || "").toLowerCase() === "director")
+    .map((person) => person.name)
+    .filter((name) => {
+      if (!name || seen.has(name)) {
+        return false;
+      }
+      seen.add(name);
+      return true;
+    });
+}
+
+function buildExternalLinks(movie, externalIds = {}) {
+  const title = String(movie && movie.title ? movie.title : "").trim();
+  const year = movie && movie.release_date
+    ? String(movie.release_date).slice(0, 4)
+    : String(movie && movie.year ? movie.year : "").trim();
+  const searchTerm = [title, year].filter(Boolean).join(" ");
+  const links = {
+    imdb: null,
+    letterboxd: null,
+    adoroCinema: null
+  };
+
+  if (externalIds && externalIds.imdb_id) {
+    links.imdb = {
+      kicker: "Base de referencia",
+      label: "Ver no IMDb",
+      href: `https://www.imdb.com/title/${externalIds.imdb_id}/`
+    };
+  }
+
+  if (searchTerm) {
+    links.letterboxd = {
+      kicker: "Comunidade cinemafila",
+      label: "Buscar no Letterboxd",
+      href: `https://letterboxd.com/search/${encodeURIComponent(searchTerm)}/`
+    };
+
+    links.adoroCinema = {
+      kicker: "Guia editorial",
+      label: "Buscar no AdoroCinema",
+      href: `https://www.adorocinema.com/pesquisar/?q=${encodeURIComponent(searchTerm)}`
+    };
+  }
+
+  return links;
+}
+
+function normalizeAvatarUrl(avatarPath) {
+  if (!avatarPath) {
+    return "";
+  }
+
+  if (avatarPath.startsWith("/http")) {
+    return avatarPath.slice(1);
+  }
+
+  if (avatarPath.startsWith("http")) {
+    return avatarPath;
+  }
+
+  return window.TMDB.getImageUrl(avatarPath, "");
+}
+
+function truncateReview(content) {
+  const normalized = String(content || "").replace(/\s+/g, " ").trim();
+  if (normalized.length <= 280) {
+    return normalized || "Sem comentario.";
+  }
+
+  return `${normalized.slice(0, 277).trim()}...`;
 }
 
     function getReviewStorageKey() {
