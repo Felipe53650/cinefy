@@ -146,6 +146,24 @@
   backdrop-filter: blur(10px);
 }
 
+.reader-card__certification {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(var(--theme-bg-rgb) / 0.72);
+  padding: 0.45rem 0.72rem;
+  color: rgb(var(--theme-text-rgb));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
 .reader-card__cta {
   position: absolute;
   left: 0.95rem;

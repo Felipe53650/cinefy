@@ -53,7 +53,16 @@
 
     function renderMovieScroller(containerId, movies) {
       const container = document.getElementById(containerId);
-      container.innerHTML = movies.map((movie) => `
+      container.innerHTML = buildMovieScrollerMarkup(movies);
+      hydrateMovieCertifications(movies).then((hasUpdates) => {
+        if (hasUpdates) {
+          container.innerHTML = buildMovieScrollerMarkup(movies);
+        }
+      });
+    }
+
+    function buildMovieScrollerMarkup(movies) {
+      return movies.map((movie) => `
         <article class="group min-w-[160px] max-w-[160px] sm:min-w-[190px] sm:max-w-[190px] md:min-w-[250px] md:max-w-[250px]">
           <a class="block" href="detalhes.html?id=${encodeURIComponent(String(movie.id || ""))}">
             <div class="relative mb-4 aspect-[2/3] overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900 shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
@@ -63,8 +72,11 @@
                 <span class="material-symbols-outlined fill-icon text-sm text-yellow-400">star</span>
                 ${formatRating(movie.vote_average)}
               </div>
-              <div class="absolute bottom-3 left-3 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-200">
-                ${formatYear(movie.release_date)}
+              <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-2">
+                <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-200">
+                  ${formatYear(movie.release_date)}
+                </span>
+                ${movie.certificationLabel ? `<span class="rounded-full border border-white/10 bg-black/55 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-100 backdrop-blur-sm">${escapeHtml(movie.certificationLabel)}</span>` : ""}
               </div>
             </div>
             <h3 class="line-clamp-1 text-base font-bold text-white transition group-hover:text-red-300">${escapeHtml(movie.title)}</h3>
@@ -232,6 +244,32 @@
       return [...combined.values()]
         .sort((a, b) => b.score - a.score)
         .map((entry) => entry.movie);
+    }
+
+    async function hydrateMovieCertifications(movies) {
+      if (!window.TMDB || typeof window.TMDB.getMovieCertificationLabel !== "function") {
+        return false;
+      }
+
+      let hasUpdates = false;
+
+      await Promise.all((Array.isArray(movies) ? movies : []).map(async (movie) => {
+        if (!movie || !movie.id || movie.certificationLabel) {
+          return;
+        }
+
+        try {
+          const certificationLabel = await window.TMDB.getMovieCertificationLabel(movie.id);
+          if (certificationLabel) {
+            movie.certificationLabel = certificationLabel;
+            hasUpdates = true;
+          }
+        } catch (error) {
+          movie.certificationLabel = "";
+        }
+      }));
+
+      return hasUpdates;
     }
 
     function toggleHeroMovieInList() {

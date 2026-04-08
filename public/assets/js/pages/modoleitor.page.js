@@ -85,13 +85,23 @@
         return;
       }
 
-      grid.innerHTML = activeListState.movies.map((movie) => `
+      grid.innerHTML = buildReaderGridMarkup(activeListState.movies);
+      hydrateReaderMovieCertifications().then((hasUpdates) => {
+        if (hasUpdates) {
+          grid.innerHTML = buildReaderGridMarkup(activeListState.movies);
+        }
+      });
+    }
+
+    function buildReaderGridMarkup(movies) {
+      return movies.map((movie) => `
         <article class="reader-card group glass-card rounded-3xl transition-all duration-300 hover:-translate-y-1">
           <div class="reader-card__poster">
             <a class="reader-card__poster-link" href="${escapeAttribute(getMovieDetailsHref(movie))}">
               <img alt="${escapeHtml(movie.title)}" decoding="async" loading="lazy" src="${escapeAttribute(safePosterUrl(movie.poster || defaultPoster))}"/>
             </a>
             <div class="reader-card__overlay"></div>
+            ${movie.certificationLabel ? `<div class="reader-card__certification">${escapeHtml(movie.certificationLabel)}</div>` : ""}
             <div class="reader-card__rating">
               <span class="material-symbols-outlined fill-icon text-yellow-500 text-sm">star</span>
               <span class="text-sm font-bold">${formatRating(movie.rating)}</span>
@@ -129,6 +139,46 @@
           <p class="mt-2 text-zinc-400">${escapeHtml(message)}</p>
         </div>
       `;
+    }
+
+    async function hydrateReaderMovieCertifications() {
+      if (!window.TMDB || typeof window.TMDB.getMovieCertificationLabel !== "function") {
+        return false;
+      }
+
+      let hasUpdates = false;
+      const movies = Array.isArray(activeListState.movies) ? activeListState.movies : [];
+
+      await Promise.all(movies.map(async (movie) => {
+        const tmdbId = getMovieTmdbId(movie);
+        if (!tmdbId || movie.certificationLabel) {
+          return;
+        }
+
+        try {
+          const certificationLabel = await window.TMDB.getMovieCertificationLabel(tmdbId);
+          if (certificationLabel) {
+            movie.certificationLabel = certificationLabel;
+            hasUpdates = true;
+          }
+        } catch (error) {
+          movie.certificationLabel = "";
+        }
+      }));
+
+      return hasUpdates;
+    }
+
+    function getMovieTmdbId(movie) {
+      if (!movie) return "";
+      if (movie.tmdbId) return String(movie.tmdbId);
+
+      const movieId = String(movie.id || "");
+      if (movieId.startsWith("tmdb-")) {
+        return movieId.replace("tmdb-", "");
+      }
+
+      return "";
     }
 
     function getMovieDetailsHref(movie) {
