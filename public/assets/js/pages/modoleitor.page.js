@@ -88,7 +88,7 @@
       grid.innerHTML = activeListState.movies.map((movie) => `
         <article class="reader-card group glass-card rounded-3xl transition-all duration-300 hover:-translate-y-1">
           <div class="reader-card__poster">
-            <a href="${escapeAttribute(getMovieDetailsHref(movie))}">
+            <a class="reader-card__poster-link" href="${escapeAttribute(getMovieDetailsHref(movie))}">
               <img alt="${escapeHtml(movie.title)}" decoding="async" loading="lazy" src="${escapeAttribute(safePosterUrl(movie.poster || defaultPoster))}"/>
             </a>
             <div class="reader-card__overlay"></div>

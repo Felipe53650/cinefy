@@ -108,7 +108,7 @@
   overflow: hidden;
 }
 
-.reader-card__poster > a,
+.reader-card__poster-link,
 .reader-card__poster img {
   display: block;
   width: 100%;
