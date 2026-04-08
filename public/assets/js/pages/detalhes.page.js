@@ -1,11 +1,16 @@
-﻿const store = window.CinefyStore;
-    const firestore = window.CinefyFirebase ? window.CinefyFirebase.firestore : null;
-    const fallbackPoster = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80";
+const store = window.CinefyStore;
+const firestore = window.CinefyFirebase ? window.CinefyFirebase.firestore : null;
+const currentProfile = store ? store.loadProfile() : {};
+const fallbackPoster = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80";
 const params = new URLSearchParams(window.location.search);
 const movieId = params.get("id");
 const localMovieId = params.get("local");
 const shareId = params.get("share");
+
 let currentMovie = null;
+let currentExternalLinks = buildExternalLinks({});
+let currentTmdbReviews = [];
+
 const addToListButton = document.getElementById("addToListButton");
 const addToListButtonIcon = document.getElementById("addToListButtonIcon");
 const addToListButtonLabel = document.getElementById("addToListButtonLabel");
@@ -18,16 +23,16 @@ addToListButton.addEventListener("click", toggleCurrentMovieInList);
 loadMovie();
 
 async function loadMovie() {
-      if (localMovieId) {
-        await loadLocalMovie();
-        return;
-      }
+  if (localMovieId) {
+    await loadLocalMovie();
+    return;
+  }
 
-      if (!movieId) {
-        document.getElementById("movieTitle").textContent = "Filme nao encontrado";
-        document.getElementById("movieOverview").textContent = "Abra esta pagina a partir de um card do catalogo para ver os detalhes.";
-        return;
-      }
+  if (!movieId) {
+    document.getElementById("movieTitle").textContent = "Filme nao encontrado";
+    document.getElementById("movieOverview").textContent = "Abra esta pagina a partir de um card do catalogo para ver os detalhes.";
+    return;
+  }
 
   try {
     const [movie, credits, releaseDates, watchProviders, externalIds, reviews] = await Promise.all([
@@ -46,20 +51,20 @@ async function loadMovie() {
   } catch (error) {
     console.error("Erro ao carregar detalhes:", error);
     document.getElementById("movieTitle").textContent = "Nao foi possivel carregar este filme";
-        document.getElementById("movieOverview").textContent = "A consulta ao TMDB falhou. Tente novamente mais tarde.";
-      }
-    }
+    document.getElementById("movieOverview").textContent = "A consulta ao TMDB falhou. Tente novamente mais tarde.";
+  }
+}
 
-    async function loadLocalMovie() {
-      const localMovie = await findLocalMovie();
+async function loadLocalMovie() {
+  const localMovie = await findLocalMovie();
 
-      if (!localMovie) {
-        document.getElementById("movieTitle").textContent = "Filme nao encontrado";
-        document.getElementById("movieOverview").textContent = shareId
-          ? "Esse item manual nao foi encontrado na lista compartilhada."
-          : "Esse item manual nao foi encontrado na sua lista atual.";
-        return;
-      }
+  if (!localMovie) {
+    document.getElementById("movieTitle").textContent = "Filme nao encontrado";
+    document.getElementById("movieOverview").textContent = shareId
+      ? "Esse item manual nao foi encontrado na lista compartilhada."
+      : "Esse item manual nao foi encontrado na sua lista atual.";
+    return;
+  }
 
   currentMovie = localMovie;
   renderLocalMovie(localMovie);
@@ -67,37 +72,40 @@ async function loadMovie() {
   syncAddButtonState();
 }
 
-    async function findLocalMovie() {
-      if (shareId && !firestore) {
-        return null;
-      }
+async function findLocalMovie() {
+  if (shareId && !firestore) {
+    return null;
+  }
 
-      if (shareId && firestore) {
-        try {
-          const snapshot = await firestore.collection("shared_lists").doc(shareId).get();
-          if (snapshot.exists) {
-            const sharedList = snapshot.data() || {};
-            const sharedMovies = Array.isArray(sharedList.movies) ? sharedList.movies : [];
-            const sharedMovie = sharedMovies.find((movie) => String(movie.id) === localMovieId);
-            if (sharedMovie) {
-              return sharedMovie;
-            }
-          }
-        } catch (error) {
-          console.error("Erro ao carregar filme manual compartilhado:", error);
+  if (shareId && firestore) {
+    try {
+      const snapshot = await firestore.collection("shared_lists").doc(shareId).get();
+      if (snapshot.exists) {
+        const sharedList = snapshot.data() || {};
+        const sharedMovies = Array.isArray(sharedList.movies) ? sharedList.movies : [];
+        const sharedMovie = sharedMovies.find((movie) => String(movie.id) === localMovieId);
+        if (sharedMovie) {
+          return sharedMovie;
         }
       }
-
-      return store.loadListState().movies.find((movie) => String(movie.id) === localMovieId);
+    } catch (error) {
+      console.error("Erro ao carregar filme manual compartilhado:", error);
     }
+  }
 
-function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews) {
+  return store.loadListState().movies.find((movie) => String(movie.id) === localMovieId);
+}
+
+function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviewsResponse) {
   const certification = getMovieCertification(releaseDates);
   const providerData = getPreferredWatchProviders(watchProviders);
   const cast = Array.isArray(credits && credits.cast) ? credits.cast : [];
   const crew = Array.isArray(credits && credits.crew) ? credits.crew : [];
   const directors = getMovieDirectors(crew);
   const externalLinks = buildExternalLinks(movie, externalIds);
+
+  currentExternalLinks = externalLinks;
+  currentTmdbReviews = Array.isArray(reviewsResponse && reviewsResponse.results) ? reviewsResponse.results : [];
 
   document.title = `CINEfy - ${movie.title}`;
   document.getElementById("movieBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
@@ -111,34 +119,41 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
   document.getElementById("movieProvidersSummary").textContent = getProvidersSummary(providerData);
   document.getElementById("movieDirectors").textContent = directors.length ? directors.join(", ") : "Nao informado";
   document.getElementById("movieBadges").innerHTML = `
-        ${(movie.genres || []).slice(0, 3).map((genre) => `<span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(genre.name)}</span>`).join("")}
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano"}</span>
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.runtime ? `${movie.runtime} min` : "Duracao nao informada"}</span>
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(certification || "Classificacao nao informada")}</span>
-      `;
+    ${(movie.genres || []).slice(0, 3).map((genre) => `<span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(genre.name)}</span>`).join("")}
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano"}</span>
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.runtime ? `${movie.runtime} min` : "Duracao nao informada"}</span>
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(certification || "Classificacao nao informada")}</span>
+  `;
+
   renderWatchProviders(providerData);
   renderExternalLinks(externalLinks);
-  renderCommunityReviews(reviews, externalLinks);
+  renderCommunityReviews(currentTmdbReviews, externalLinks);
+  loadCinefyCommunityReviews();
+
   document.getElementById("castGrid").innerHTML = cast.slice(0, 6).map((person) => `
-        <article class="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
-          <img alt="${escapeHtml(person.name)}" class="mb-3 h-16 w-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${person.profile_path ? window.TMDB.getImageUrl(person.profile_path, fallbackPoster) : fallbackPoster}" />
-          <p class="text-sm font-bold text-white">${escapeHtml(person.name)}</p>
-          <p class="mt-1 text-xs text-zinc-400">${escapeHtml(person.character || "Elenco")}</p>
-        </article>
-      `).join("") || `
-        <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
-          O TMDB nao retornou elenco principal para este filme.
-        </div>
-      `;
-    }
+    <article class="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+      <img alt="${escapeHtml(person.name)}" class="mb-3 h-16 w-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${person.profile_path ? window.TMDB.getImageUrl(person.profile_path, fallbackPoster) : fallbackPoster}" />
+      <p class="text-sm font-bold text-white">${escapeHtml(person.name)}</p>
+      <p class="mt-1 text-xs text-zinc-400">${escapeHtml(person.character || "Elenco")}</p>
+    </article>
+  `).join("") || `
+    <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
+      O TMDB nao retornou elenco principal para este filme.
+    </div>
+  `;
+}
 
 function renderLocalMovie(movie) {
+  const externalLinks = buildExternalLinks(movie);
+  currentExternalLinks = externalLinks;
+  currentTmdbReviews = [];
+
   document.title = `CINEfy - ${movie.title}`;
   document.getElementById("movieBackdrop").src = movie.poster || fallbackPoster;
   document.getElementById("movieTitle").textContent = movie.title;
   document.getElementById("movieOverview").textContent = movie.note || (shareId
-        ? "Filme adicionado manualmente a uma lista compartilhada."
-        : "Filme adicionado manualmente a sua lista.");
+    ? "Filme adicionado manualmente a uma lista compartilhada."
+    : "Filme adicionado manualmente a sua lista.");
   document.getElementById("movieYear").textContent = movie.year || "-";
   document.getElementById("movieRuntime").textContent = "Nao informado";
   document.getElementById("movieGenres").textContent = movie.genre || "-";
@@ -147,49 +162,64 @@ function renderLocalMovie(movie) {
   document.getElementById("movieProvidersSummary").textContent = "Indisponivel";
   document.getElementById("movieDirectors").textContent = "Nao informado";
   document.getElementById("movieBadges").innerHTML = `
-        <span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(movie.genre || "Personalizado")}</span>
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(String(movie.year || "Sem ano"))}</span>
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Filme manual</span>
-        <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Classificacao personalizada</span>
-      `;
+    <span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(movie.genre || "Personalizado")}</span>
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(String(movie.year || "Sem ano"))}</span>
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Filme manual</span>
+    <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Classificacao personalizada</span>
+  `;
+
   renderWatchProviders(null, true);
-  renderExternalLinks(buildExternalLinks(movie));
-  renderCommunityReviews(null, buildExternalLinks(movie), true);
+  renderExternalLinks(externalLinks);
+  renderCommunityReviews([], externalLinks, true, []);
+
   document.getElementById("castGrid").innerHTML = `
-        <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
-          Esse filme foi adicionado manualmente, entao nao ha elenco do TMDB disponivel para exibir aqui.
-        </div>
-      `;
-    }
+    <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
+      Esse filme foi adicionado manualmente, entao nao ha elenco do TMDB disponivel para exibir aqui.
+    </div>
+  `;
+}
 
-    function loadReviews() {
-      return store.loadReviews();
-    }
+function loadReviews() {
+  return store.loadReviews();
+}
 
-    function saveReviews(reviews) {
-      store.saveReviews(reviews);
-    }
+function saveReviews(reviews) {
+  store.saveReviews(reviews);
+}
 
-    function hydrateReview() {
-      const reviews = loadReviews();
-      const review = reviews[getReviewStorageKey()];
-      if (!review) return;
+function hydrateReview() {
+  const reviews = loadReviews();
+  const review = reviews[getReviewStorageKey()];
+  if (!review) {
+    return;
+  }
 
-      document.getElementById("ratingInput").value = review.rating || "";
-      document.getElementById("commentInput").value = review.comment || "";
-      document.getElementById("reviewFeedback").textContent = "Avaliacao restaurada do seu navegador.";
-    }
+  document.getElementById("ratingInput").value = review.rating || "";
+  document.getElementById("commentInput").value = review.comment || "";
+  document.getElementById("reviewFeedback").textContent = "Avaliacao restaurada do seu navegador.";
+}
 
-    function saveReview() {
-      const reviews = loadReviews();
-      reviews[getReviewStorageKey()] = {
-        rating: document.getElementById("ratingInput").value,
-        comment: document.getElementById("commentInput").value.trim(),
-        updatedAt: new Date().toISOString()
-      };
-      saveReviews(reviews);
-      document.getElementById("reviewFeedback").textContent = "Avaliacao salva com sucesso.";
-    }
+async function saveReview() {
+  const reviews = loadReviews();
+  const reviewPayload = {
+    rating: document.getElementById("ratingInput").value,
+    comment: document.getElementById("commentInput").value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  reviews[getReviewStorageKey()] = reviewPayload;
+  saveReviews(reviews);
+
+  try {
+    await syncPublicReviewForCurrentMovie(reviewPayload);
+    document.getElementById("reviewFeedback").textContent = "Avaliacao salva com sucesso.";
+  } catch (error) {
+    console.error("Erro ao publicar review da comunidade:", error);
+    document.getElementById("reviewFeedback").textContent = "Avaliacao salva no seu navegador, mas nao foi possivel atualizar a comunidade agora.";
+  }
+
+  await loadCinefyCommunityReviews();
+}
 
 function toggleCurrentMovieInList() {
   if (!currentMovie) return;
@@ -216,14 +246,14 @@ function toggleCurrentMovieInList() {
 
     state.movies.unshift({
       id: `shared-${Date.now()}`,
-          sharedSourceId,
-          title: currentMovie.title,
-          genre: currentMovie.genre || "Personalizado",
-          year: currentMovie.year || "",
-          rating: Number(currentMovie.rating || 0),
-        note: currentMovie.note || "Adicionado de uma lista compartilhada.",
-        poster: currentMovie.poster || fallbackPoster
-      });
+      sharedSourceId,
+      title: currentMovie.title,
+      genre: currentMovie.genre || "Personalizado",
+      year: currentMovie.year || "",
+      rating: Number(currentMovie.rating || 0),
+      note: currentMovie.note || "Adicionado de uma lista compartilhada.",
+      poster: currentMovie.poster || fallbackPoster
+    });
     state.updatedAt = new Date().toISOString();
     store.saveListState(state);
     syncAddButtonState();
@@ -236,10 +266,10 @@ function toggleCurrentMovieInList() {
   state.movies.unshift({
     id,
     tmdbId: currentMovie.id,
-        title: currentMovie.title,
-        genre: currentMovie.genres && currentMovie.genres[0] ? currentMovie.genres[0].name : "TMDB",
-        year: currentMovie.release_date ? Number(currentMovie.release_date.slice(0, 4)) : "",
-        rating: Number(currentMovie.vote_average || 0) / 2,
+    title: currentMovie.title,
+    genre: currentMovie.genres && currentMovie.genres[0] ? currentMovie.genres[0].name : "TMDB",
+    year: currentMovie.release_date ? Number(currentMovie.release_date.slice(0, 4)) : "",
+    rating: Number(currentMovie.vote_average || 0) / 2,
     note: currentMovie.overview || "Adicionado pela tela de detalhes.",
     poster: window.TMDB.getImageUrl(currentMovie.poster_path, fallbackPoster)
   });
@@ -351,7 +381,7 @@ function renderExternalLinks(externalLinks) {
   `).join("");
 }
 
-function renderCommunityReviews(reviewsResponse, externalLinks, isManual = false) {
+function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = false, cinefyReviews = []) {
   const grid = document.getElementById("communityReviewsGrid");
   const caption = document.getElementById("communityReviewsCaption");
   const letterboxdHref = externalLinks.letterboxd ? externalLinks.letterboxd.href : "#";
@@ -368,44 +398,92 @@ function renderCommunityReviews(reviewsResponse, externalLinks, isManual = false
     return;
   }
 
-  const reviews = Array.isArray(reviewsResponse && reviewsResponse.results) ? reviewsResponse.results : [];
+  const tmdbReviews = Array.isArray(tmdbReviewsInput)
+    ? tmdbReviewsInput
+    : Array.isArray(tmdbReviewsInput && tmdbReviewsInput.results)
+      ? tmdbReviewsInput.results
+      : [];
 
-  if (!reviews.length) {
-    caption.textContent = "O TMDB nao retornou reviews publicas para este filme agora.";
+  if (!cinefyReviews.length && !tmdbReviews.length) {
+    caption.textContent = "Ainda nao encontramos reviews da comunidade para este filme.";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
-        Ainda nao ha comentarios publicos aqui. Use os atalhos acima para continuar a leitura em comunidades como IMDb, Letterboxd e AdoroCinema.
+        Ainda nao ha comentarios publicos aqui. Avalie este filme para comecar a conversa no CINEfy ou use os atalhos acima para continuar a leitura em outras comunidades.
       </div>
     `;
     return;
   }
 
-  caption.textContent = "Exibindo reviews publicas do TMDB e atalhos para seguir a conversa em outras comunidades.";
-  grid.innerHTML = reviews.slice(0, 4).map((review) => {
-    const authorDetails = review.author_details || {};
-    const rating = typeof authorDetails.rating === "number" ? `${authorDetails.rating.toFixed(1)}/10` : "Sem nota";
-    const content = truncateReview(review.content || "");
-    const avatar = normalizeAvatarUrl(authorDetails.avatar_path);
+  const sections = [];
 
-    return `
-      <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
-            <img alt="${escapeHtml(review.author || "Autor desconhecido")}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(avatar || fallbackPoster)}"/>
-            <div class="min-w-0">
-              <p class="truncate text-base font-semibold text-white">${escapeHtml(review.author || "Autor desconhecido")}</p>
-              <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">TMDB • ${escapeHtml(rating)}</p>
-            </div>
-          </div>
-          <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-white/12" href="${escapeHtml(review.url || "#")}" rel="noopener noreferrer" target="_blank">
-            Ler review
-            <span class="material-symbols-outlined text-sm">open_in_new</span>
-          </a>
+  if (cinefyReviews.length) {
+    sections.push(`
+      <section class="space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">No CINEfy</h3>
+          <span class="text-xs uppercase tracking-[0.16em] text-zinc-500">${cinefyReviews.length} review(s)</span>
         </div>
-        <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(content)}</p>
-      </article>
-    `;
-  }).join("");
+        ${cinefyReviews.map((review) => `
+          <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
+                <div class="min-w-0">
+                  <p class="truncate text-base font-semibold text-white">${escapeHtml(review.authorName)}</p>
+                  <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)}</p>
+                </div>
+              </div>
+              ${review.isOwn
+                ? '<span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">Sua review</span>'
+                : ''}
+            </div>
+            <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(review.comment)}</p>
+          </article>
+        `).join("")}
+      </section>
+    `);
+  }
+
+  if (tmdbReviews.length) {
+    sections.push(`
+      <section class="space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">TMDB</h3>
+          <span class="text-xs uppercase tracking-[0.16em] text-zinc-500">${Math.min(tmdbReviews.length, 4)} review(s)</span>
+        </div>
+        ${tmdbReviews.slice(0, 4).map((review) => {
+          const authorDetails = review.author_details || {};
+          const rating = typeof authorDetails.rating === "number" ? `${authorDetails.rating.toFixed(1)}/10` : "Sem nota";
+          const content = truncateReview(review.content || "");
+          const avatar = normalizeAvatarUrl(authorDetails.avatar_path);
+
+          return `
+            <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <img alt="${escapeHtml(review.author || "Autor desconhecido")}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(avatar || fallbackPoster)}"/>
+                  <div class="min-w-0">
+                    <p class="truncate text-base font-semibold text-white">${escapeHtml(review.author || "Autor desconhecido")}</p>
+                    <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">TMDB • ${escapeHtml(rating)}</p>
+                  </div>
+                </div>
+                <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-white/12" href="${escapeHtml(review.url || "#")}" rel="noopener noreferrer" target="_blank">
+                  Ler review
+                  <span class="material-symbols-outlined text-sm">open_in_new</span>
+                </a>
+              </div>
+              <p class="mt-4 text-sm leading-7 text-zinc-300">${escapeHtml(content)}</p>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `);
+  }
+
+  caption.textContent = cinefyReviews.length
+    ? "Suas reviews e as dos seus amigos aparecem primeiro, seguidas das leituras publicas do TMDB."
+    : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do CINEfy crescer aqui.";
+  grid.innerHTML = sections.join("");
 }
 
 function getMovieCertification(releaseDates) {
@@ -574,18 +652,144 @@ function truncateReview(content) {
   return `${normalized.slice(0, 277).trim()}...`;
 }
 
-    function getReviewStorageKey() {
-      return localMovieId
-        ? `local-${shareId ? `${shareId}-` : ""}${localMovieId}`
-        : `tmdb-${movieId}`;
-    }
+async function loadCinefyCommunityReviews() {
+  if (!movieId) {
+    return;
+  }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+  const ownReview = getOwnCinefyReview();
+  const friendReviews = await loadFriendCinefyReviews();
+  const merged = [ownReview, ...friendReviews]
+    .filter(Boolean)
+    .sort((left, right) => new Date(right.updatedAt || 0) - new Date(left.updatedAt || 0));
 
+  renderCommunityReviews(currentTmdbReviews, currentExternalLinks, false, merged);
+}
+
+function getOwnCinefyReview() {
+  if (!store || !currentProfile || !currentProfile.uid || !movieId) {
+    return null;
+  }
+
+  const reviews = store.loadReviews();
+  const review = reviews[getReviewStorageKey()];
+  if (!review || (!String(review.comment || "").trim() && !String(review.rating || "").trim())) {
+    return null;
+  }
+
+  return normalizeCinefyReviewRecord({
+    uid: currentProfile.uid,
+    authorName: currentProfile.displayName || currentProfile.username || "Voce",
+    authorUsername: currentProfile.username || "",
+    authorAvatar: currentProfile.avatar || fallbackPoster,
+    rating: review.rating,
+    comment: review.comment,
+    updatedAt: review.updatedAt,
+    sourceLabel: "Sua review",
+    isOwn: true
+  });
+}
+
+async function loadFriendCinefyReviews() {
+  if (!firestore || !currentProfile || !currentProfile.uid || !movieId || !store) {
+    return [];
+  }
+
+  const friends = store.loadFriends().filter((friend) => friend && friend.id);
+  if (!friends.length) {
+    return [];
+  }
+
+  const snapshots = await Promise.all(
+    friends.slice(0, 12).map((friend) =>
+      firestore.collection("users").doc(friend.id).collection("public_reviews").doc(`tmdb-${movieId}`).get()
+        .then((snapshot) => ({ friend, snapshot }))
+        .catch((error) => {
+          console.error("Erro ao carregar review de amigo:", error);
+          return { friend, snapshot: null };
+        })
+    )
+  );
+
+  return snapshots
+    .filter(({ snapshot }) => snapshot && snapshot.exists)
+    .map(({ friend, snapshot }) => {
+      const data = snapshot.data() || {};
+      return normalizeCinefyReviewRecord({
+        ...data,
+        authorName: data.authorName || friend.displayName || friend.name || "Amigo",
+        authorUsername: data.authorUsername || friend.username || "",
+        authorAvatar: data.authorAvatar || friend.avatar || fallbackPoster,
+        sourceLabel: "Amigo no CINEfy",
+        isOwn: false
+      });
+    })
+    .filter(Boolean);
+}
+
+async function syncPublicReviewForCurrentMovie(reviewPayload) {
+  if (!firestore || !currentProfile || !currentProfile.uid || !movieId || localMovieId) {
+    return;
+  }
+
+  const hasContent = String(reviewPayload.comment || "").trim() || String(reviewPayload.rating || "").trim();
+  const docRef = firestore.collection("users").doc(currentProfile.uid).collection("public_reviews").doc(`tmdb-${movieId}`);
+
+  if (!hasContent) {
+    await docRef.delete().catch(() => {});
+    return;
+  }
+
+  await docRef.set({
+    movieKey: `tmdb-${movieId}`,
+    tmdbId: String(movieId),
+    title: currentMovie && currentMovie.title ? currentMovie.title : "",
+    poster: currentMovie && currentMovie.poster_path ? window.TMDB.getImageUrl(currentMovie.poster_path, fallbackPoster) : "",
+    authorUid: currentProfile.uid,
+    authorName: currentProfile.displayName || currentProfile.username || "Cinefilo",
+    authorUsername: currentProfile.username || "",
+    authorAvatar: currentProfile.avatar || fallbackPoster,
+    rating: reviewPayload.rating || "",
+    comment: String(reviewPayload.comment || "").trim(),
+    updatedAt: reviewPayload.updatedAt || new Date().toISOString()
+  }, { merge: true });
+}
+
+function normalizeCinefyReviewRecord(review) {
+  if (!review) {
+    return null;
+  }
+
+  const comment = String(review.comment || "").trim();
+  const rating = String(review.rating || "").trim();
+  if (!comment && !rating) {
+    return null;
+  }
+
+  const ratingNumber = Number(rating);
+  return {
+    authorName: review.authorName || "Cinefilo",
+    authorUsername: review.authorUsername || "",
+    authorAvatar: review.authorAvatar || fallbackPoster,
+    comment: comment || "Sem comentario.",
+    updatedAt: review.updatedAt || "",
+    sourceLabel: review.sourceLabel || "Review no CINEfy",
+    isOwn: Boolean(review.isOwn),
+    ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota"
+  };
+}
+
+function getReviewStorageKey() {
+  return localMovieId
+    ? `local-${shareId ? `${shareId}-` : ""}${localMovieId}`
+    : `tmdb-${movieId}`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
