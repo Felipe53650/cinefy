@@ -63,6 +63,7 @@
       document.addEventListener("click", handleOutsideFilterMenuClick);
       document.addEventListener("keydown", handleFilterMenuKeydown);
       window.addEventListener("cinefy:global-search", handleGlobalSearch);
+      window.addEventListener("cinefy:list-updated", handleListUpdated);
 
       applyViewMode();
       updateFilterAuxControls();
@@ -110,6 +111,12 @@
         runSearch(query);
       }
 
+      function handleListUpdated() {
+        if (currentMovies.length) {
+          renderMovies(currentMovies);
+        }
+      }
+
       function renderMovies(movies) {
         currentMovies = movies;
         if (!movies.length) {
@@ -129,6 +136,7 @@
           const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano";
           const rating = typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "N/A";
           const reviewCount = formatVoteCountSuffix(movie.vote_count);
+          const isInList = isMovieInUserList(movie);
           const poster = window.TMDB.getImageUrl(movie.poster_path, SEARCH_PLACEHOLDER_POSTER);
           const articleClass = currentView === "list"
             ? "group relative flex flex-col overflow-hidden rounded-[1.9rem] border border-white/10 bg-[#241314] transition hover:border-red-500/20 hover:bg-[#2a1718] md:flex-row"
@@ -147,7 +155,15 @@
             <article class="${articleClass}">
               <div class="${mediaClass}">
                 <img alt="${escapeHtml(movie.title)}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" decoding="async" loading="lazy" src="${escapeAttribute(safePosterUrl(poster))}" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"></div>
+              ${isInList ? `
+                <div class="absolute left-3 top-3">
+                  <span class="cinefy-in-list-badge px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]">
+                    <span class="material-symbols-outlined fill-icon text-[13px]">check_circle</span>
+                    Na lista
+                  </span>
+                </div>
+              ` : ""}
                 <div class="absolute right-3 top-3">
                   <span class="flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
                     <span class="material-symbols-outlined fill-icon text-[13px] text-yellow-400">star</span>${rating}${reviewCount}
@@ -168,9 +184,9 @@
                     <span class="material-symbols-outlined text-sm">open_in_new</span>
                     Detalhes
                   </a>
-                  <button class="flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-600" data-add-movie="${escapeAttribute(JSON.stringify(movie))}" type="button">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    Minha Lista
+                  <button class="flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white transition ${isInList ? "bg-red-600" : "bg-zinc-800 hover:bg-red-600"}" data-add-movie="${escapeAttribute(JSON.stringify(movie))}" type="button" ${isInList ? "disabled" : ""}>
+                    <span class="material-symbols-outlined text-sm">${isInList ? "check" : "add"}</span>
+                    ${isInList ? "Adicionado" : "Minha Lista"}
                   </button>
                 </div>
               </div>
@@ -565,6 +581,19 @@
 
         const formatted = window.TMDB.formatVoteCount(value);
         return formatted ? ` (${formatted})` : "";
+      }
+
+      function isMovieInUserList(movie) {
+        const state = store.loadListState();
+        const tmdbId = String(movie && movie.id ? movie.id : "").trim();
+        if (!tmdbId || !state || !Array.isArray(state.movies)) {
+          return false;
+        }
+
+        return state.movies.some((item) =>
+          String(item.tmdbId || "").trim() === tmdbId ||
+          String(item.id || "").trim() === `tmdb-${tmdbId}`
+        );
       }
 
       function safePosterUrl(value) {

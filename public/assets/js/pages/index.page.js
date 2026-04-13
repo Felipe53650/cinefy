@@ -6,6 +6,9 @@
     const heroListButtonLabel = document.getElementById("heroListButtonLabel");
     const homeFeedback = document.getElementById("homeFeedback");
     const recommendationsSubtitle = document.getElementById("recommendationsSubtitle");
+    let featuredMovies = [];
+    let topRatedMovies = [];
+    let recommendedMovies = [];
 
     heroListButton.addEventListener("click", toggleHeroMovieInList);
     window.addEventListener("cinefy:list-updated", handleListUpdated);
@@ -21,6 +24,8 @@
         ]);
 
         const myList = store.loadListState().movies;
+        featuredMovies = featured.slice(0, 12);
+        topRatedMovies = topRated.slice(0, 12);
         heroMovie = featured[0] || null;
 
         if (heroMovie) {
@@ -30,8 +35,8 @@
         }
 
         store.syncCatalogNotifications(featured.slice(0, 10));
-        renderMovieScroller("featuredScroller", featured.slice(0, 12));
-        renderMovieScroller("topRatedScroller", topRated.slice(0, 12));
+        renderMovieScroller("featuredScroller", featuredMovies);
+        renderMovieScroller("topRatedScroller", topRatedMovies);
         await renderRecommendedScroller();
         renderMyListScroller(myList);
       } catch (error) {
@@ -77,6 +82,14 @@
             <div class="relative mb-4 aspect-[2/3] overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900 shadow-[0_20px_45px_rgba(0,0,0,0.25)]">
               <img alt="${escapeHtml(movie.title)}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" decoding="async" loading="lazy" src="${escapeAttribute(safeMediaUrl(window.TMDB.getImageUrl(movie.poster_path, fallbackPoster)))}" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-90"></div>
+              ${isMovieInUserList(movie) ? `
+                <div class="absolute left-3 top-3">
+                  <span class="cinefy-in-list-badge px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]">
+                    <span class="material-symbols-outlined fill-icon text-[13px]">check_circle</span>
+                    Na lista
+                  </span>
+                </div>
+              ` : ""}
               <div class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                 <span class="material-symbols-outlined fill-icon text-sm text-yellow-400">star</span>
                 ${formatRating(movie.vote_average)}${formatVoteCountSuffix(movie.vote_count)}
@@ -142,6 +155,7 @@
         const recommendations = await buildPersonalizedRecommendations();
 
         if (!recommendations.length) {
+          recommendedMovies = [];
           recommendationsSubtitle.textContent = "Avalie ou adicione filmes para desbloquear sugestoes personalizadas.";
           container.innerHTML = `
             <div class="w-full rounded-[1.75rem] border border-dashed border-zinc-700 bg-zinc-950/50 p-8 text-center">
@@ -157,8 +171,10 @@
         }
 
         recommendationsSubtitle.textContent = "Sugestoes geradas com base nas suas notas mais altas e nos filmes da sua lista.";
-        renderMovieScroller("recommendedScroller", recommendations.slice(0, 12));
+        recommendedMovies = recommendations.slice(0, 12);
+        renderMovieScroller("recommendedScroller", recommendedMovies);
       } catch (error) {
+        recommendedMovies = [];
         console.error("Erro ao montar recomendacoes personalizadas:", error);
         recommendationsSubtitle.textContent = "Nao foi possivel montar recomendacoes agora.";
         container.innerHTML = `
@@ -362,6 +378,15 @@
 
       renderMyListScroller(state.movies || []);
       syncHeroListButtonState(state);
+      if (featuredMovies.length) {
+        renderMovieScroller("featuredScroller", featuredMovies);
+      }
+      if (topRatedMovies.length) {
+        renderMovieScroller("topRatedScroller", topRatedMovies);
+      }
+      if (recommendedMovies.length) {
+        renderMovieScroller("recommendedScroller", recommendedMovies);
+      }
       renderRecommendedScroller();
     }
 
@@ -384,6 +409,19 @@
 
       const formatted = window.TMDB.formatVoteCount(value);
       return formatted ? ` (${formatted})` : "";
+    }
+
+    function isMovieInUserList(movie) {
+      const state = store.loadListState();
+      const tmdbId = String(movie && movie.id ? movie.id : "").trim();
+      if (!tmdbId || !state || !Array.isArray(state.movies)) {
+        return false;
+      }
+
+      return state.movies.some((item) =>
+        String(item.tmdbId || "").trim() === tmdbId ||
+        String(item.id || "").trim() === `tmdb-${tmdbId}`
+      );
     }
 
     function getReleaseRecencyScore(releaseDate) {
