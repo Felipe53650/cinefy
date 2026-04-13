@@ -157,7 +157,7 @@
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="busca.html">Buscar</a>
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="mailto:felipe53650@outlook.com">Suporte</a>
           </nav>
-          <p class="mt-4 text-xs text-zinc-500">Powered by TMDB</p>
+          <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Powered by TMDB</p>
         </div>
       </div>
     `;
