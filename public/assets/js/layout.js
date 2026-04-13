@@ -140,9 +140,9 @@
           <div class="cinefy-topbar__secondary flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
             ${buildGlobalSearch()}
             ${buildHeaderTrustLinks()}
-            <a class="cinefy-search-shortcut hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-red-500/30 hover:bg-white/[0.08] lg:hidden" href="busca.html">
+            <a class="cinefy-search-shortcut items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-red-500/30 hover:bg-white/[0.08]" href="busca.html" aria-label="Buscar filmes">
               <span class="material-symbols-outlined text-[18px]">travel_explore</span>
-              <span>Explorar</span>
+              <span class="cinefy-search-shortcut__label">Buscar</span>
             </a>
             <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
             ${session ? `
