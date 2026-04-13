@@ -77,6 +77,14 @@
             <h2 class="font-display text-2xl font-bold tracking-tight text-white">Em destaque</h2>
             <p class="text-sm text-zinc-400">Selecao semanal</p>
           </div>
+          <div class="carousel-controls" data-carousel-controls-for="featuredScroller">
+            <button aria-label="Ver filmes anteriores" class="carousel-arrow" data-carousel-control="prev" data-carousel-target="featuredScroller" type="button">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button aria-label="Ver mais filmes em destaque" class="carousel-arrow" data-carousel-control="next" data-carousel-target="featuredScroller" type="button">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
         </div>
         <div class="flex gap-4 overflow-x-auto pb-3" id="featuredScroller"></div>
       </section>
@@ -86,6 +94,14 @@
           <div class="section-heading">
             <h2 class="font-display text-2xl font-bold tracking-tight text-white">Melhores avaliados</h2>
             <p class="text-sm text-zinc-400">Os filmes mais bem pontuados do TMDB</p>
+          </div>
+          <div class="carousel-controls" data-carousel-controls-for="topRatedScroller">
+            <button aria-label="Ver filmes anteriores" class="carousel-arrow" data-carousel-control="prev" data-carousel-target="topRatedScroller" type="button">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button aria-label="Ver mais filmes bem avaliados" class="carousel-arrow" data-carousel-control="next" data-carousel-target="topRatedScroller" type="button">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         </div>
         <div class="flex gap-4 overflow-x-auto pb-3" id="topRatedScroller"></div>
@@ -97,6 +113,14 @@
             <h2 class="font-display text-2xl font-bold tracking-tight text-white">Recomendado para voce</h2>
             <p class="text-sm text-zinc-400" id="recommendationsSubtitle">Sugestoes geradas com base nas suas notas e listas.</p>
           </div>
+          <div class="carousel-controls" data-carousel-controls-for="recommendedScroller">
+            <button aria-label="Ver recomendacoes anteriores" class="carousel-arrow" data-carousel-control="prev" data-carousel-target="recommendedScroller" type="button">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button aria-label="Ver mais recomendacoes" class="carousel-arrow" data-carousel-control="next" data-carousel-target="recommendedScroller" type="button">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
         </div>
         <div class="flex gap-4 overflow-x-auto pb-3" id="recommendedScroller"></div>
       </section>
@@ -107,7 +131,17 @@
             <h2 class="font-display text-2xl font-bold tracking-tight text-white">Sua Lista</h2>
             <p class="text-sm text-zinc-400">Os filmes que voce ja separou para rever, indicar ou guardar</p>
           </div>
-          <a class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-red-200 transition hover:bg-white/10" href="lista.html">Gerenciar</a>
+          <div class="flex items-center gap-3">
+            <div class="carousel-controls" data-carousel-controls-for="myListScroller">
+              <button aria-label="Ver filmes anteriores da sua lista" class="carousel-arrow" data-carousel-control="prev" data-carousel-target="myListScroller" type="button">
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button aria-label="Ver mais filmes da sua lista" class="carousel-arrow" data-carousel-control="next" data-carousel-target="myListScroller" type="button">
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+            <a class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-red-200 transition hover:bg-white/10" href="lista.html">Gerenciar</a>
+          </div>
         </div>
         <div class="flex gap-4 overflow-x-auto pb-3" id="myListScroller"></div>
       </section>

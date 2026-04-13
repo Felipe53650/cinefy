@@ -9,10 +9,12 @@
     let featuredMovies = [];
     let topRatedMovies = [];
     let recommendedMovies = [];
+    let carouselControlsInitialized = false;
 
     heroListButton.addEventListener("click", toggleHeroMovieInList);
     window.addEventListener("cinefy:list-updated", handleListUpdated);
     window.addEventListener("cinefy:reviews-updated", handleReviewsUpdated);
+    initializeCarouselControls();
 
     loadHome();
 
@@ -39,6 +41,7 @@
         renderMovieScroller("topRatedScroller", topRatedMovies);
         await renderRecommendedScroller();
         renderMyListScroller(myList);
+        refreshCarouselControls();
       } catch (error) {
         console.error("Erro ao carregar a home do TMDB:", error);
         document.getElementById("heroTitle").textContent = "Nao foi possivel carregar o catalogo agora";
@@ -68,9 +71,11 @@
     function renderMovieScroller(containerId, movies) {
       const container = document.getElementById(containerId);
       container.innerHTML = buildMovieScrollerMarkup(movies);
+      requestAnimationFrame(refreshCarouselControls);
       hydrateMovieCertifications(movies).then((hasUpdates) => {
         if (hasUpdates) {
           container.innerHTML = buildMovieScrollerMarkup(movies);
+          requestAnimationFrame(refreshCarouselControls);
         }
       });
     }
@@ -121,6 +126,7 @@
             </a>
           </div>
         `;
+        requestAnimationFrame(refreshCarouselControls);
         return;
       }
 
@@ -145,6 +151,7 @@
           </article>
         `;
       }).join("");
+      requestAnimationFrame(refreshCarouselControls);
     }
 
     async function renderRecommendedScroller() {
@@ -165,8 +172,9 @@
                 <span class="material-symbols-outlined">search</span>
                 Explorar catalogo
               </a>
-            </div>
+          </div>
           `;
+          requestAnimationFrame(refreshCarouselControls);
           return;
         }
 
@@ -183,6 +191,7 @@
             <p class="mt-2 text-zinc-400">Tente novamente daqui a pouco enquanto consultamos o TMDB.</p>
           </div>
         `;
+        requestAnimationFrame(refreshCarouselControls);
       }
     }
 
@@ -388,10 +397,64 @@
         renderMovieScroller("recommendedScroller", recommendedMovies);
       }
       renderRecommendedScroller();
+      refreshCarouselControls();
     }
 
     function handleReviewsUpdated() {
       renderRecommendedScroller();
+    }
+
+    function initializeCarouselControls() {
+      if (carouselControlsInitialized) {
+        return;
+      }
+
+      const controls = document.querySelectorAll("[data-carousel-control]");
+      controls.forEach((button) => {
+        button.addEventListener("click", handleCarouselControlClick);
+      });
+
+      document.querySelectorAll("[id$='Scroller']").forEach((track) => {
+        track.addEventListener("scroll", () => syncCarouselControlState(track.id), { passive: true });
+      });
+
+      window.addEventListener("resize", refreshCarouselControls, { passive: true });
+      carouselControlsInitialized = true;
+      requestAnimationFrame(refreshCarouselControls);
+    }
+
+    function handleCarouselControlClick(event) {
+      const button = event.currentTarget;
+      const targetId = button.dataset.carouselTarget;
+      const track = document.getElementById(targetId);
+      if (!track) return;
+
+      const direction = button.dataset.carouselControl === "prev" ? -1 : 1;
+      const scrollAmount = Math.max(track.clientWidth * 0.82, 240) * direction;
+      track.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+
+    function refreshCarouselControls() {
+      document.querySelectorAll("[data-carousel-controls-for]").forEach((controls) => {
+        syncCarouselControlState(controls.dataset.carouselControlsFor);
+      });
+    }
+
+    function syncCarouselControlState(trackId) {
+      const track = document.getElementById(trackId);
+      const controls = document.querySelector(`[data-carousel-controls-for="${trackId}"]`);
+      if (!track || !controls) return;
+
+      const hasOverflow = track.scrollWidth - track.clientWidth > 24;
+      controls.hidden = !hasOverflow;
+
+      const prevButton = controls.querySelector('[data-carousel-control="prev"]');
+      const nextButton = controls.querySelector('[data-carousel-control="next"]');
+      if (!prevButton || !nextButton) return;
+
+      const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+      prevButton.disabled = !hasOverflow || track.scrollLeft <= 6;
+      nextButton.disabled = !hasOverflow || track.scrollLeft >= maxScrollLeft - 6;
     }
 
     function formatYear(releaseDate) {
