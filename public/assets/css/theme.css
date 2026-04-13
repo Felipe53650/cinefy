@@ -239,6 +239,31 @@ body[data-page="cadastro"] {
   backdrop-filter: blur(10px);
 }
 
+.cinefy-metadata-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--theme-outline-rgb) / 0.26);
+  background: linear-gradient(180deg, rgb(var(--theme-surface-rgb) / 0.82), rgb(var(--theme-surface-rgb) / 0.68));
+  color: rgb(var(--theme-text-rgb) / 0.96);
+  padding: 0.42rem 0.82rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 0 10px 22px rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.cinefy-metadata-pill--strong {
+  border-color: rgb(var(--theme-accent-soft-rgb) / 0.28);
+  background: linear-gradient(180deg, rgb(var(--theme-surface-strong-rgb) / 0.92), rgb(var(--theme-surface-rgb) / 0.88));
+  color: rgb(var(--theme-text-rgb));
+}
+
 .auth-shell {
   background: rgb(var(--theme-surface-rgb) / 0.64) !important;
   border-color: rgb(var(--theme-outline-rgb) / 0.22) !important;
@@ -1013,6 +1038,13 @@ body[data-page="modoleitor"] .max-w-7xl {
   .section-heading::before {
     top: 0.16rem;
     height: 1.65rem;
+  }
+
+  .cinefy-metadata-pill {
+    min-height: 1.85rem;
+    padding: 0.38rem 0.72rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
   }
 }
 

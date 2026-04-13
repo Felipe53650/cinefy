@@ -148,7 +148,7 @@
             ? "flex flex-1 flex-col justify-between p-5"
             : "flex flex-1 flex-col justify-between p-5";
           const certificationMarkup = movie.certificationLabel
-            ? `<span class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-200">${escapeHtml(movie.certificationLabel)}</span>`
+            ? `<span class="cinefy-metadata-pill cinefy-metadata-pill--strong">${escapeHtml(movie.certificationLabel)}</span>`
             : "";
 
           return `
@@ -174,7 +174,7 @@
                 <div>
                   <h4 class="text-base font-bold text-white ${currentView === "list" ? "" : "line-clamp-1"}">${escapeHtml(movie.title)}</h4>
                   <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <span class="inline-block text-xs uppercase tracking-[0.2em] text-zinc-500">${releaseYear}</span>
+                    <span class="cinefy-metadata-pill">${releaseYear}</span>
                     ${certificationMarkup}
                   </div>
                   <p class="mt-3 text-sm leading-relaxed text-zinc-400 ${currentView === "list" ? "line-clamp-4" : "line-clamp-3"}">${escapeHtml(movie.overview || "Sem sinopse disponivel no TMDB.")}</p>

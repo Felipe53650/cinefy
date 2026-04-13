@@ -100,10 +100,10 @@
                 ${formatRating(movie.vote_average)}${formatVoteCountSuffix(movie.vote_count)}
               </div>
               <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-2">
-                <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-200">
+                <span class="cinefy-metadata-pill">
                   ${formatYear(movie.release_date)}
                 </span>
-                ${movie.certificationLabel ? `<span class="rounded-full border border-white/10 bg-black/55 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-100 backdrop-blur-sm">${escapeHtml(movie.certificationLabel)}</span>` : ""}
+                ${movie.certificationLabel ? `<span class="cinefy-metadata-pill cinefy-metadata-pill--strong">${escapeHtml(movie.certificationLabel)}</span>` : ""}
               </div>
             </div>
             <h3 class="line-clamp-1 text-base font-bold text-white transition group-hover:text-red-300">${escapeHtml(movie.title)}</h3>
