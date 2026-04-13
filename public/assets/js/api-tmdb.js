@@ -145,6 +145,27 @@
     return path ? `${TMDB_BACKDROP_URL}${path}` : fallback;
   }
 
+  function formatVoteCount(value) {
+    const count = Number(value || 0);
+    if (!Number.isFinite(count) || count <= 0) {
+      return "";
+    }
+
+    if (count >= 1000000) {
+      return `${stripTrailingZero((count / 1000000).toFixed(1))}M`;
+    }
+
+    if (count >= 1000) {
+      return `${stripTrailingZero((count / 1000).toFixed(1))}k`;
+    }
+
+    return String(Math.round(count));
+  }
+
+  function stripTrailingZero(value) {
+    return String(value).replace(/\.0$/, "");
+  }
+
   function extractMovieCertificationLabel(releaseDatesPayload) {
     const results = Array.isArray(releaseDatesPayload && releaseDatesPayload.results)
       ? releaseDatesPayload.results
@@ -207,6 +228,7 @@
     getMovieRecommendations,
     getMovieExternalIds,
     getMovieReviews,
+    formatVoteCount,
     getImageUrl,
     getBackdropUrl
   };

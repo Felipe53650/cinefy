@@ -128,6 +128,7 @@
         resultsGrid.innerHTML = movies.map((movie) => {
           const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano";
           const rating = typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "N/A";
+          const reviewCount = formatVoteCountSuffix(movie.vote_count);
           const poster = window.TMDB.getImageUrl(movie.poster_path, SEARCH_PLACEHOLDER_POSTER);
           const articleClass = currentView === "list"
             ? "group relative flex flex-col overflow-hidden rounded-[1.9rem] border border-white/10 bg-[#241314] transition hover:border-red-500/20 hover:bg-[#2a1718] md:flex-row"
@@ -149,7 +150,7 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"></div>
                 <div class="absolute right-3 top-3">
                   <span class="flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
-                    <span class="material-symbols-outlined fill-icon text-[13px] text-yellow-400">star</span>${rating}
+                    <span class="material-symbols-outlined fill-icon text-[13px] text-yellow-400">star</span>${rating}${reviewCount}
                   </span>
                 </div>
               </div>
@@ -555,6 +556,15 @@
           .replace(/&/g, "&amp;")
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
+      }
+
+      function formatVoteCountSuffix(value) {
+        if (!window.TMDB || typeof window.TMDB.formatVoteCount !== "function") {
+          return "";
+        }
+
+        const formatted = window.TMDB.formatVoteCount(value);
+        return formatted ? ` (${formatted})` : "";
       }
 
       function safePosterUrl(value) {

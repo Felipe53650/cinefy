@@ -56,7 +56,7 @@
       if (movie.certificationLabel) {
         parts.push(movie.certificationLabel);
       }
-      parts.push(`Nota ${formatRating(movie.vote_average)}`);
+      parts.push(`Nota ${formatRating(movie.vote_average)}${formatVoteCountSuffix(movie.vote_count)}`);
       document.getElementById("heroMetaPrimary").textContent = parts.join(" • ");
     }
 
@@ -79,7 +79,7 @@
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-90"></div>
               <div class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                 <span class="material-symbols-outlined fill-icon text-sm text-yellow-400">star</span>
-                ${formatRating(movie.vote_average)}
+                ${formatRating(movie.vote_average)}${formatVoteCountSuffix(movie.vote_count)}
               </div>
               <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center gap-2">
                 <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-200">
@@ -375,6 +375,15 @@
 
     function formatRating(voteAverage) {
       return typeof voteAverage === "number" ? voteAverage.toFixed(1) : "N/A";
+    }
+
+    function formatVoteCountSuffix(value) {
+      if (!window.TMDB || typeof window.TMDB.formatVoteCount !== "function") {
+        return "";
+      }
+
+      const formatted = window.TMDB.formatVoteCount(value);
+      return formatted ? ` (${formatted})` : "";
     }
 
     function getReleaseRecencyScore(releaseDate) {

@@ -114,7 +114,7 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
   document.getElementById("movieYear").textContent = movie.release_date ? movie.release_date.slice(0, 4) : "-";
   document.getElementById("movieRuntime").textContent = movie.runtime ? `${movie.runtime} min` : "-";
   document.getElementById("movieGenres").textContent = movie.genres && movie.genres.length ? movie.genres.map((genre) => genre.name).join(", ") : "-";
-  document.getElementById("movieScore").textContent = typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "-";
+  document.getElementById("movieScore").textContent = buildTmdbScoreLabel(movie.vote_average, movie.vote_count);
   document.getElementById("movieCertification").textContent = certification || "Nao informado";
   document.getElementById("movieProvidersSummary").textContent = getProvidersSummary(providerData);
   document.getElementById("movieDirectors").textContent = directors.length ? directors.join(", ") : "Nao informado";
@@ -309,6 +309,16 @@ function syncAddButtonState() {
     addToListButtonLabel.textContent = "Adicionar a Minha Lista";
     addToListButton.setAttribute("aria-pressed", "false");
   }
+}
+
+function buildTmdbScoreLabel(score, voteCount) {
+  const formattedScore = typeof score === "number" ? score.toFixed(1) : "-";
+  if (!window.TMDB || typeof window.TMDB.formatVoteCount !== "function") {
+    return formattedScore;
+  }
+
+  const formattedVoteCount = window.TMDB.formatVoteCount(voteCount);
+  return formattedVoteCount ? `${formattedScore} (${formattedVoteCount})` : formattedScore;
 }
 
 function renderWatchProviders(providerData, isManual = false) {
