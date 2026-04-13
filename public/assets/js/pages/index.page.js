@@ -46,7 +46,6 @@
       document.getElementById("heroTitle").textContent = movie.title;
       document.getElementById("heroOverview").textContent = movie.overview || "Sem sinopse disponivel.";
       updateHeroMetaPrimary(movie);
-      document.getElementById("heroMetaSecondary").textContent = "Tendencia da semana";
       document.getElementById("heroDetailsLink").href = `detalhes.html?id=${movie.id}`;
       syncHeroListButtonState();
       hydrateHeroCertification(movie);
