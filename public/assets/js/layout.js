@@ -39,8 +39,8 @@
       const isActive = item.key === currentPage;
       const ariaCurrent = isActive ? ' aria-current="page"' : "";
       return `
-        <a class="group relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${isActive ? "text-white" : "text-zinc-400 transition-colors hover:text-white"}" href="${item.href}"${ariaCurrent}>
-          <span class="material-symbols-outlined text-[18px] ${isActive ? "text-red-300" : "text-zinc-500 transition-colors group-hover:text-red-300"}">${item.icon}</span>
+        <a class="group relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${isActive ? "text-white" : "text-zinc-200 transition-colors hover:text-white"}" href="${item.href}"${ariaCurrent}>
+          <span class="material-symbols-outlined text-[18px] ${isActive ? "text-red-300" : "text-zinc-300 transition-colors group-hover:text-red-300"}">${item.icon}</span>
           <span>${item.label}</span>
           ${isActive ? '<span class="absolute inset-x-3 -bottom-1 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent"></span>' : ""}
         </a>
@@ -64,9 +64,9 @@
       const isActive = item.key === currentPage;
       const ariaCurrent = isActive ? ' aria-current="page"' : "";
       return `
-        <a class="flex flex-col items-center gap-1 rounded-2xl px-3 py-1.5 ${isActive ? "text-white" : "text-zinc-500 transition-colors hover:text-white"}" href="${item.href}"${ariaCurrent}>
-          <span class="material-symbols-outlined ${isActive ? "text-red-300" : ""}">${item.icon}</span>
-          <span class="text-[10px] font-medium">${item.mobileLabel || item.label}</span>
+        <a class="flex flex-col items-center gap-1 rounded-2xl px-3 py-1.5 ${isActive ? "text-white" : "text-zinc-200 transition-colors hover:text-white"}" href="${item.href}"${ariaCurrent}>
+          <span class="material-symbols-outlined ${isActive ? "text-red-300" : "text-zinc-300"}">${item.icon}</span>
+          <span class="text-[10px] font-semibold">${item.mobileLabel || item.label}</span>
         </a>
       `;
     }).join("");
@@ -153,9 +153,9 @@
         <div class="cinefy-footer-shell__inner mx-auto w-full max-w-[1440px] rounded-[2rem] border border-white/10 bg-zinc-950/78 px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:px-7 md:py-6">
           <a class="inline-block text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500" href="index.html">CINEfy</a>
           <nav aria-label="Rodape" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
-            <a class="text-zinc-500 transition-colors hover:text-red-400" href="index.html">Inicio</a>
-            <a class="text-zinc-500 transition-colors hover:text-red-400" href="busca.html">Buscar</a>
-            <a class="text-zinc-500 transition-colors hover:text-red-400" href="mailto:felipe53650@outlook.com">Suporte</a>
+            <a class="text-zinc-300 transition-colors hover:text-red-300" href="index.html">Inicio</a>
+            <a class="text-zinc-300 transition-colors hover:text-red-300" href="busca.html">Buscar</a>
+            <a class="text-zinc-300 transition-colors hover:text-red-300" href="mailto:felipe53650@outlook.com">Suporte</a>
           </nav>
           <p class="mt-4 text-xs text-zinc-500">Powered by TMDB</p>
         </div>
