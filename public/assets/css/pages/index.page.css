@@ -53,3 +53,23 @@
       background-color: rgb(var(--theme-accent-rgb) / 0.22) !important;
       border-color: rgb(var(--theme-accent-soft-rgb) / 0.58);
     }
+
+    .hero-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: rgb(244 244 245 / 0.92);
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      text-shadow: 0 2px 12px rgb(0 0 0 / 0.42);
+    }
+
+    .hero-tagline::before {
+      content: "";
+      width: 0.22rem;
+      height: 1.3rem;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgb(var(--theme-accent-rgb) / 1), rgb(var(--theme-accent-soft-rgb) / 0.8));
+      box-shadow: 0 0 18px rgb(var(--theme-accent-rgb) / 0.24);
+      flex: 0 0 auto;
+    }
