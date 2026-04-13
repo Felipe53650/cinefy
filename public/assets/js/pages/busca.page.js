@@ -3,6 +3,13 @@
       const VIEW_STORAGE_KEY = "cinefy-search-view";
       const runtimeCache = new Map();
       const certificationCache = new Map();
+      const suggestedSearches = [
+        { label: "Ação", query: "acao" },
+        { label: "Ficção científica", query: "ficcao cientifica" },
+        { label: "Terror", query: "terror" },
+        { label: "Animação", query: "animacao" },
+        { label: "Romance", query: "romance" }
+      ];
       let currentView = loadViewPreference();
       let currentMovies = [];
       let sourceMovies = [];
@@ -125,8 +132,10 @@
             <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
             <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
             <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
+            ${buildSuggestedSearchMarkup("Tente um destes caminhos rapidos")}
           `;
           emptyState.classList.remove("hidden");
+          bindSuggestedSearchButtons();
           return;
         }
 
@@ -263,10 +272,12 @@
           <span class="material-symbols-outlined text-5xl text-zinc-500">search</span>
           <p class="mt-4 font-bold text-zinc-200">Digite um filme para comecar a busca.</p>
           <p class="mt-2 text-zinc-500">Os resultados aparecem aqui assim que voce pesquisar no catalogo do TMDB.</p>
+          ${buildSuggestedSearchMarkup("Ou comece por um genero popular")}
         `;
         resultsSubtitle.textContent = "Aguardando sua pesquisa";
-        searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Pesquise por titulo para ver resultados.';
+        searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Pesquise por titulo ou escolha um genero para entrar no catalogo mais rapido.';
         syncGlobalSearchQuery("");
+        bindSuggestedSearchButtons();
       }
 
       function handleSearchError(error) {
@@ -277,9 +288,40 @@
           <span class="material-symbols-outlined text-5xl text-zinc-500">movie_off</span>
           <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
           <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
+          ${buildSuggestedSearchMarkup("Se preferir, tente um genero em destaque")}
         `;
         resultsSubtitle.textContent = "Nao foi possivel carregar resultados";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Nao foi possivel carregar resultados agora. Tente novamente em instantes.';
+        bindSuggestedSearchButtons();
+      }
+
+      function buildSuggestedSearchMarkup(kicker) {
+        return `
+          <div class="mt-6 flex flex-col items-center gap-3">
+            <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-zinc-500">${escapeHtml(kicker)}</p>
+            <div class="flex flex-wrap justify-center gap-2">
+              ${suggestedSearches.map((item) => `
+                <button
+                  class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.09] hover:text-white"
+                  data-suggested-search="${escapeAttribute(item.query)}"
+                  type="button"
+                >
+                  ${escapeHtml(item.label)}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function bindSuggestedSearchButtons() {
+        emptyState.querySelectorAll("[data-suggested-search]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const query = String(button.dataset.suggestedSearch || "").trim();
+            if (!query) return;
+            runSearch(query);
+          });
+        });
       }
 
       function syncSearchInputs(value) {
