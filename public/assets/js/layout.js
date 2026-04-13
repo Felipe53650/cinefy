@@ -11,6 +11,14 @@
       return null;
     }
   })();
+  const currentSearchQuery = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return String(params.get("q") || "").trim();
+    } catch (error) {
+      return "";
+    }
+  })();
 
   // Removido: redirecionamento forçado para login. Agora permite acesso anônimo.
 
@@ -27,7 +35,7 @@
   const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
 
   function buildDesktopLinks() {
-    return navItems.map((item) => {
+    return navItems.filter((item) => item.key !== "buscar").map((item) => {
       const isActive = item.key === currentPage;
       const ariaCurrent = isActive ? ' aria-current="page"' : "";
       return `
@@ -38,6 +46,17 @@
         </a>
       `;
     }).join("");
+  }
+
+  function buildGlobalSearch() {
+    return `
+      <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
+        <label class="sr-only" for="globalSearchInput">Buscar filmes no CINEfy</label>
+        <span class="material-symbols-outlined cinefy-global-search__icon">search</span>
+        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Buscar filmes..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
+        <button class="cinefy-global-search__button" type="submit">Buscar</button>
+      </form>
+    `;
   }
 
   function buildMobileLinks() {
@@ -87,6 +106,7 @@
             <nav aria-label="Navegacao principal" class="hidden items-center gap-1.5 md:flex">
               ${buildDesktopLinks()}
             </nav>
+            ${buildGlobalSearch()}
           </div>
           <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
             ${session ? `
@@ -213,6 +233,31 @@
     }
   }
 
+  function wireGlobalSearch() {
+    const form = document.getElementById("globalSearchForm");
+    const input = document.getElementById("globalSearchInput");
+    if (!form || !input) return;
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = String(input.value || "").trim();
+
+      if (currentPage === "buscar") {
+        const targetHref = query ? `busca.html?q=${encodeURIComponent(query)}` : "busca.html";
+        window.history.replaceState({}, "", targetHref);
+        window.dispatchEvent(new CustomEvent("cinefy:global-search", { detail: { query } }));
+        return;
+      }
+
+      window.location.href = query ? `busca.html?q=${encodeURIComponent(query)}` : "busca.html";
+    });
+
+    window.addEventListener("cinefy:search-query-updated", (event) => {
+      const query = event && event.detail ? String(event.detail.query || "") : "";
+      input.value = query;
+    });
+  }
+
   function refreshNotificationsUI() {
     const button = document.getElementById("notificationsButton");
     const panel = document.getElementById("notificationsPanel");
@@ -300,6 +345,7 @@
     hideLegacyChrome();
     navbarMount.innerHTML = renderNavbar();
     wireNotifications();
+    wireGlobalSearch();
   }
 
   const footerMount = document.querySelector('[data-layout="footer"]');

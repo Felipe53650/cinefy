@@ -27,6 +27,14 @@
       const certificationFilterGroup = document.getElementById("certificationFilterGroup");
       const certificationFilterSelect = document.getElementById("certificationFilterSelect");
       const topbar = document.querySelector(".cinefy-topbar");
+      const initialQuery = (() => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          return String(params.get("q") || "").trim();
+        } catch (error) {
+          return "";
+        }
+      })();
       let lastScrollY = window.scrollY;
       let isCompactSearchVisible = false;
       let isFilterMenuOpen = false;
@@ -54,25 +62,33 @@
       filterForm.addEventListener("change", handleFilterFormChange);
       document.addEventListener("click", handleOutsideFilterMenuClick);
       document.addEventListener("keydown", handleFilterMenuKeydown);
+      window.addEventListener("cinefy:global-search", handleGlobalSearch);
 
       applyViewMode();
       updateFilterAuxControls();
       updateActiveFilterLabel();
-      syncSearchInputs(searchInput.value);
+      syncSearchInputs(initialQuery || searchInput.value);
       wireSearchHeaderBehavior();
-      renderIdleState();
+      if (initialQuery) {
+        runSearch(initialQuery);
+      } else {
+        renderIdleState();
+      }
 
       async function runSearch(queryOverride) {
         const query = typeof queryOverride === "string" ? queryOverride.trim() : searchInput.value.trim();
         syncSearchInputs(query);
+        syncGlobalSearchQuery(query);
 
         if (!query) {
+          window.history.replaceState({}, "", "busca.html");
           renderIdleState();
           return;
         }
 
         try {
           setLoading(true);
+          window.history.replaceState({}, "", `busca.html?q=${encodeURIComponent(query)}`);
           const movies = await window.TMDB.searchMovies(query);
           resultsSubtitle.textContent = `Resultados para "${escapeHtml(query)}"`;
           searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Busca concluida no TMDB.';
@@ -87,6 +103,11 @@
 
       function runSearchFromFloatingSprite() {
         runSearch(floatingSearchInput.value);
+      }
+
+      function handleGlobalSearch(event) {
+        const query = event && event.detail ? String(event.detail.query || "") : "";
+        runSearch(query);
       }
 
       function renderMovies(movies) {
@@ -228,6 +249,7 @@
         `;
         resultsSubtitle.textContent = "Aguardando sua pesquisa";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Pesquise por titulo para ver resultados.';
+        syncGlobalSearchQuery("");
       }
 
       function handleSearchError(error) {
@@ -251,6 +273,13 @@
         if (floatingSearchInput && floatingSearchInput.value !== nextValue) {
           floatingSearchInput.value = nextValue;
         }
+        syncGlobalSearchQuery(nextValue);
+      }
+
+      function syncGlobalSearchQuery(value) {
+        window.dispatchEvent(new CustomEvent("cinefy:search-query-updated", {
+          detail: { query: String(value || "") }
+        }));
       }
 
       function wireSearchHeaderBehavior() {
