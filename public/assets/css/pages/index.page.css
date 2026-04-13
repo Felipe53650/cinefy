@@ -73,3 +73,13 @@
       box-shadow: 0 0 18px rgb(var(--theme-accent-rgb) / 0.24);
       flex: 0 0 auto;
     }
+
+    .home-featured-section {
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .home-featured-section {
+        margin-top: 1.5rem;
+      }
+    }
