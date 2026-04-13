@@ -3,6 +3,7 @@
       const VIEW_STORAGE_KEY = "cinefy-search-view";
       const runtimeCache = new Map();
       const certificationCache = new Map();
+      let emptyStateDiscoveryPromise = null;
       const suggestedSearches = [
         { label: "Ação", query: "acao" },
         { label: "Ficção científica", query: "ficcao cientifica" },
@@ -133,9 +134,11 @@
             <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
             <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
             ${buildSuggestedSearchMarkup("Tente um destes caminhos rapidos")}
+            <div class="empty-discovery-shell hidden" id="emptyDiscoveryMount"></div>
           `;
           emptyState.classList.remove("hidden");
           bindSuggestedSearchButtons();
+          enrichEmptyStateWithDiscovery();
           return;
         }
 
@@ -273,11 +276,13 @@
           <p class="mt-4 font-bold text-zinc-200">Digite um filme para comecar a busca.</p>
           <p class="mt-2 text-zinc-500">Os resultados aparecem aqui assim que voce pesquisar no catalogo do TMDB.</p>
           ${buildSuggestedSearchMarkup("Ou comece por um genero popular")}
+          <div class="empty-discovery-shell hidden" id="emptyDiscoveryMount"></div>
         `;
         resultsSubtitle.textContent = "Aguardando sua pesquisa";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">search</span> Pesquise por titulo ou escolha um genero para entrar no catalogo mais rapido.';
         syncGlobalSearchQuery("");
         bindSuggestedSearchButtons();
+        enrichEmptyStateWithDiscovery();
       }
 
       function handleSearchError(error) {
@@ -289,10 +294,12 @@
           <p class="mt-4 font-bold text-zinc-200">Nenhum filme encontrado.</p>
           <p class="mt-2 text-zinc-500">Tente outro titulo ou ajuste o filtro aplicado.</p>
           ${buildSuggestedSearchMarkup("Se preferir, tente um genero em destaque")}
+          <div class="empty-discovery-shell hidden" id="emptyDiscoveryMount"></div>
         `;
         resultsSubtitle.textContent = "Nao foi possivel carregar resultados";
         searchStatus.innerHTML = '<span class="material-symbols-outlined text-base">error</span> Nao foi possivel carregar resultados agora. Tente novamente em instantes.';
         bindSuggestedSearchButtons();
+        enrichEmptyStateWithDiscovery();
       }
 
       function buildSuggestedSearchMarkup(kicker) {
@@ -322,6 +329,164 @@
             runSearch(query);
           });
         });
+      }
+
+      async function enrichEmptyStateWithDiscovery() {
+        const mount = document.getElementById("emptyDiscoveryMount");
+        if (!mount) return;
+
+        mount.classList.remove("hidden");
+        mount.innerHTML = `
+          <div class="empty-discovery-loading">
+            <span class="material-symbols-outlined text-3xl text-zinc-500">progress_activity</span>
+            <p class="text-sm font-semibold text-zinc-400">Montando uma faixa para voce descobrir algo agora.</p>
+          </div>
+        `;
+
+        try {
+          const payload = await loadEmptyStateDiscovery();
+          const currentMount = document.getElementById("emptyDiscoveryMount");
+          if (!currentMount) return;
+
+          currentMount.innerHTML = `
+            <div class="empty-discovery-header">
+              <div class="section-heading">
+                <h4 class="text-lg font-bold text-white">${escapeHtml(payload.title)}</h4>
+                <p class="text-sm text-zinc-400">${escapeHtml(payload.subtitle)}</p>
+              </div>
+            </div>
+            <div class="empty-discovery-track">
+              ${payload.movies.map((movie) => buildEmptyDiscoveryCard(movie)).join("")}
+            </div>
+          `;
+        } catch (error) {
+          const currentMount = document.getElementById("emptyDiscoveryMount");
+          if (!currentMount) return;
+          currentMount.innerHTML = "";
+          currentMount.classList.add("hidden");
+        }
+      }
+
+      function buildEmptyDiscoveryCard(movie) {
+        const year = movie.release_date ? String(movie.release_date).slice(0, 4) : "Sem ano";
+        const rating = typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "N/A";
+        const reviewCount = formatVoteCountSuffix(movie.vote_count);
+        const poster = safePosterUrl(window.TMDB.getImageUrl(movie.poster_path, SEARCH_PLACEHOLDER_POSTER));
+
+        return `
+          <article class="empty-discovery-card">
+            <a class="empty-discovery-card__poster" href="detalhes.html?id=${encodeURIComponent(String(movie.id || ""))}">
+              <img alt="${escapeHtml(movie.title)}" decoding="async" loading="lazy" src="${escapeAttribute(poster)}" />
+              <span class="empty-discovery-card__rating">
+                <span class="material-symbols-outlined fill-icon text-[13px] text-yellow-400">star</span>
+                ${rating}${reviewCount}
+              </span>
+            </a>
+            <div class="empty-discovery-card__body">
+              <h5 class="line-clamp-1 text-sm font-bold text-white">${escapeHtml(movie.title)}</h5>
+              <p class="mt-1 text-xs text-zinc-400">${escapeHtml(year)}</p>
+            </div>
+          </article>
+        `;
+      }
+
+      async function loadEmptyStateDiscovery() {
+        if (!emptyStateDiscoveryPromise) {
+          emptyStateDiscoveryPromise = buildEmptyStateDiscovery().catch((error) => {
+            emptyStateDiscoveryPromise = null;
+            throw error;
+          });
+        }
+
+        return emptyStateDiscoveryPromise;
+      }
+
+      async function buildEmptyStateDiscovery() {
+        const personalized = await buildLightweightPersonalizedRecommendations();
+        if (personalized.length >= 4) {
+          return {
+            title: "Recomendado para voce",
+            subtitle: "Escolhas puxadas do seu historico no CINEfy para facilitar a descoberta.",
+            movies: personalized.slice(0, 8)
+          };
+        }
+
+        const topRated = await window.TMDB.getTopRatedMovies();
+        return {
+          title: "Muito bem avaliados agora",
+          subtitle: "Uma faixa pronta para voce entrar no catalogo sem partir de uma busca em branco.",
+          movies: topRated.slice(0, 8)
+        };
+      }
+
+      async function buildLightweightPersonalizedRecommendations() {
+        const listState = store.loadListState();
+        const reviews = store.loadReviews();
+        const savedMovies = Array.isArray(listState.movies) ? listState.movies : [];
+        const savedTmdbIds = new Set(
+          savedMovies
+            .map((movie) => String(movie.tmdbId || "").trim())
+            .filter(Boolean)
+        );
+
+        const seedScores = new Map();
+
+        savedMovies.forEach((movie) => {
+          const tmdbId = String(movie.tmdbId || "").trim();
+          if (!tmdbId) return;
+
+          const baseScore = 1 + Math.max(0, Number(movie.rating || 0)) * 0.32;
+          seedScores.set(tmdbId, (seedScores.get(tmdbId) || 0) + baseScore);
+        });
+
+        Object.entries(reviews || {}).forEach(([key, review]) => {
+          const match = /^tmdb-(\d+)$/.exec(String(key || ""));
+          if (!match) return;
+
+          const tmdbId = match[1];
+          const rating = Number(review && review.rating);
+          if (!Number.isFinite(rating) || rating < 3.5) return;
+
+          const commentBoost = review && review.comment ? Math.min(review.comment.length / 160, 0.6) : 0;
+          seedScores.set(tmdbId, (seedScores.get(tmdbId) || 0) + 1.3 + rating * 0.45 + commentBoost);
+        });
+
+        const seeds = [...seedScores.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+
+        if (!seeds.length) {
+          return [];
+        }
+
+        const recommendationBuckets = await Promise.allSettled(
+          seeds.map(async ([tmdbId, weight]) => {
+            const movies = await window.TMDB.getMovieRecommendations(tmdbId);
+            return { weight, movies };
+          })
+        );
+
+        const combined = new Map();
+
+        recommendationBuckets
+          .filter((result) => result.status === "fulfilled")
+          .map((result) => result.value)
+          .forEach(({ weight, movies }) => {
+            movies.forEach((movie, index) => {
+              if (!movie || !movie.id) return;
+              if (savedTmdbIds.has(String(movie.id))) return;
+
+              const score = weight + Math.max(0, 10 - index) * 0.18 + Number(movie.vote_average || 0) * 0.14;
+              const existing = combined.get(movie.id);
+              if (!existing || score > existing.score) {
+                combined.set(movie.id, { movie, score });
+              }
+            });
+          });
+
+        return [...combined.values()]
+          .sort((a, b) => b.score - a.score)
+          .map((entry) => entry.movie);
       }
 
       function syncSearchInputs(value) {
