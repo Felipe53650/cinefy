@@ -48,12 +48,42 @@
     }).join("");
   }
 
+  function buildHeaderTrustLinks() {
+    return `
+      <div aria-label="Sinais de confianca" class="cinefy-header-trust hidden xl:flex">
+        <a
+          class="cinefy-header-trust-link"
+          href="https://github.com/Felipe53650/cinefy"
+          rel="noopener noreferrer"
+          target="_blank"
+          title="Ver projeto no GitHub"
+        >
+          <svg aria-hidden="true" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.4-1.33-1.77-1.33-1.77-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.24 1.84 1.24 1.08 1.84 2.82 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.11.81 2.24 0 1.62-.01 2.92-.01 3.31 0 .32.21.7.82.58A12 12 0 0 0 12 .5Z"></path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <a
+          class="cinefy-header-trust-link"
+          href="mailto:felipe53650@outlook.com?subject=Contato%20CINEfy"
+          title="Entrar em contato"
+        >
+          <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M4 6h16v12H4z"></path>
+            <path d="m4 7 8 6 8-6"></path>
+          </svg>
+          <span>Contato</span>
+        </a>
+      </div>
+    `;
+  }
+
   function buildGlobalSearch() {
     return `
       <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
         <label class="sr-only" for="globalSearchInput">Buscar filmes no CINEfy</label>
         <span class="material-symbols-outlined cinefy-global-search__icon">search</span>
-        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Buscar filmes..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
+        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, genero ou clima..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
         <button class="cinefy-global-search__button" type="submit">Buscar</button>
       </form>
     `;
@@ -98,17 +128,23 @@
   function renderNavbar() {
     return `
       <div class="cinefy-topbar fixed inset-x-0 top-0 z-[80] px-3 pt-3 md:px-6 md:pt-4">
-        <div class="cinefy-topbar__inner mx-auto flex h-[4.25rem] w-full max-w-[1440px] items-center justify-between gap-2 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
-          <div class="flex min-w-0 items-center gap-4 md:gap-8">
+        <div class="cinefy-topbar__inner mx-auto flex min-h-[4.5rem] w-full max-w-[1440px] items-center justify-between gap-3 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 py-2 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
+          <div class="cinefy-topbar__primary flex min-w-0 items-center gap-3 md:gap-5">
             <a class="cinefy-brand min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
               CINEfy
             </a>
-            <nav aria-label="Navegacao principal" class="hidden items-center gap-1.5 md:flex">
+            <nav aria-label="Navegacao principal" class="cinefy-nav-links-shell hidden items-center gap-1.5 lg:flex">
               ${buildDesktopLinks()}
             </nav>
-            ${buildGlobalSearch()}
           </div>
-          <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
+          <div class="cinefy-topbar__secondary flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
+            ${buildGlobalSearch()}
+            ${buildHeaderTrustLinks()}
+            <a class="cinefy-search-shortcut hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-red-500/30 hover:bg-white/[0.08] lg:hidden" href="busca.html">
+              <span class="material-symbols-outlined text-[18px]">travel_explore</span>
+              <span>Explorar</span>
+            </a>
+            <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
             ${session ? `
             <div class="relative">
               <button class="cinefy-notifications-button relative rounded-[0.95rem] border border-[#5a2b2d] bg-[#2a1516] p-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] active:scale-95" id="notificationsButton" type="button" aria-label="Notificacoes">
@@ -138,6 +174,7 @@
             ` : `
             <a class="rounded-full bg-red-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-500 md:px-4" href="login.html">Entrar</a>
             `}
+            </div>
           </div>
         </div>
       </div>
