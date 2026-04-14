@@ -93,6 +93,8 @@ Algumas entregas mais relevantes das ultimas iteracoes:
 
 Esses prints mostram alguns fluxos principais da interface atual.
 
+A galeria abaixo privilegia telas publicas e neutras, sem expor dados pessoais reais de usuarios do projeto.
+
 <p align="center">
   <img src="public/assets/img/screenshots/home.png" alt="Home do CINEfy" width="90%">
 </p>
@@ -101,6 +103,20 @@ Esses prints mostram alguns fluxos principais da interface atual.
   <img src="public/assets/img/screenshots/login.png" alt="Tela de login do CINEfy" width="44%">
   <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do CINEfy" width="44%">
 </p>
+
+### Outros fluxos importantes da interface atual
+
+Mesmo sem expor dados sensiveis no repositório, a versao atual do produto ja inclui estes percursos relevantes:
+
+- busca com cabecalho persistente, filtros, classificacao etaria e cards com estado `Na lista`
+- detalhes do filme com diretores, streaming, reviews da comunidade e acoes sociais
+- perfil publico navegavel com amizade, listas abertas e reviews publicas
+- listas compartilhadas com permissao de leitura ou edicao colaborativa
+
+Para uma visao mais completa da estrutura do produto, vale abrir tambem:
+
+- [Arquitetura do projeto](./docs/architecture.md)
+- [Demo online](https://cinefy3-83a9a.web.app)
 
 ## Stack
 
