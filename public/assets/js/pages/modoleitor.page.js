@@ -35,6 +35,7 @@
   const readerOwnerName = document.getElementById("readerOwnerName");
   const readerOwnerHandle = document.getElementById("readerOwnerHandle");
   const readerOwnerAvatar = document.getElementById("readerOwnerAvatar");
+  const readerOwnerLink = document.getElementById("readerOwnerLink");
   const readerStatusValue = document.getElementById("readerStatusValue");
   const readerExperienceCopy = document.getElementById("readerExperienceCopy");
   const readerEditorPanel = document.getElementById("readerEditorPanel");
@@ -139,6 +140,9 @@
     readerOwnerName.textContent = activeOwner.displayName || "Cinefilo";
     readerOwnerHandle.textContent = `@${activeOwner.username || "cinefyuser"}`;
     readerOwnerAvatar.src = safeAvatarUrl(activeOwner.avatar);
+    if (readerOwnerLink) {
+      readerOwnerLink.href = getPublicProfileHref(activeOwner);
+    }
 
     renderReaderStatus();
     renderEditorPanel();
@@ -552,5 +556,13 @@
     }
 
     return "/assets/img/logo.png";
+  }
+
+  function getPublicProfileHref(user) {
+    if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
+      return window.CinefyProfiles.buildPublicProfileHref(user);
+    }
+
+    return "perfil.html";
   }
 })();

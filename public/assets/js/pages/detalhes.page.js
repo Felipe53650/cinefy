@@ -436,13 +436,21 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
         ${cinefyReviews.map((review) => `
           <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
-              <div class="flex min-w-0 items-center gap-3">
-                <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
-                <div class="min-w-0">
-                  <p class="truncate text-base font-semibold text-white">${escapeHtml(review.authorName)}</p>
-                  <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)} • ${escapeHtml(review.updatedLabel)}</p>
-                </div>
-              </div>
+              ${review.authorHref
+                ? `<a class="cinefy-user-link cinefy-user-link-card" href="${escapeHtml(review.authorHref)}">
+                    <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
+                    <div class="min-w-0">
+                      <p class="truncate text-base font-semibold text-white">${escapeHtml(review.authorName)}</p>
+                      <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)} • ${escapeHtml(review.updatedLabel)}</p>
+                    </div>
+                  </a>`
+                : `<div class="flex min-w-0 items-center gap-3">
+                    <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
+                    <div class="min-w-0">
+                      <p class="truncate text-base font-semibold text-white">${escapeHtml(review.authorName)}</p>
+                      <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)} • ${escapeHtml(review.updatedLabel)}</p>
+                    </div>
+                  </div>`}
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
               ${review.tags.map((tag) => `
@@ -786,6 +794,7 @@ function normalizeCinefyReviewRecord(review) {
 
   const ratingNumber = Number(rating);
   return {
+    authorUid: review.authorUid || review.uid || "",
     authorName: review.authorName || "Cinefilo",
     authorUsername: review.authorUsername || "",
     authorAvatar: review.authorAvatar || fallbackPoster,
@@ -795,7 +804,13 @@ function normalizeCinefyReviewRecord(review) {
     isOwn: Boolean(review.isOwn),
     ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota",
     updatedLabel: formatReviewDate(review.updatedAt),
-    tags: buildReviewTags(review)
+    tags: buildReviewTags(review),
+    authorHref: getPublicProfileHref({
+      uid: review.authorUid || review.uid || "",
+      username: review.authorUsername || "",
+      displayName: review.authorName || "",
+      avatar: review.authorAvatar || ""
+    })
   };
 }
 
@@ -870,4 +885,12 @@ function sanitizeReviewComment(value) {
 
 function truncateText(value, maxLength) {
   return String(value ?? "").slice(0, maxLength);
+}
+
+function getPublicProfileHref(user) {
+  if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
+    return window.CinefyProfiles.buildPublicProfileHref(user);
+  }
+
+  return "perfil.html";
 }

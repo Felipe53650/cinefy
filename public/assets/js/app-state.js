@@ -193,7 +193,7 @@
 
   function sanitizeNotificationHref(value) {
     const candidate = String(value ?? "").trim();
-    if (/^(index|lista|busca|amigos|perfil|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(candidate)) {
+    if (/^(index|lista|busca|amigos|perfil|usuario|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(candidate)) {
       return candidate;
     }
 

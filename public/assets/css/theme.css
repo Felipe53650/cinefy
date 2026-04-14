@@ -164,6 +164,7 @@ body {
 
 body[data-page="home"],
 body[data-page="perfil"],
+body[data-page="usuario"],
 body[data-page="lista"],
 body[data-page="buscar"],
 body[data-page="detalhes"],
@@ -225,6 +226,34 @@ body[data-page="cadastro"] {
 
 .section-heading > p {
   margin: 0;
+}
+
+.cinefy-user-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cinefy-user-link-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.9rem;
+  border-radius: 1.2rem;
+  margin: -0.5rem;
+  padding: 0.5rem;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.cinefy-user-link-card:hover {
+  background: rgb(var(--theme-surface-strong-rgb) / 0.18);
+  transform: translateY(-1px);
+}
+
+.cinefy-user-link-card:focus-visible {
+  outline-offset: 4px;
 }
 
 .cinefy-in-list-badge {

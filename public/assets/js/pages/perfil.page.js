@@ -93,13 +93,13 @@
         emptyState.classList.add("hidden");
         list.innerHTML = friends.slice(0, 4).map((friend) => `
           <div class="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/60 px-4 py-3">
-            <div class="flex items-center gap-3 min-w-0">
+            <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(friend))}">
               <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-12 h-12 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}" />
               <div class="min-w-0">
                 <p class="font-bold text-white truncate">${escapeHtml(friend.displayName || friend.name || "Usuario")}</p>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(friend.username || "cinefyuser")} • ${escapeHtml(friend.favoriteGenre || "Cinema")}</p>
               </div>
-            </div>
+            </a>
             <a class="text-sm font-bold text-red-300 hover:text-red-200 whitespace-nowrap" href="amigos.html">Editar</a>
           </div>
         `).join("");
@@ -765,5 +765,13 @@
         }
 
         return fallbackAvatar;
+      }
+
+      function getPublicProfileHref(user) {
+        if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
+          return window.CinefyProfiles.buildPublicProfileHref(user);
+        }
+
+        return "perfil.html";
       }
 

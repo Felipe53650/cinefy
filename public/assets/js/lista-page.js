@@ -196,11 +196,13 @@
       return `
         <label class="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition hover:border-red-500/20 hover:bg-white/[0.05]">
           <input class="h-4 w-4 rounded border-zinc-600 bg-zinc-950 text-red-500 focus:ring-red-500" data-reader-only-id="${escapeAttribute(friend.id)}" type="checkbox" ${checked}/>
-          <img alt="${escapeAttribute(displayName)}" class="h-11 w-11 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}"/>
-          <div class="min-w-0">
-            <p class="truncate text-sm font-bold text-white">${escapeHtml(displayName)}</p>
-            <p class="truncate text-xs text-zinc-400">@${escapeHtml(friend.username || "cinefyuser")}</p>
-          </div>
+          <a class="cinefy-user-link cinefy-user-link-card flex-1" href="${escapeAttribute(getPublicProfileHref(friend))}">
+            <img alt="${escapeAttribute(displayName)}" class="h-11 w-11 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}"/>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-bold text-white">${escapeHtml(displayName)}</p>
+              <p class="truncate text-xs text-zinc-400">@${escapeHtml(friend.username || "cinefyuser")}</p>
+            </div>
+          </a>
         </label>
       `;
     }).join("");
@@ -928,5 +930,13 @@
     }
 
     return "";
+  }
+
+  function getPublicProfileHref(user) {
+    if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
+      return window.CinefyProfiles.buildPublicProfileHref(user);
+    }
+
+    return "perfil.html";
   }
 })();

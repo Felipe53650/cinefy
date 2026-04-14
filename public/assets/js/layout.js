@@ -19,6 +19,11 @@
       return "";
     }
   })();
+  const currentUserUid = String(
+    (session && session.uid) ||
+    (profile && profile.uid) ||
+    ""
+  ).trim();
 
   // Removido: redirecionamento forçado para login. Agora permite acesso anônimo.
 
@@ -233,6 +238,73 @@
     `;
   }
 
+  function sanitizeProfileTargetText(value, maxLength) {
+    return String(value ?? "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, maxLength);
+  }
+
+  function normalizeProfileTarget(userLike) {
+    const safeUser = userLike && typeof userLike === "object" ? userLike : {};
+    const uid = sanitizeProfileTargetText(
+      safeUser.uid || safeUser.id || safeUser.authorUid || safeUser.ownerUid || "",
+      128
+    );
+    const username = sanitizeProfileTargetText(
+      safeUser.username || safeUser.authorUsername || safeUser.ownerUsername || "",
+      24
+    ).replace(/^@+/, "");
+    const displayName = sanitizeProfileTargetText(
+      safeUser.displayName || safeUser.name || safeUser.authorName || safeUser.ownerDisplayName || "",
+      80
+    );
+    const avatar = String(safeUser.avatar || safeUser.authorAvatar || safeUser.ownerAvatar || "").trim();
+
+    return {
+      uid,
+      username,
+      displayName,
+      avatar
+    };
+  }
+
+  function buildPublicProfileHref(userLike) {
+    const target = normalizeProfileTarget(userLike);
+
+    if (target.uid && currentUserUid && target.uid === currentUserUid) {
+      return "perfil.html";
+    }
+
+    if (!target.uid && !target.username) {
+      return "perfil.html";
+    }
+
+    const params = new URLSearchParams();
+
+    if (target.uid) {
+      params.set("uid", target.uid);
+    }
+
+    if (target.username) {
+      params.set("u", target.username);
+      params.set("username", target.username);
+    }
+
+    if (target.displayName) {
+      params.set("name", target.displayName);
+    }
+
+    if (target.avatar) {
+      const safeAvatar = safeAvatarUrl(target.avatar);
+      if (safeAvatar && safeAvatar !== defaultAvatar) {
+        params.set("avatar", safeAvatar);
+      }
+    }
+
+    return `usuario.html?${params.toString()}`;
+  }
+
   function hideLegacyChrome() {
     const selectors = [
       "body > header",
@@ -370,7 +442,7 @@
       return "index.html";
     }
 
-    if (/^(index|lista|busca|amigos|perfil|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(safeHref)) {
+    if (/^(index|lista|busca|amigos|perfil|usuario|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(safeHref)) {
       return escapeAttribute(safeHref);
     }
 
@@ -409,6 +481,15 @@
 
     return defaultAvatar;
   }
+
+  window.CinefyProfiles = {
+    buildPublicProfileHref,
+    normalizeProfileTarget,
+    isOwnProfileTarget(userLike) {
+      const target = normalizeProfileTarget(userLike);
+      return Boolean(target.uid && currentUserUid && target.uid === currentUserUid);
+    }
+  };
 
   const navbarMount = document.querySelector('[data-layout="navbar"]');
   if (navbarMount) {

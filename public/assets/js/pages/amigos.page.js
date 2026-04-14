@@ -140,14 +140,14 @@
         document.getElementById("emptyFriendsState").classList.add("hidden");
         friendList.innerHTML = friends.map((friend) => `
           <article class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
-            <div class="flex items-center gap-4 min-w-0">
+            <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(friend))}">
               <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-16 h-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}" />
               <div class="min-w-0">
                 <h3 class="text-lg font-black text-white truncate">${escapeHtml(friend.displayName || friend.name || "Usuario")}</h3>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(friend.username || "cinefyuser")}</p>
                 <p class="text-sm text-zinc-300 mt-1">Genero favorito: ${escapeHtml(friend.favoriteGenre || "Cinema")}</p>
               </div>
-            </div>
+            </a>
             <button class="inline-flex items-center justify-center gap-2 rounded-full border border-red-500/40 text-red-200 hover:bg-red-500/10 px-4 py-2 font-bold transition-all active:scale-95 whitespace-nowrap" data-remove-id="${escapeAttribute(friend.id)}" type="button">
               <span class="material-symbols-outlined">person_remove</span>
               <span>Remover amigo</span>
@@ -173,13 +173,13 @@
         incomingRequestsList.innerHTML = incomingRequests.map((request) => `
           <article class="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
             <div class="flex items-center justify-between gap-4">
-              <div class="flex items-center gap-4 min-w-0">
+              <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref({ uid: request.id, ...request }))}">
                 <img alt="${escapeAttribute(request.displayName || request.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(request.avatar))}" />
                 <div class="min-w-0">
                   <h3 class="font-black text-white truncate">${escapeHtml(request.displayName || request.name || "Usuario")}</h3>
                   <p class="text-sm text-zinc-400 truncate">@${escapeHtml(request.username || "cinefyuser")}</p>
                 </div>
-              </div>
+              </a>
               <div class="flex gap-2">
                 <button class="inline-flex items-center gap-2 rounded-full bg-white text-black hover:bg-zinc-200 px-4 py-2 font-black transition-all active:scale-95" data-accept-id="${escapeAttribute(request.id)}" type="button">
                   <span class="material-symbols-outlined">check</span>
@@ -232,14 +232,14 @@
 
         searchResults.innerHTML = filteredUsers.map((user) => `
           <article class="flex items-center justify-between gap-4 rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
-            <div class="flex items-center gap-4 min-w-0">
+            <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(user))}">
               <img alt="${escapeAttribute(user.displayName || user.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(user.avatar))}" />
               <div class="min-w-0">
                 <h3 class="font-black text-white truncate">${escapeHtml(user.displayName || user.name || "Usuario")}</h3>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(user.username || "cinefyuser")}</p>
                 <p class="text-sm text-zinc-300 mt-1">${escapeHtml(user.location || "Brasil")}</p>
               </div>
-            </div>
+            </a>
             ${outgoingRequestIds.has(user.uid)
               ? '<span class="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 text-zinc-300 px-4 py-2 font-bold whitespace-nowrap"><span class="material-symbols-outlined">schedule</span><span>Solicitado</span></span>'
               : `<button class="inline-flex items-center justify-center gap-2 rounded-full bg-white text-black hover:bg-zinc-200 px-4 py-2 font-black transition-all active:scale-95 whitespace-nowrap" data-add-id="${escapeAttribute(user.uid)}" type="button">
@@ -466,5 +466,13 @@
 
       function escapeAttribute(value) {
         return escapeHtml(value).replace(/`/g, "&#96;");
+      }
+
+      function getPublicProfileHref(user) {
+        if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
+          return window.CinefyProfiles.buildPublicProfileHref(user);
+        }
+
+        return "perfil.html";
       }
 

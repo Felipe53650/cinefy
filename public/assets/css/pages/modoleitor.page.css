@@ -29,6 +29,14 @@
   max-width: 30rem;
   padding: 1rem 1.05rem;
   border-radius: 1.5rem;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.reader-owner-card:hover {
+  transform: translateY(-1px);
+  border-color: rgb(var(--theme-accent-rgb) / 0.34);
+  background: linear-gradient(180deg, rgb(var(--theme-surface-rgb) / 0.84), rgb(var(--theme-surface-rgb) / 0.64));
 }
 
 .reader-owner-avatar-shell {

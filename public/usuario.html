@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CINEfy - Perfil publico</title>
+  <meta name="description" content="Veja o perfil publico de outros cinefilos, listas compartilhadas e reviews no CINEfy."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="theme-color" content="#e83b24"/>
+  <link rel="canonical" href="https://cinefy3-83a9a.web.app/usuario"/>
+  <meta property="og:title" content="CINEfy - Perfil publico"/>
+  <meta property="og:description" content="Veja o perfil publico de outros cinefilos, listas compartilhadas e reviews no CINEfy."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://cinefy3-83a9a.web.app/usuario"/>
+  <meta property="og:image" content="/assets/img/logo.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="CINEfy - Perfil publico"/>
+  <meta name="twitter:description" content="Veja o perfil publico de outros cinefilos, listas compartilhadas e reviews no CINEfy."/>
+  <meta name="twitter:image" content="/assets/img/logo.png"/>
+  <link rel="icon" sizes="any" type="image/svg+xml" href="/assets/img/favicon-c-bold.svg"/>
+  <script src="assets/js/theme.js"></script>
+  <link href="assets/css/tailwind.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="assets/css/pages/usuario.page.css" rel="stylesheet"/>
+  <link href="assets/css/theme.css" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col" data-page="usuario">
+  <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+
+  <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-28 md:pt-24 max-w-7xl mx-auto w-full">
+    <section class="glass-card public-profile-hero rounded-[2rem] overflow-hidden">
+      <div class="public-profile-hero__cover"></div>
+      <div class="public-profile-hero__body">
+        <div class="public-profile-identity">
+          <div class="public-profile-avatar-shell">
+            <img alt="Avatar do usuario" class="public-profile-avatar" id="publicProfileAvatar" src="/assets/img/logo.png"/>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Perfil publico</p>
+            <h1 class="mt-3 text-3xl md:text-5xl font-black text-white font-display" id="publicProfileName">Cinefilo</h1>
+            <p class="mt-2 text-lg text-zinc-300" id="publicProfileHandle">@cinefyuser</p>
+            <p class="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base" id="publicProfileBio">Esse usuario ainda nao adicionou uma bio publica.</p>
+            <div class="public-profile-chips mt-4">
+              <span class="public-profile-chip" id="publicProfileLocation">Brasil</span>
+              <span class="public-profile-chip" id="publicProfileTheme">Tema favorito: Ember</span>
+            </div>
+          </div>
+        </div>
+        <div class="public-profile-actions">
+          <a class="public-profile-action" href="amigos.html">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span>Voltar</span>
+          </a>
+          <a class="public-profile-action public-profile-action--strong hidden" href="perfil.html" id="editOwnProfileLink">
+            <span class="material-symbols-outlined">edit</span>
+            <span>Editar meu perfil</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 grid gap-4 md:grid-cols-3">
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Status</p>
+        <p class="mt-3 text-xl font-black text-white" id="publicProfileStatus">Comunidade CINEfy</p>
+        <p class="mt-2 text-sm text-zinc-400" id="publicProfileStatusCopy">Explore listas publicas e reviews recentes desse perfil.</p>
+      </article>
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Listas publicas</p>
+        <p class="mt-3 text-3xl font-black text-white" id="publicProfileListCount">0</p>
+        <p class="mt-2 text-sm text-zinc-400">Curadorias compartilhadas que podem ser abertas direto pelo link.</p>
+      </article>
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Reviews publicas</p>
+        <p class="mt-3 text-3xl font-black text-white" id="publicProfileReviewCount">0</p>
+        <p class="mt-2 text-sm text-zinc-400">Avaliacoes recentes publicadas na comunidade do CINEfy.</p>
+      </article>
+    </section>
+
+    <section class="public-profile-notice hidden mt-6 glass-card rounded-[1.6rem] p-5" id="publicProfileNotice"></section>
+
+    <section class="mt-8 grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
+      <article class="glass-card rounded-[2rem] p-6 md:p-8">
+        <div class="flex items-center justify-between gap-4">
+          <div class="section-heading">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Curadoria publica</p>
+            <h2 class="mt-2 text-2xl font-black text-white">Listas compartilhadas</h2>
+          </div>
+          <span class="material-symbols-outlined text-3xl text-red-300">movie_filter</span>
+        </div>
+        <p class="mt-4 text-sm text-zinc-400" id="publicProfileListsCaption">As listas publicas desse usuario aparecem aqui.</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2" id="publicProfileListsGrid"></div>
+      </article>
+
+      <article class="glass-card rounded-[2rem] p-6 md:p-8">
+        <div class="flex items-center justify-between gap-4">
+          <div class="section-heading">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Reviews recentes</p>
+            <h2 class="mt-2 text-2xl font-black text-white">Comunidade e opiniao</h2>
+          </div>
+          <span class="material-symbols-outlined text-3xl text-red-300">rate_review</span>
+        </div>
+        <p class="mt-4 text-sm text-zinc-400" id="publicProfileReviewsCaption">As reviews publicas do usuario aparecem aqui quando existirem.</p>
+        <div class="mt-6 space-y-4" id="publicProfileReviewsList"></div>
+      </article>
+    </section>
+  </main>
+
+  <footer data-layout="footer" aria-label="Rodape do site"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="assets/js/app-state.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/pages/usuario.page.js"></script>
+</body>
+</html>
