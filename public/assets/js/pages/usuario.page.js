@@ -18,6 +18,7 @@
   const state = {
     targetUid: "",
     viewerSignedIn: false,
+    viewerUid: "",
     profile: {
       uid: "",
       displayName: sanitizeText(params.get("name") || "Cinefilo", 80) || "Cinefilo",
@@ -28,7 +29,12 @@
       theme: "ember"
     },
     sharedLists: [],
-    reviews: []
+    reviews: [],
+    social: {
+      status: "signed_out",
+      busy: false,
+      message: ""
+    }
   };
 
   const publicProfileAvatar = document.getElementById("publicProfileAvatar");
@@ -47,6 +53,7 @@
   const publicProfileReviewsList = document.getElementById("publicProfileReviewsList");
   const publicProfileNotice = document.getElementById("publicProfileNotice");
   const editOwnProfileLink = document.getElementById("editOwnProfileLink");
+  const publicProfileSocialActions = document.getElementById("publicProfileSocialActions");
 
   renderPage();
   void bootstrapPublicProfile();
@@ -65,7 +72,9 @@
       return;
     }
 
-    state.viewerSignedIn = Boolean(await waitForAuthResolution());
+    const viewer = await waitForAuthResolution();
+    state.viewerSignedIn = Boolean(viewer);
+    state.viewerUid = viewer && viewer.uid ? String(viewer.uid) : "";
 
     if (firestore && state.targetUid) {
       await loadPublicLists();
@@ -102,8 +111,10 @@
       state.reviews = reviewsSnapshot.docs
         .map((doc) => normalizeReviewRecord(doc.data()))
         .filter(Boolean);
+      await loadSocialState();
     } catch (error) {
       console.error("Erro ao carregar perfil publico:", error);
+      await loadSocialState();
       renderNotice("Nao foi possivel carregar tudo agora", "Os dados principais do perfil ainda podem aparecer, mas reviews e detalhes adicionais falharam nesta tentativa.");
     }
 
@@ -179,6 +190,7 @@
     }
 
     renderStatus();
+    renderSocialActions();
     renderSharedLists();
     renderReviews();
   }
@@ -190,6 +202,24 @@
       return;
     }
 
+    if (state.social.status === "friend") {
+      publicProfileStatus.textContent = "Amigos no CINEfy";
+      publicProfileStatusCopy.textContent = "Voce ja acompanha esse perfil na sua rede e pode abrir listas e reviews sem desvio.";
+      return;
+    }
+
+    if (state.social.status === "incoming") {
+      publicProfileStatus.textContent = "Pedido aguardando sua resposta";
+      publicProfileStatusCopy.textContent = "Esse usuario ja pediu amizade. Voce pode aceitar direto daqui e continuar navegando.";
+      return;
+    }
+
+    if (state.social.status === "outgoing") {
+      publicProfileStatus.textContent = "Pedido enviado";
+      publicProfileStatusCopy.textContent = "Seu pedido ja foi enviado. Assim que a outra pessoa aceitar, a conexao vira amizade.";
+      return;
+    }
+
     if (!state.sharedLists.length && !state.reviews.length) {
       publicProfileStatus.textContent = "Perfil em construcao";
       publicProfileStatusCopy.textContent = "Esse usuario ainda nao compartilhou listas nem reviews publicas por aqui.";
@@ -198,6 +228,108 @@
 
     publicProfileStatus.textContent = "Comunidade CINEfy";
     publicProfileStatusCopy.textContent = "Abra listas publicas, leia reviews recentes e descubra o gosto cinematografico desse perfil com poucos cliques.";
+  }
+
+  function renderSocialActions() {
+    if (!publicProfileSocialActions) return;
+
+    const isOwnProfile = Boolean(state.targetUid && state.viewerUid && state.targetUid === state.viewerUid);
+    if (isOwnProfile) {
+      publicProfileSocialActions.classList.add("hidden");
+      publicProfileSocialActions.innerHTML = "";
+      return;
+    }
+
+    const actions = [];
+
+    if (!state.viewerSignedIn) {
+      actions.push({
+        href: `login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        icon: "login",
+        label: "Entrar para interagir",
+        strong: true,
+        isLink: true
+      });
+    } else if (state.social.status === "friend") {
+      actions.push({
+        icon: "group",
+        label: "Amigo",
+        variant: "success",
+        disabled: true
+      });
+    } else if (state.social.status === "incoming") {
+      actions.push({
+        icon: "person_add",
+        label: state.social.busy ? "Aceitando..." : "Aceitar amizade",
+        strong: true,
+        action: "accept",
+        disabled: state.social.busy
+      });
+    } else if (state.social.status === "outgoing") {
+      actions.push({
+        icon: "schedule",
+        label: state.social.busy ? "Atualizando..." : "Pedido enviado",
+        variant: "status",
+        disabled: true
+      });
+    } else {
+      actions.push({
+        icon: "person_add",
+        label: state.social.busy ? "Enviando..." : "Adicionar amigo",
+        strong: true,
+        action: "add",
+        disabled: state.social.busy
+      });
+    }
+
+    if (state.viewerSignedIn) {
+      actions.push({
+        href: "amigos.html",
+        icon: "groups",
+        label: "Gerenciar amizades",
+        isLink: true
+      });
+    }
+
+    publicProfileSocialActions.classList.remove("hidden");
+    publicProfileSocialActions.innerHTML = actions.map((action) => {
+      const classes = [
+        "public-profile-action",
+        action.strong ? "public-profile-action--strong" : "",
+        action.variant === "status" ? "public-profile-action--status" : "",
+        action.variant === "success" ? "public-profile-action--success" : ""
+      ].filter(Boolean).join(" ");
+
+      if (action.isLink) {
+        return `
+          <a class="${classes}" href="${escapeAttribute(action.href)}">
+            <span class="material-symbols-outlined">${escapeHtml(action.icon || "arrow_forward")}</span>
+            <span>${escapeHtml(action.label)}</span>
+          </a>
+        `;
+      }
+
+      return `
+        <button class="${classes}" ${action.disabled ? "disabled" : ""} data-social-action="${escapeAttribute(action.action || "")}" type="button">
+          <span class="material-symbols-outlined">${escapeHtml(action.icon || "arrow_forward")}</span>
+          <span>${escapeHtml(action.label)}</span>
+        </button>
+      `;
+    }).join("");
+
+    publicProfileSocialActions.querySelectorAll("[data-social-action]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const action = button.getAttribute("data-social-action");
+        if (action === "add") {
+          await sendFriendRequest();
+          return;
+        }
+
+        if (action === "accept") {
+          await acceptIncomingFriendRequest();
+        }
+      });
+    });
   }
 
   function renderSharedLists() {
@@ -295,6 +427,193 @@
         </div>
       ` : ""}
     `;
+  }
+
+  async function loadSocialState() {
+    if (!state.viewerSignedIn || !firestore || !state.viewerUid || !state.targetUid) {
+      state.social = { status: "signed_out", busy: false, message: "" };
+      return;
+    }
+
+    if (state.viewerUid === state.targetUid) {
+      state.social = { status: "own", busy: false, message: "" };
+      return;
+    }
+
+    try {
+      const viewerDoc = firestore.collection("users").doc(state.viewerUid);
+      const [friendSnapshot, incomingSnapshot, outgoingSnapshot] = await Promise.all([
+        viewerDoc.collection("friends").doc(state.targetUid).get(),
+        viewerDoc.collection("friend_requests").doc(state.targetUid).get(),
+        viewerDoc.collection("outgoing_requests").doc(state.targetUid).get()
+      ]);
+
+      state.social = {
+        status: friendSnapshot.exists
+          ? "friend"
+          : incomingSnapshot.exists
+            ? "incoming"
+            : outgoingSnapshot.exists
+              ? "outgoing"
+              : "available",
+        busy: false,
+        message: ""
+      };
+    } catch (error) {
+      console.error("Erro ao carregar estado social do perfil publico:", error);
+      state.social = { status: "available", busy: false, message: "" };
+    }
+  }
+
+  function getRelationshipRefs(otherUserId) {
+    return {
+      currentFriend: firestore.collection("users").doc(state.viewerUid).collection("friends").doc(otherUserId),
+      otherFriend: firestore.collection("users").doc(otherUserId).collection("friends").doc(state.viewerUid),
+      currentIncoming: firestore.collection("users").doc(state.viewerUid).collection("friend_requests").doc(otherUserId),
+      currentOutgoing: firestore.collection("users").doc(state.viewerUid).collection("outgoing_requests").doc(otherUserId),
+      otherIncoming: firestore.collection("users").doc(otherUserId).collection("friend_requests").doc(state.viewerUid),
+      otherOutgoing: firestore.collection("users").doc(otherUserId).collection("outgoing_requests").doc(state.viewerUid)
+    };
+  }
+
+  async function commitRelationshipBatch(otherUserId, applyBatch) {
+    const refs = getRelationshipRefs(otherUserId);
+    const batch = firestore.batch();
+    applyBatch(batch, refs);
+    await batch.commit();
+  }
+
+  async function sendFriendRequest() {
+    if (!firestore || !state.viewerUid || !state.targetUid || state.social.busy || state.social.status !== "available") {
+      return;
+    }
+
+    state.social.busy = true;
+    renderSocialActions();
+
+    try {
+      const requestPayload = {
+        senderUid: state.viewerUid,
+        displayName: currentProfile.displayName || "Cinefilo",
+        username: currentProfile.username || "cinefyuser",
+        avatar: currentProfile.avatar || defaultAvatar,
+        createdAt: new Date().toISOString()
+      };
+
+      await Promise.all([
+        firestore.collection("users").doc(state.targetUid).collection("friend_requests").doc(state.viewerUid).set(requestPayload),
+        firestore.collection("users").doc(state.viewerUid).collection("outgoing_requests").doc(state.targetUid).set({
+          recipientUid: state.targetUid,
+          displayName: state.profile.displayName || "Cinefilo",
+          username: state.profile.username || "cinefyuser",
+          avatar: state.profile.avatar || defaultAvatar,
+          createdAt: new Date().toISOString()
+        })
+      ]);
+
+      await appendNotificationToUser(state.targetUid, {
+        id: `friend-request-${state.viewerUid}`,
+        type: "friend_request",
+        title: "Pedido de amizade recebido",
+        message: `${currentProfile.displayName || "Um cinefilo"} enviou um pedido de amizade.`,
+        href: "amigos.html",
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+
+      state.social = { status: "outgoing", busy: false, message: "Pedido enviado." };
+      renderNotice(
+        "Pedido enviado",
+        `Avisamos @${state.profile.username || "cinefyuser"} de que voce quer entrar na rede dele.`
+      );
+    } catch (error) {
+      console.error("Erro ao enviar pedido de amizade a partir do perfil:", error);
+      state.social = { status: "available", busy: false, message: "" };
+      renderNotice(
+        "Nao foi possivel enviar o pedido",
+        "Tente novamente em instantes. Se o problema persistir, abra a tela de amizades para tentar por la."
+      );
+    }
+
+    renderPage();
+  }
+
+  async function acceptIncomingFriendRequest() {
+    if (!firestore || !state.viewerUid || !state.targetUid || state.social.busy || state.social.status !== "incoming") {
+      return;
+    }
+
+    state.social.busy = true;
+    renderSocialActions();
+
+    try {
+      await commitRelationshipBatch(state.targetUid, (batch, refs) => {
+        batch.set(refs.currentFriend, {
+          id: state.targetUid,
+          name: state.profile.displayName || "Cinefilo",
+          displayName: state.profile.displayName || "Cinefilo",
+          username: state.profile.username || "cinefyuser",
+          avatar: state.profile.avatar || defaultAvatar,
+          favoriteGenre: "Cinema",
+          location: state.profile.location || "Brasil",
+          createdAt: new Date().toISOString()
+        });
+        batch.set(refs.otherFriend, {
+          id: state.viewerUid,
+          name: currentProfile.displayName || "Cinefilo",
+          displayName: currentProfile.displayName || "Cinefilo",
+          username: currentProfile.username || "cinefyuser",
+          avatar: currentProfile.avatar || defaultAvatar,
+          favoriteGenre: "Cinema",
+          location: currentProfile.location || "Brasil",
+          createdAt: new Date().toISOString()
+        });
+        batch.delete(refs.currentIncoming);
+        batch.delete(refs.currentOutgoing);
+        batch.delete(refs.otherIncoming);
+        batch.delete(refs.otherOutgoing);
+      });
+
+      await appendNotificationToUser(state.targetUid, {
+        id: `friend-accepted-${state.viewerUid}`,
+        type: "friend_accepted",
+        title: "Pedido aceito",
+        message: `${currentProfile.displayName || "Um cinefilo"} aceitou seu pedido de amizade.`,
+        href: "amigos.html",
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+
+      state.social = { status: "friend", busy: false, message: "Amizade aceita." };
+      renderNotice(
+        "Agora voces sao amigos",
+        `Voce pode continuar explorando o perfil de @${state.profile.username || "cinefyuser"} e acompanhar as listas publicas com menos atrito.`
+      );
+    } catch (error) {
+      console.error("Erro ao aceitar pedido no perfil publico:", error);
+      state.social = { status: "incoming", busy: false, message: "" };
+      renderNotice(
+        "Nao foi possivel aceitar agora",
+        "Tente novamente em instantes. Se preferir, o pedido tambem continua disponivel na tela de amizades."
+      );
+    }
+
+    renderPage();
+  }
+
+  async function appendNotificationToUser(userId, notification) {
+    try {
+      const docRef = firestore.collection("users").doc(userId).collection("app_state").doc("notifications");
+      const snapshot = await docRef.get();
+      const current = snapshot.exists && Array.isArray(snapshot.data().value) ? snapshot.data().value : [];
+      if (current.some((item) => item.id === notification.id)) return;
+      await docRef.set({
+        value: [notification, ...current].slice(0, 40),
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (error) {
+      console.error("Erro ao anexar notificacao remota:", error);
+    }
   }
 
   function renderUnavailableState(message) {
