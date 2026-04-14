@@ -62,6 +62,33 @@ Para recrutadores, avaliadores ou clientes, o CINEfy mostra:
 - fluxo social com baixa friccao em desktop e mobile
 - cuidado tecnico com acessibilidade, contraste, feedbacks e responsividade
 
+## Features em destaque
+
+- descoberta de filmes com busca, filtros e leitura de metadados relevantes
+- curadoria pessoal com multiplas listas e posters manuais
+- compartilhamento por link com modo leitor ou edicao colaborativa
+- perfis publicos com reviews, listas abertas e camada social
+- recomendacoes iniciais personalizadas com base no comportamento do usuario
+
+## Casos de uso
+
+O CINEfy pode ser posicionado para:
+
+- cinefilos que querem organizar e compartilhar curadorias
+- criadores de conteudo que desejam publicar listas tematicas
+- clubes de cinema e comunidades fechadas
+- produtos white-label de curadoria cultural
+
+## Evolucao recente
+
+Algumas entregas mais relevantes das ultimas iteracoes:
+
+- proxy do TMDB via Cloud Functions
+- upload real de avatar e poster no Storage
+- perfis publicos navegaveis
+- lista compartilhada com permissao de edicao
+- reviews publicas e interacao social em detalhes e perfis
+
 ## Capturas da aplicacao
 
 Esses prints mostram alguns fluxos principais da interface atual.
