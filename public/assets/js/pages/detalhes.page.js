@@ -10,6 +10,13 @@ const shareId = params.get("share");
 let currentMovie = null;
 let currentExternalLinks = buildExternalLinks({});
 let currentTmdbReviews = [];
+let currentCinefyReviews = [];
+const relationshipState = {
+  friends: new Set(),
+  incoming: new Set(),
+  outgoing: new Set(),
+  loaded: false
+};
 
 const addToListButton = document.getElementById("addToListButton");
 const addToListButtonIcon = document.getElementById("addToListButtonIcon");
@@ -20,6 +27,7 @@ const communityReviewsLink = document.getElementById("communityReviewsLink");
 document.getElementById("saveReviewButton").addEventListener("click", saveReview);
 addToListButton.addEventListener("click", toggleCurrentMovieInList);
 
+void loadViewerRelationshipState();
 loadMovie();
 
 async function loadMovie() {
@@ -395,6 +403,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
   const grid = document.getElementById("communityReviewsGrid");
   const caption = document.getElementById("communityReviewsCaption");
   const letterboxdHref = externalLinks.letterboxd ? externalLinks.letterboxd.href : "#";
+  currentCinefyReviews = Array.isArray(cinefyReviews) ? cinefyReviews : [];
   communityReviewsLink.href = letterboxdHref;
   communityReviewsLink.classList.toggle("hidden", !externalLinks.letterboxd);
 
@@ -436,7 +445,8 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
         ${cinefyReviews.map((review) => `
           <article class="community-review-card rounded-3xl border border-white/8 bg-black/20 p-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
-              ${review.authorHref
+              <div class="community-review-card__author-row">
+                ${review.authorHref
                 ? `<a class="cinefy-user-link cinefy-user-link-card" href="${escapeHtml(review.authorHref)}">
                     <img alt="${escapeHtml(review.authorName)}" class="h-12 w-12 rounded-full object-cover" decoding="async" loading="lazy" src="${escapeHtml(review.authorAvatar || fallbackPoster)}"/>
                     <div class="min-w-0">
@@ -451,6 +461,8 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
                       <p class="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">${escapeHtml(review.sourceLabel)} • ${escapeHtml(review.ratingLabel)} • ${escapeHtml(review.updatedLabel)}</p>
                     </div>
                   </div>`}
+                ${renderReviewFriendAction(review)}
+              </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
               ${review.tags.map((tag) => `
@@ -510,6 +522,64 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
     ? "Suas reviews e as dos seus amigos aparecem primeiro, seguidas das leituras publicas do TMDB."
     : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do CINEfy crescer aqui.";
   grid.innerHTML = sections.join("");
+
+  grid.querySelectorAll("[data-review-social-action]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const action = button.getAttribute("data-review-social-action");
+      const targetUid = button.getAttribute("data-target-uid") || "";
+      const targetName = button.getAttribute("data-target-name") || "";
+      const targetUsername = button.getAttribute("data-target-username") || "";
+      const targetAvatar = button.getAttribute("data-target-avatar") || "";
+
+      if (!action || !targetUid) return;
+      await handleReviewSocialAction(action, {
+        uid: targetUid,
+        displayName: targetName,
+        username: targetUsername,
+        avatar: targetAvatar
+      });
+    });
+  });
+}
+
+function renderReviewFriendAction(review) {
+  if (!review || !review.showFriendAction || !review.authorUid) {
+    return "";
+  }
+
+  if (review.relationshipStatus === "friend") {
+    return `
+      <button class="review-social-action review-social-action--state" disabled type="button">
+        <span class="material-symbols-outlined text-sm">group</span>
+        <span>Amigo</span>
+      </button>
+    `;
+  }
+
+  if (review.relationshipStatus === "outgoing") {
+    return `
+      <button class="review-social-action review-social-action--state" disabled type="button">
+        <span class="material-symbols-outlined text-sm">schedule</span>
+        <span>Pedido enviado</span>
+      </button>
+    `;
+  }
+
+  if (review.relationshipStatus === "incoming") {
+    return `
+      <button class="review-social-action review-social-action--primary" data-review-social-action="accept" data-target-avatar="${escapeHtml(review.authorAvatar || "")}" data-target-name="${escapeHtml(review.authorName || "")}" data-target-uid="${escapeHtml(review.authorUid)}" data-target-username="${escapeHtml(review.authorUsername || "")}" type="button">
+        <span class="material-symbols-outlined text-sm">person_add</span>
+        <span>Aceitar amizade</span>
+      </button>
+    `;
+  }
+
+  return `
+    <button class="review-social-action review-social-action--primary" data-review-social-action="add" data-target-avatar="${escapeHtml(review.authorAvatar || "")}" data-target-name="${escapeHtml(review.authorName || "")}" data-target-uid="${escapeHtml(review.authorUid)}" data-target-username="${escapeHtml(review.authorUsername || "")}" type="button">
+      <span class="material-symbols-outlined text-sm">person_add</span>
+      <span>Adicionar amigo</span>
+    </button>
+  `;
 }
 
 function getMovieCertification(releaseDates) {
@@ -805,6 +875,8 @@ function normalizeCinefyReviewRecord(review) {
     ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota",
     updatedLabel: formatReviewDate(review.updatedAt),
     tags: buildReviewTags(review),
+    relationshipStatus: getRelationshipStatusForUser(review.authorUid || review.uid || "", Boolean(review.isOwn)),
+    showFriendAction: Boolean(review.authorUid && currentProfile.uid && review.authorUid !== currentProfile.uid),
     authorHref: getPublicProfileHref({
       uid: review.authorUid || review.uid || "",
       username: review.authorUsername || "",
@@ -853,6 +925,202 @@ function formatReviewDate(dateValue) {
     month: "2-digit",
     year: "numeric"
   });
+}
+
+async function loadViewerRelationshipState() {
+  if (!firestore || !currentProfile.uid) {
+    relationshipState.loaded = true;
+    return;
+  }
+
+  try {
+    const viewerDoc = firestore.collection("users").doc(currentProfile.uid);
+    const [friendsSnapshot, incomingSnapshot, outgoingSnapshot] = await Promise.all([
+      viewerDoc.collection("friends").get(),
+      viewerDoc.collection("friend_requests").get(),
+      viewerDoc.collection("outgoing_requests").get()
+    ]);
+
+    relationshipState.friends = new Set(friendsSnapshot.docs.map((doc) => doc.id));
+    relationshipState.incoming = new Set(incomingSnapshot.docs.map((doc) => doc.id));
+    relationshipState.outgoing = new Set(outgoingSnapshot.docs.map((doc) => doc.id));
+    relationshipState.loaded = true;
+  } catch (error) {
+    console.error("Erro ao carregar relacionamentos para reviews:", error);
+    relationshipState.loaded = true;
+  }
+
+  if (currentMovie) {
+    renderCommunityReviews(currentTmdbReviews, currentExternalLinks, Boolean(localMovieId), currentCinefyReviews);
+  }
+}
+
+function getRelationshipStatusForUser(userId, isOwn) {
+  if (!currentProfile.uid || !userId || isOwn) {
+    return isOwn ? "own" : "available";
+  }
+
+  if (relationshipState.friends.has(userId)) {
+    return "friend";
+  }
+
+  if (relationshipState.incoming.has(userId)) {
+    return "incoming";
+  }
+
+  if (relationshipState.outgoing.has(userId)) {
+    return "outgoing";
+  }
+
+  return "available";
+}
+
+function getRelationshipRefs(otherUserId) {
+  return {
+    currentFriend: firestore.collection("users").doc(currentProfile.uid).collection("friends").doc(otherUserId),
+    otherFriend: firestore.collection("users").doc(otherUserId).collection("friends").doc(currentProfile.uid),
+    currentIncoming: firestore.collection("users").doc(currentProfile.uid).collection("friend_requests").doc(otherUserId),
+    currentOutgoing: firestore.collection("users").doc(currentProfile.uid).collection("outgoing_requests").doc(otherUserId),
+    otherIncoming: firestore.collection("users").doc(otherUserId).collection("friend_requests").doc(currentProfile.uid),
+    otherOutgoing: firestore.collection("users").doc(otherUserId).collection("outgoing_requests").doc(currentProfile.uid)
+  };
+}
+
+async function commitRelationshipBatch(otherUserId, applyBatch) {
+  const refs = getRelationshipRefs(otherUserId);
+  const batch = firestore.batch();
+  applyBatch(batch, refs);
+  await batch.commit();
+}
+
+async function handleReviewSocialAction(action, targetUser) {
+  if (!firestore || !currentProfile.uid || !targetUser || !targetUser.uid) {
+    return;
+  }
+
+  if (action === "add") {
+    await sendFriendRequestFromReview(targetUser);
+    return;
+  }
+
+  if (action === "accept") {
+    await acceptFriendRequestFromReview(targetUser);
+  }
+}
+
+async function sendFriendRequestFromReview(targetUser) {
+  const targetUid = String(targetUser.uid || "");
+  if (!targetUid || relationshipState.outgoing.has(targetUid) || relationshipState.friends.has(targetUid)) {
+    return;
+  }
+
+  try {
+    const requestPayload = {
+      senderUid: currentProfile.uid,
+      displayName: currentProfile.displayName || "Cinefilo",
+      username: currentProfile.username || "cinefyuser",
+      avatar: currentProfile.avatar || fallbackPoster,
+      createdAt: new Date().toISOString()
+    };
+
+    await Promise.all([
+      firestore.collection("users").doc(targetUid).collection("friend_requests").doc(currentProfile.uid).set(requestPayload),
+      firestore.collection("users").doc(currentProfile.uid).collection("outgoing_requests").doc(targetUid).set({
+        recipientUid: targetUid,
+        displayName: targetUser.displayName || "Cinefilo",
+        username: targetUser.username || "cinefyuser",
+        avatar: targetUser.avatar || fallbackPoster,
+        createdAt: new Date().toISOString()
+      })
+    ]);
+
+    await appendNotificationToUser(targetUid, {
+      id: `friend-request-${currentProfile.uid}`,
+      type: "friend_request",
+      title: "Pedido de amizade recebido",
+      message: `${currentProfile.displayName || "Um cinefilo"} enviou um pedido de amizade.`,
+      href: "amigos.html",
+      read: false,
+      createdAt: new Date().toISOString()
+    });
+
+    relationshipState.outgoing.add(targetUid);
+    document.getElementById("reviewFeedback").textContent = `Pedido enviado para ${targetUser.displayName || "esse usuario"}.`;
+    renderCommunityReviews(currentTmdbReviews, currentExternalLinks, Boolean(localMovieId), currentCinefyReviews);
+  } catch (error) {
+    console.error("Erro ao enviar pedido via review:", error);
+    document.getElementById("reviewFeedback").textContent = "Nao foi possivel enviar o pedido agora.";
+  }
+}
+
+async function acceptFriendRequestFromReview(targetUser) {
+  const targetUid = String(targetUser.uid || "");
+  if (!targetUid || !relationshipState.incoming.has(targetUid)) {
+    return;
+  }
+
+  try {
+    await commitRelationshipBatch(targetUid, (batch, refs) => {
+      batch.set(refs.currentFriend, {
+        id: targetUid,
+        name: targetUser.displayName || "Cinefilo",
+        displayName: targetUser.displayName || "Cinefilo",
+        username: targetUser.username || "cinefyuser",
+        avatar: targetUser.avatar || fallbackPoster,
+        favoriteGenre: "Cinema",
+        location: "Brasil",
+        createdAt: new Date().toISOString()
+      });
+      batch.set(refs.otherFriend, {
+        id: currentProfile.uid,
+        name: currentProfile.displayName || "Cinefilo",
+        displayName: currentProfile.displayName || "Cinefilo",
+        username: currentProfile.username || "cinefyuser",
+        avatar: currentProfile.avatar || fallbackPoster,
+        favoriteGenre: "Cinema",
+        location: currentProfile.location || "Brasil",
+        createdAt: new Date().toISOString()
+      });
+      batch.delete(refs.currentIncoming);
+      batch.delete(refs.currentOutgoing);
+      batch.delete(refs.otherIncoming);
+      batch.delete(refs.otherOutgoing);
+    });
+
+    await appendNotificationToUser(targetUid, {
+      id: `friend-accepted-${currentProfile.uid}`,
+      type: "friend_accepted",
+      title: "Pedido aceito",
+      message: `${currentProfile.displayName || "Um cinefilo"} aceitou seu pedido de amizade.`,
+      href: "amigos.html",
+      read: false,
+      createdAt: new Date().toISOString()
+    });
+
+    relationshipState.incoming.delete(targetUid);
+    relationshipState.outgoing.delete(targetUid);
+    relationshipState.friends.add(targetUid);
+    document.getElementById("reviewFeedback").textContent = `${targetUser.displayName || "Esse usuario"} agora faz parte da sua rede.`;
+    renderCommunityReviews(currentTmdbReviews, currentExternalLinks, Boolean(localMovieId), currentCinefyReviews);
+  } catch (error) {
+    console.error("Erro ao aceitar pedido via review:", error);
+    document.getElementById("reviewFeedback").textContent = "Nao foi possivel aceitar esse pedido agora.";
+  }
+}
+
+async function appendNotificationToUser(userId, notification) {
+  try {
+    const docRef = firestore.collection("users").doc(userId).collection("app_state").doc("notifications");
+    const snapshot = await docRef.get();
+    const current = snapshot.exists && Array.isArray(snapshot.data().value) ? snapshot.data().value : [];
+    if (current.some((item) => item.id === notification.id)) return;
+    await docRef.set({
+      value: [notification, ...current].slice(0, 40),
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Erro ao anexar notificacao remota:", error);
+  }
 }
 
 function getReviewStorageKey() {
