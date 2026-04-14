@@ -95,6 +95,9 @@
     title: "Lista sem nome",
     description: "Uma lista com filmes que recomendo.",
     privacy: "publica",
+    shareAccessLevel: "reader",
+    shareEditorScope: "link",
+    shareReaderOnlyUserIds: [],
     updatedAt: new Date().toISOString(),
     movies: [],
     shareId: "",
@@ -278,6 +281,14 @@
       title: sanitizeText(safeList.title || defaultListState.title, MAX_LIST_TITLE_LENGTH) || defaultListState.title,
       description: sanitizeMultilineText(safeList.description || defaultListState.description, MAX_LIST_DESCRIPTION_LENGTH) || defaultListState.description,
       privacy: safeList.privacy === "privada" ? "privada" : "publica",
+      shareAccessLevel: safeList.shareAccessLevel === "editor" ? "editor" : "reader",
+      shareEditorScope: safeList.shareEditorScope === "except_selected" ? "except_selected" : "link",
+      shareReaderOnlyUserIds: Array.isArray(safeList.shareReaderOnlyUserIds)
+        ? safeList.shareReaderOnlyUserIds
+            .slice(0, MAX_FRIENDS)
+            .map((value) => truncate(String(value || ""), 128))
+            .filter(Boolean)
+        : [],
       updatedAt: sanitizeIsoDate(safeList.updatedAt || new Date().toISOString()),
       movies: Array.isArray(safeList.movies) ? safeList.movies.slice(0, MAX_MOVIES_PER_LIST).map(normalizeMovie) : []
     };

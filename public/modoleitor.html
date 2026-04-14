@@ -54,7 +54,7 @@
         <div class="grid gap-4 sm:grid-cols-3 xl:grid-cols-2">
           <div class="reader-stat-card">
             <p class="reader-stat-label">Status</p>
-            <p class="reader-stat-value">Somente leitura</p>
+            <p class="reader-stat-value" id="readerStatusValue">Somente leitura</p>
           </div>
           <div class="reader-stat-card">
             <p class="reader-stat-label">Filmes</p>
@@ -62,9 +62,79 @@
           </div>
           <div class="reader-stat-card sm:col-span-3 xl:col-span-2">
             <p class="reader-stat-label">Experiencia</p>
-            <p class="reader-stat-copy">Explore a curadoria, abra detalhes e descubra os titulos sem alterar a lista original.</p>
+            <p class="reader-stat-copy" id="readerExperienceCopy">Explore a curadoria, abra detalhes e descubra os titulos sem alterar a lista original.</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="reader-editor-panel hidden mb-8 space-y-5" id="readerEditorPanel">
+      <div class="grid gap-5 xl:grid-cols-[0.95fr,1.05fr]">
+        <article class="glass-card rounded-[1.8rem] p-5 md:p-6">
+          <div class="section-heading">
+            <p class="text-xs uppercase tracking-[0.24em] text-red-300">Edicao colaborativa</p>
+            <h2 class="mt-3 text-2xl font-black text-white">Atualize a curadoria compartilhada</h2>
+            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400">Quem tiver permissao pode ajustar o titulo e a descricao dessa lista sem sair do link compartilhado.</p>
+          </div>
+          <form class="mt-6 grid gap-4" id="readerSharedMetaForm">
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Nome da lista</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerSharedTitleInput" maxlength="80" type="text"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Descricao</span>
+              <textarea class="mt-2 min-h-28 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerSharedDescriptionInput" maxlength="240"></textarea>
+            </label>
+            <div class="flex flex-wrap items-center gap-3">
+              <button class="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 font-bold text-white transition-all hover:bg-red-700 active:scale-95" type="submit">
+                <span class="material-symbols-outlined">save</span>
+                <span>Salvar ajustes</span>
+              </button>
+              <p aria-live="polite" class="min-h-[1.25rem] text-sm text-zinc-400" id="readerSharedMetaFeedback" role="status"></p>
+            </div>
+          </form>
+        </article>
+
+        <article class="glass-card rounded-[1.8rem] p-5 md:p-6">
+          <div class="section-heading">
+            <p class="text-xs uppercase tracking-[0.24em] text-red-300">Adicionar filme</p>
+            <h2 class="mt-3 text-2xl font-black text-white">Expanda a lista em conjunto</h2>
+            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-400">Adicione filmes manuais direto por aqui. O poster pode ser uma URL opcional, e a lista atualiza em tempo real para quem estiver com o link aberto.</p>
+          </div>
+          <form class="mt-6 grid gap-4 md:grid-cols-2" id="readerAddMovieForm">
+            <label class="block md:col-span-2">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Titulo</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMovieTitleInput" maxlength="120" placeholder="Ex.: Past Lives" required type="text"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Genero</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMovieGenreInput" maxlength="60" placeholder="Drama" required type="text"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Ano</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMovieYearInput" max="2100" min="1900" placeholder="2024" required type="number"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Nota</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMovieRatingInput" max="5" min="0" placeholder="4.5" required step="0.1" type="number"/>
+            </label>
+            <label class="block">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Poster URL</span>
+              <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMoviePosterInput" placeholder="https://..." type="url"/>
+            </label>
+            <label class="block md:col-span-2">
+              <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Comentario rapido</span>
+              <textarea class="mt-2 min-h-24 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="readerMovieNoteInput" maxlength="1200" placeholder="Por que esse filme merece entrar na lista?"></textarea>
+            </label>
+            <div class="md:col-span-2 flex flex-wrap items-center gap-3">
+              <button class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-black transition-all hover:bg-zinc-200 active:scale-95" type="submit">
+                <span class="material-symbols-outlined">playlist_add</span>
+                <span>Adicionar filme</span>
+              </button>
+              <p aria-live="polite" class="min-h-[1.25rem] text-sm text-zinc-400" id="readerAddMovieFeedback" role="status"></p>
+            </div>
+          </form>
+        </article>
       </div>
     </section>
 

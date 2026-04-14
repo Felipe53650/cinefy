@@ -214,8 +214,8 @@ service cloud.firestore {
         validShortText(request.resource.data.updatedAt, 40);
     }
 
-    function isValidSharedList(shareId) {
-      return request.resource.data.keys().hasOnly([
+    function isValidSharedListShape(data, shareId) {
+      return data.keys().hasOnly([
           "shareId",
           "slug",
           "ownerUid",
@@ -226,11 +226,14 @@ service cloud.firestore {
           "title",
           "description",
           "privacy",
+          "shareAccessLevel",
+          "shareEditorScope",
+          "shareReaderOnlyUserIds",
           "updatedAt",
           "createdAt",
           "movies"
         ]) &&
-        request.resource.data.keys().hasAll([
+        data.keys().hasAll([
           "shareId",
           "ownerUid",
           "ownerListId",
@@ -240,24 +243,66 @@ service cloud.firestore {
           "title",
           "description",
           "privacy",
+          "shareAccessLevel",
+          "shareEditorScope",
+          "shareReaderOnlyUserIds",
           "updatedAt",
           "createdAt",
           "movies"
         ]) &&
-        request.resource.data.shareId == shareId &&
-        request.resource.data.ownerUid == request.auth.uid &&
-        validShortText(request.resource.data.shareId, 160) &&
-        validShortText(request.resource.data.slug, 120) &&
-        validShortText(request.resource.data.ownerUid, 128) &&
-        validShortText(request.resource.data.ownerListId, 160) &&
-        validShortText(request.resource.data.ownerUsername, 24) &&
-        validShortText(request.resource.data.ownerDisplayName, 80) &&
-        validShortText(request.resource.data.ownerAvatar, 2048) &&
+        data.shareId == shareId &&
+        validShortText(data.shareId, 160) &&
+        validShortText(data.slug, 120) &&
+        validShortText(data.ownerUid, 128) &&
+        validShortText(data.ownerListId, 160) &&
+        validShortText(data.ownerUsername, 24) &&
+        validShortText(data.ownerDisplayName, 80) &&
+        validShortText(data.ownerAvatar, 2048) &&
+        validShortText(data.title, 80) &&
+        validShortText(data.description, 240) &&
+        (data.privacy == "publica" || data.privacy == "privada") &&
+        (data.shareAccessLevel == "reader" || data.shareAccessLevel == "editor") &&
+        (data.shareEditorScope == "link" || data.shareEditorScope == "except_selected") &&
+        data.shareReaderOnlyUserIds is list &&
+        data.shareReaderOnlyUserIds.size() <= 80 &&
+        validShortText(data.updatedAt, 40) &&
+        validShortText(data.createdAt, 40) &&
+        data.movies is list &&
+        data.movies.size() <= 120;
+    }
+
+    function isValidSharedListOwnerWrite(shareId) {
+      return request.resource.data.ownerUid == request.auth.uid &&
+        isValidSharedListShape(request.resource.data, shareId);
+    }
+
+    function isValidSharedListCollaboratorUpdate(shareId) {
+      return resource != null &&
+        resource.data.shareId == shareId &&
+        resource.data.privacy == "publica" &&
+        resource.data.shareAccessLevel == "editor" &&
+        !(request.auth.uid in resource.data.shareReaderOnlyUserIds) &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly([
+          "title",
+          "description",
+          "movies",
+          "updatedAt"
+        ]) &&
+        request.resource.data.ownerUid == resource.data.ownerUid &&
+        request.resource.data.ownerListId == resource.data.ownerListId &&
+        request.resource.data.shareId == resource.data.shareId &&
+        request.resource.data.slug == resource.data.slug &&
+        request.resource.data.ownerUsername == resource.data.ownerUsername &&
+        request.resource.data.ownerDisplayName == resource.data.ownerDisplayName &&
+        request.resource.data.ownerAvatar == resource.data.ownerAvatar &&
+        request.resource.data.privacy == resource.data.privacy &&
+        request.resource.data.shareAccessLevel == resource.data.shareAccessLevel &&
+        request.resource.data.shareEditorScope == resource.data.shareEditorScope &&
+        request.resource.data.shareReaderOnlyUserIds == resource.data.shareReaderOnlyUserIds &&
+        request.resource.data.createdAt == resource.data.createdAt &&
         validShortText(request.resource.data.title, 80) &&
         validShortText(request.resource.data.description, 240) &&
-        (request.resource.data.privacy == "publica" || request.resource.data.privacy == "privada") &&
         validShortText(request.resource.data.updatedAt, 40) &&
-        validShortText(request.resource.data.createdAt, 40) &&
         request.resource.data.movies is list &&
         request.resource.data.movies.size() <= 120;
     }
@@ -313,7 +358,10 @@ service cloud.firestore {
 
     match /shared_lists/{shareId} {
       allow read: if true;
-      allow create, update: if isSignedIn() && isValidSharedList(shareId);
+      allow create, update: if isSignedIn() && (
+        isValidSharedListOwnerWrite(shareId) ||
+        isValidSharedListCollaboratorUpdate(shareId)
+      );
       allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
     }
 

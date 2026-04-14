@@ -22,6 +22,15 @@
   const createListButton = document.getElementById("createListButton");
   const listSelector = document.getElementById("listSelector");
   const deleteCurrentListButton = document.getElementById("deleteCurrentListButton");
+  const listShareAccessInput = document.getElementById("listShareAccessInput");
+  const listShareEditorScopeInput = document.getElementById("listShareEditorScopeInput");
+  const shareEditorScopeField = document.getElementById("shareEditorScopeField");
+  const shareReaderOnlyField = document.getElementById("shareReaderOnlyField");
+  const shareReaderOnlyList = document.getElementById("shareReaderOnlyList");
+  const shareReaderOnlyCountBadge = document.getElementById("shareReaderOnlyCountBadge");
+  const shareReaderOnlyHint = document.getElementById("shareReaderOnlyHint");
+  const shareAccessSummary = document.getElementById("shareAccessSummary");
+  const shareAccessDescription = document.getElementById("shareAccessDescription");
   const moviePosterUrlInput = document.getElementById("moviePosterUrl");
   const moviePosterFileInput = document.getElementById("moviePosterFile");
   const moviePosterDropzone = document.getElementById("moviePosterDropzone");
@@ -53,6 +62,8 @@
   createListButton.addEventListener("click", handleCreateList);
   deleteCurrentListButton.addEventListener("click", handleDeleteCurrentList);
   listSelector.addEventListener("change", handleSelectList);
+  listShareAccessInput.addEventListener("change", handleSharePermissionChange);
+  listShareEditorScopeInput.addEventListener("change", handleSharePermissionChange);
   newListNameInput.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
@@ -78,7 +89,12 @@
   updatePosterPreview(DEFAULT_POSTER, "Poster padrao", "Sera usado se nenhuma imagem for enviada.");
   updateClearPosterButtonState();
   updatePosterPreviewButtonState();
-  render();
+  void bootstrapListaPage();
+
+  async function bootstrapListaPage() {
+    await pullSharedListIfNewer();
+    render();
+  }
 
   function getCurrentProfile() {
     return store.loadProfile();
@@ -103,6 +119,9 @@
     document.getElementById("listTitleInput").value = state.title || DEFAULT_LIST_TITLE;
     document.getElementById("listDescriptionInput").value = state.description || DEFAULT_LIST_DESCRIPTION;
     document.getElementById("listPrivacyInput").value = state.privacy === "privada" ? "privada" : "publica";
+    listShareAccessInput.value = state.shareAccessLevel === "editor" ? "editor" : "reader";
+    listShareEditorScopeInput.value = state.shareEditorScope === "except_selected" ? "except_selected" : "link";
+    renderSharePermissionFields();
   }
 
   function render() {
@@ -110,6 +129,7 @@
     renderHeader();
     renderMovies();
     renderShareLink();
+    renderShareAccessSummary();
     saveState();
     renderListSelector();
     updateDeleteButtonState();
@@ -139,6 +159,80 @@
     document.getElementById("privacyLabel").textContent = state.privacy === "publica" ? "Sim" : "Nao";
     document.getElementById("topGenre").textContent = getTopGenre();
     document.getElementById("updatedAt").textContent = formatDate(state.updatedAt);
+  }
+
+  function renderSharePermissionFields() {
+    const isPublic = document.getElementById("listPrivacyInput").value === "publica";
+    const isEditor = listShareAccessInput.value === "editor";
+    const useExceptions = listShareEditorScopeInput.value === "except_selected";
+    const friends = store.loadFriends();
+
+    shareEditorScopeField.classList.toggle("hidden", !(isPublic && isEditor));
+    shareReaderOnlyField.classList.toggle("hidden", !(isPublic && isEditor && useExceptions));
+
+    if (!(isPublic && isEditor && useExceptions)) {
+      shareReaderOnlyList.innerHTML = "";
+      shareReaderOnlyCountBadge.textContent = `${state.shareReaderOnlyUserIds.length || 0} leitores forcados`;
+      return;
+    }
+
+    if (!friends.length) {
+      shareReaderOnlyList.innerHTML = `
+        <div class="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-zinc-400 sm:col-span-2">
+          Adicione amigos no CINEfy para escolher excecoes de edicao aqui.
+        </div>
+      `;
+      shareReaderOnlyCountBadge.textContent = "0 leitores forcados";
+      return;
+    }
+
+    const selectedIds = new Set(Array.isArray(state.shareReaderOnlyUserIds) ? state.shareReaderOnlyUserIds : []);
+    shareReaderOnlyCountBadge.textContent = `${selectedIds.size} leitores forcados`;
+    shareReaderOnlyHint.textContent = "Quem estiver marcado continua acessando o link, mas sem poder editar a lista compartilhada.";
+
+    shareReaderOnlyList.innerHTML = friends.map((friend) => {
+      const displayName = friend.displayName || friend.name || "Usuario";
+      const checked = selectedIds.has(friend.id) ? "checked" : "";
+      return `
+        <label class="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition hover:border-red-500/20 hover:bg-white/[0.05]">
+          <input class="h-4 w-4 rounded border-zinc-600 bg-zinc-950 text-red-500 focus:ring-red-500" data-reader-only-id="${escapeAttribute(friend.id)}" type="checkbox" ${checked}/>
+          <img alt="${escapeAttribute(displayName)}" class="h-11 w-11 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}"/>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-bold text-white">${escapeHtml(displayName)}</p>
+            <p class="truncate text-xs text-zinc-400">@${escapeHtml(friend.username || "cinefyuser")}</p>
+          </div>
+        </label>
+      `;
+    }).join("");
+
+    shareReaderOnlyList.querySelectorAll("[data-reader-only-id]").forEach((checkbox) => {
+      checkbox.addEventListener("change", handleReaderOnlyToggle);
+    });
+  }
+
+  function renderShareAccessSummary() {
+    const isPublic = state.privacy === "publica";
+    const isEditor = state.shareAccessLevel === "editor";
+    const hasExceptions = state.shareEditorScope === "except_selected" && Array.isArray(state.shareReaderOnlyUserIds) && state.shareReaderOnlyUserIds.length;
+
+    if (!isPublic) {
+      shareAccessSummary.textContent = "Compartilhamento desativado.";
+      shareAccessDescription.textContent = "A lista esta privada no momento. O link deixa de funcionar ate que ela volte a ser publica.";
+      return;
+    }
+
+    if (!isEditor) {
+      shareAccessSummary.textContent = "Somente leitura por link.";
+      shareAccessDescription.textContent = "Quem receber o link consegue visualizar essa lista, sem alterar o conteudo original.";
+      return;
+    }
+
+    shareAccessSummary.textContent = hasExceptions
+      ? "Edicao colaborativa com excecoes."
+      : "Edicao colaborativa por link.";
+    shareAccessDescription.textContent = hasExceptions
+      ? `${state.shareReaderOnlyUserIds.length} amigo(s) continuam em modo leitor, enquanto os demais usuarios logados com o link podem editar.`
+      : "Usuarios logados que abrirem o link podem editar o titulo, a descricao e os filmes compartilhados.";
   }
 
   function renderMovies() {
@@ -191,11 +285,12 @@
     settingsFeedback.textContent = `A lista "${state.title}" foi criada.`;
   }
 
-  function handleSelectList() {
+  async function handleSelectList() {
     if (!listSelector.value) return;
 
     store.selectList(listSelector.value);
     reloadState({ resetSignature: true });
+    await pullSharedListIfNewer();
     render();
     settingsFeedback.textContent = `Agora voce esta editando "${state.title}".`;
   }
@@ -251,9 +346,44 @@
     state.title = document.getElementById("listTitleInput").value.trim() || DEFAULT_LIST_TITLE;
     state.description = document.getElementById("listDescriptionInput").value.trim() || DEFAULT_LIST_DESCRIPTION;
     state.privacy = document.getElementById("listPrivacyInput").value === "privada" ? "privada" : "publica";
+    state.shareAccessLevel = listShareAccessInput.value === "editor" ? "editor" : "reader";
+    state.shareEditorScope = listShareEditorScopeInput.value === "except_selected" ? "except_selected" : "link";
+    if (state.shareAccessLevel !== "editor" || state.shareEditorScope !== "except_selected") {
+      state.shareReaderOnlyUserIds = [];
+    }
     touchState();
     render();
     settingsFeedback.textContent = `As informacoes de "${state.title}" foram atualizadas.`;
+  }
+
+  function handleSharePermissionChange() {
+    state.shareAccessLevel = listShareAccessInput.value === "editor" ? "editor" : "reader";
+    state.shareEditorScope = listShareEditorScopeInput.value === "except_selected" ? "except_selected" : "link";
+    if (state.shareAccessLevel !== "editor" || state.shareEditorScope !== "except_selected") {
+      state.shareReaderOnlyUserIds = [];
+    }
+    touchState();
+    renderSharePermissionFields();
+    renderShareAccessSummary();
+    saveState();
+  }
+
+  function handleReaderOnlyToggle(event) {
+    const friendId = String(event.target.dataset.readerOnlyId || "");
+    if (!friendId) return;
+
+    const selectedIds = new Set(Array.isArray(state.shareReaderOnlyUserIds) ? state.shareReaderOnlyUserIds : []);
+    if (event.target.checked) {
+      selectedIds.add(friendId);
+    } else {
+      selectedIds.delete(friendId);
+    }
+
+    state.shareReaderOnlyUserIds = Array.from(selectedIds);
+    touchState();
+    saveState();
+    renderSharePermissionFields();
+    renderShareAccessSummary();
   }
 
   function removeMovie(id) {
@@ -399,6 +529,9 @@
       title: state.title,
       description: state.description,
       privacy: state.privacy,
+      shareAccessLevel: state.shareAccessLevel === "editor" ? "editor" : "reader",
+      shareEditorScope: state.shareEditorScope === "except_selected" ? "except_selected" : "link",
+      shareReaderOnlyUserIds: Array.isArray(state.shareReaderOnlyUserIds) ? state.shareReaderOnlyUserIds.slice(0, 80) : [],
       updatedAt: state.updatedAt || new Date().toISOString(),
       createdAt,
       movies: state.movies.map((movie) => ({
@@ -451,6 +584,47 @@
     }
   }
 
+  async function pullSharedListIfNewer() {
+    const currentProfile = getCurrentProfile();
+
+    if (!firestore || !currentProfile.uid || !state.shareId) {
+      return;
+    }
+
+    try {
+      const snapshot = await firestore.collection("shared_lists").doc(state.shareId).get();
+      if (!snapshot.exists) return;
+
+      const data = snapshot.data() || {};
+      if (String(data.ownerUid || "") !== String(currentProfile.uid || "")) return;
+      if (data.ownerListId && String(data.ownerListId) !== String(state.id || "")) return;
+
+      const localUpdatedAt = Date.parse(String(state.updatedAt || ""));
+      const remoteUpdatedAt = Date.parse(String(data.updatedAt || ""));
+      if (!Number.isFinite(remoteUpdatedAt) || (Number.isFinite(localUpdatedAt) && remoteUpdatedAt <= localUpdatedAt)) {
+        return;
+      }
+
+      state = store.saveListState({
+        ...state,
+        title: data.title || state.title,
+        description: data.description || state.description,
+        privacy: data.privacy === "privada" ? "privada" : "publica",
+        shareAccessLevel: data.shareAccessLevel === "editor" ? "editor" : "reader",
+        shareEditorScope: data.shareEditorScope === "except_selected" ? "except_selected" : "link",
+        shareReaderOnlyUserIds: Array.isArray(data.shareReaderOnlyUserIds) ? data.shareReaderOnlyUserIds.slice(0, 80) : [],
+        updatedAt: data.updatedAt || state.updatedAt,
+        sharedCreatedAt: data.createdAt || state.sharedCreatedAt || "",
+        shareId: data.shareId || state.shareId,
+        movies: Array.isArray(data.movies) ? data.movies : state.movies
+      });
+      lists = store.loadLists();
+      lastPublishedSignature = JSON.stringify(buildSharedListPayload() || {});
+    } catch (error) {
+      console.error("Erro ao sincronizar a lista compartilhada mais recente:", error);
+    }
+  }
+
   function getMovieDetailsHref(movie) {
     if (movie.tmdbId) {
       return `detalhes.html?id=${movie.tmdbId}`;
@@ -482,6 +656,26 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function safeAvatarUrl(value) {
+    const candidate = String(value || "").trim();
+    if (!candidate) return "/assets/img/logo.png";
+
+    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+      return candidate;
+    }
+
+    try {
+      const parsedUrl = new URL(candidate, window.location.origin);
+      if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+        return parsedUrl.href;
+      }
+    } catch (error) {
+      return "/assets/img/logo.png";
+    }
+
+    return "/assets/img/logo.png";
   }
 
   function setPosterMode(mode) {
