@@ -105,6 +105,42 @@ Esses prints mostram alguns fluxos principais da interface atual.
 - a camada social foi distribuida por perfil publico, reviews, amizades e listas compartilhadas
 - o design system ficou orientado por tema, com variaveis globais e componentes reutilizaveis
 
+## Desafios tecnicos resolvidos
+
+- transformar uma base inicial mais improvisada em uma aplicacao com fluxo social consistente
+- reduzir atrito de descoberta com busca global, filtros, indicadores de estado e atalhos contextuais
+- migrar a integracao do TMDB para backend sem quebrar a experiencia do usuario
+- sair de persistencia fraca de imagens para um fluxo real com Firebase Storage
+- criar perfis publicos, reviews publicas e amizades sem perder clareza entre o que e publico e o que e privado
+- reforcar seguranca com rules, headers, CSP, sanitizacao e menor confianca no frontend
+
+## Antes e depois
+
+No inicio, o projeto funcionava mais como uma interface de curadoria com autenticacao e algumas telas principais. Ao longo da evolucao, o CINEfy ganhou camadas mais proximas de produto:
+
+- de listas simples para listas compartilhadas com leitura e edicao colaborativa
+- de perfil apenas proprio para perfis publicos navegaveis
+- de reviews locais para reviews publicas da comunidade
+- de busca isolada para descoberta integrada por home, busca, detalhes e perfis
+- de integracao externa direta no cliente para proxy seguro via Cloud Functions
+
+O resultado hoje e um produto bem mais coerente, navegavel e apresentavel tanto tecnicamente quanto comercialmente.
+
+## Roadmap comercial do produto
+
+Hoje o CINEfy ja pode ser entendido em tres camadas de valor:
+
+- portfolio tecnico forte, mostrando construcao real de produto com Firebase, UX e camada social
+- base white-label para nichos ligados a cinema, creators, clubes e curadoria cultural
+- ponto de partida para uma evolucao futura em modelo SaaS com descoberta personalizada e features sociais mais profundas
+
+Do ponto de vista de negocio, os proximos incrementos com mais potencial seriam:
+
+- analytics de uso e retencao
+- recomendacao personalizada mais sofisticada
+- onboarding social com importacao de gostos ou interesses
+- camada premium para curadores, criadores ou comunidades fechadas
+
 ## Seguranca do repositorio
 
 ### O que deve continuar publico no repo
