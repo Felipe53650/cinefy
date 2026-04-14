@@ -365,8 +365,48 @@
       available,
       ...validation,
       ownerUid,
+      reason: available ? "available" : "taken",
       message: available ? "Nome de usuario disponivel." : "Esse nome de usuario ja esta em uso."
     };
+  }
+
+  async function getUsernameSuggestions(value, options = {}) {
+    const validation = validateUsernameCandidate(value);
+    if (!validation.valid) {
+      return [];
+    }
+
+    const baseSource = validation.sanitized.replace(/[._-]+$/g, "") || validation.sanitized;
+    const candidates = [];
+    const seen = new Set([validation.sanitized]);
+    const separators = [".", "_", "-", ""];
+
+    for (let index = 2; index <= 20 && candidates.length < 6; index += 1) {
+      for (const separator of separators) {
+        const suffix = `${separator}${index}`;
+        const trimmedBase = baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - suffix.length, USERNAME_MIN_LENGTH));
+        const candidate = sanitizeUsername(`${trimmedBase}${suffix}`);
+        if (!candidate || seen.has(candidate)) continue;
+        seen.add(candidate);
+        candidates.push(candidate);
+        if (candidates.length >= 12) {
+          break;
+        }
+      }
+    }
+
+    const suggestions = [];
+    for (const candidate of candidates) {
+      const availability = await checkUsernameAvailability(candidate, options);
+      if (availability.available) {
+        suggestions.push(availability.sanitized);
+      }
+      if (suggestions.length >= 4) {
+        break;
+      }
+    }
+
+    return suggestions;
   }
 
   async function findAvailableUsernameVariant(value, currentUid) {
@@ -792,6 +832,7 @@
   window.getCurrentUser = getCurrentUser;
   window.saveCurrentProfile = saveCurrentProfile;
   window.checkUsernameAvailability = checkUsernameAvailability;
+  window.getUsernameSuggestions = getUsernameSuggestions;
   window.validateUsernameCandidate = validateUsernameCandidate;
   window.mapFirebaseError = mapFirebaseError;
   window.consumeAuthFlash = consumeAuthFlash;

@@ -2,6 +2,7 @@ const registerForm = document.getElementById("registerForm");
 const registerFeedback = document.getElementById("registerFeedback");
 const usernameInput = document.getElementById("username");
 const usernameFeedback = document.getElementById("usernameFeedback");
+const usernameSuggestions = document.getElementById("usernameSuggestions");
 const submitButton = registerForm ? registerForm.querySelector('button[type="submit"]') : null;
 
 let usernameCheckTimer = null;
@@ -28,6 +29,10 @@ if (usernameInput) {
 
     scheduleUsernameAvailabilityCheck({ immediate: true });
   });
+}
+
+if (usernameSuggestions) {
+  usernameSuggestions.addEventListener("click", handleUsernameSuggestionClick);
 }
 
 registerForm.addEventListener("submit", async (event) => {
@@ -93,12 +98,14 @@ function handleUsernameInput() {
 
   if (!sanitized) {
     hideUsernameFeedback();
+    renderUsernameSuggestions([]);
     return;
   }
 
   const validation = validateUsernameLocally(sanitized);
   if (!validation.valid) {
     applyUsernameFeedback("unavailable", validation.message);
+    renderUsernameSuggestions([]);
     return;
   }
 
@@ -142,6 +149,7 @@ function scheduleUsernameAvailabilityCheck({ immediate = false } = {}) {
   const validation = validateUsernameLocally(usernameInput.value);
   if (!validation.valid) {
     applyUsernameFeedback("unavailable", validation.message);
+    renderUsernameSuggestions([]);
     return;
   }
 
@@ -161,6 +169,7 @@ async function resolveUsernameAvailability(value, { force = false } = {}) {
   const validation = validateUsernameLocally(value);
   if (!validation.valid) {
     applyUsernameFeedback("unavailable", validation.message);
+    renderUsernameSuggestions([]);
     return {
       available: false,
       ...validation
@@ -169,6 +178,7 @@ async function resolveUsernameAvailability(value, { force = false } = {}) {
 
   if (!force && lastUsernameAvailability && lastUsernameAvailability.sanitized === validation.sanitized) {
     applyUsernameFeedback(lastUsernameAvailability.available ? "available" : "unavailable", lastUsernameAvailability.message);
+    maybeRenderUsernameSuggestions(lastUsernameAvailability, validation.sanitized);
     return lastUsernameAvailability;
   }
 
@@ -186,6 +196,7 @@ async function resolveUsernameAvailability(value, { force = false } = {}) {
 
     lastUsernameAvailability = availability;
     applyUsernameFeedback(availability.available ? "available" : "unavailable", availability.message);
+    await maybeRenderUsernameSuggestions(availability, validation.sanitized);
     return availability;
   } catch (error) {
     if (token !== usernameRequestToken) {
@@ -199,6 +210,7 @@ async function resolveUsernameAvailability(value, { force = false } = {}) {
     };
     lastUsernameAvailability = fallback;
     applyUsernameFeedback("unavailable", fallback.message);
+    renderUsernameSuggestions([]);
     return fallback;
   }
 }
@@ -215,6 +227,67 @@ function hideUsernameFeedback() {
   usernameFeedback.textContent = "";
   usernameFeedback.dataset.state = "";
   usernameFeedback.classList.add("hidden");
+}
+
+async function maybeRenderUsernameSuggestions(availability, seedValue) {
+  if (!availability || availability.available || availability.reason !== "taken") {
+    renderUsernameSuggestions([]);
+    return;
+  }
+
+  const currentToken = usernameRequestToken;
+  const suggestions = typeof window.getUsernameSuggestions === "function"
+    ? await window.getUsernameSuggestions(seedValue)
+    : [];
+
+  if (currentToken !== usernameRequestToken) {
+    return;
+  }
+
+  renderUsernameSuggestions(suggestions);
+}
+
+function renderUsernameSuggestions(suggestions) {
+  if (!usernameSuggestions) return;
+
+  if (!Array.isArray(suggestions) || !suggestions.length) {
+    usernameSuggestions.innerHTML = "";
+    usernameSuggestions.classList.add("hidden");
+    return;
+  }
+
+  usernameSuggestions.innerHTML = suggestions.map((suggestion) => `
+    <button class="username-suggestion-chip" data-username-suggestion="${escapeAttribute(suggestion)}" type="button">
+      @${escapeHtml(suggestion)}
+    </button>
+  `).join("");
+  usernameSuggestions.classList.remove("hidden");
+}
+
+function handleUsernameSuggestionClick(event) {
+  const button = event.target.closest("[data-username-suggestion]");
+  if (!button) return;
+
+  const suggestion = button.dataset.usernameSuggestion || "";
+  usernameInput.value = suggestion;
+  lastUsernameAvailability = null;
+  handleUsernameInput();
+  usernameInput.focus();
+}
+
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function setRegisterLoading(isLoading) {

@@ -116,6 +116,34 @@
         color: rgb(var(--theme-text-rgb) / 0.86);
       }
 
+      .profile-username-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 0.75rem;
+      }
+
+      .profile-username-suggestions.hidden {
+        display: none;
+      }
+
+      .profile-username-suggestion-chip {
+        border: 1px solid rgb(var(--theme-outline-rgb) / 0.28);
+        background: rgb(var(--theme-surface-rgb) / 0.52);
+        color: rgb(var(--theme-text-rgb));
+        border-radius: 999px;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+      }
+
+      .profile-username-suggestion-chip:hover {
+        border-color: rgb(var(--theme-accent-rgb) / 0.42);
+        background: rgb(var(--theme-accent-rgb) / 0.14);
+        transform: translateY(-1px);
+      }
+
       .profile-location-panel {
         position: absolute;
         left: 0;

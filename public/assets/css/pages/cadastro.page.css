@@ -72,6 +72,35 @@
       color: rgba(255, 255, 255, 0.78);
     }
 
+    .username-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: -0.15rem;
+      padding-inline: 0.2rem;
+    }
+
+    .username-suggestions.hidden {
+      display: none;
+    }
+
+    .username-suggestion-chip {
+      border: 1px solid rgb(var(--theme-outline-rgb) / 0.28);
+      background: rgb(var(--theme-surface-rgb) / 0.55);
+      color: rgb(var(--theme-text-rgb));
+      border-radius: 999px;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+    }
+
+    .username-suggestion-chip:hover {
+      border-color: rgb(var(--theme-accent-rgb) / 0.42);
+      background: rgb(var(--theme-accent-rgb) / 0.14);
+      transform: translateY(-1px);
+    }
+
     @media (max-width: 767px) {
       body {
         background-attachment: scroll;

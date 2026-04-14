@@ -12,6 +12,7 @@
       const feedback = document.getElementById("profileFeedback");
       const usernameInput = document.getElementById("usernameInput");
       const usernameAvailabilityFeedback = document.getElementById("usernameAvailabilityFeedback");
+      const usernameSuggestions = document.getElementById("usernameSuggestions");
       const themeSelectorGrid = document.getElementById("themeSelectorGrid");
       const themeFeedback = document.getElementById("themeFeedback");
       const locationInput = document.getElementById("locationInput");
@@ -47,6 +48,7 @@
       locationInput.addEventListener("blur", handleLocationBlur);
       usernameInput.addEventListener("input", handleUsernameInput);
       usernameInput.addEventListener("blur", handleUsernameBlur);
+      usernameSuggestions.addEventListener("click", handleUsernameSuggestionClick);
       locationSuggestionsList.addEventListener("mousedown", handleLocationOptionMouseDown);
       locationSuggestionsList.addEventListener("click", handleLocationOptionClick);
       document.addEventListener("click", handleLocationOutsideClick);
@@ -296,12 +298,14 @@
         feedback.textContent = "";
         if (!sanitized) {
           hideUsernameFeedback();
+          renderUsernameSuggestions([]);
           return;
         }
 
         const validation = validateUsernameLocally(sanitized);
         if (!validation.valid) {
           applyUsernameFeedback("unavailable", validation.message);
+          renderUsernameSuggestions([]);
           return;
         }
 
@@ -352,6 +356,7 @@
         const validation = validateUsernameLocally(usernameInput.value);
         if (!validation.valid) {
           applyUsernameFeedback("unavailable", validation.message);
+          renderUsernameSuggestions([]);
           return;
         }
 
@@ -371,6 +376,7 @@
         const validation = validateUsernameLocally(value);
         if (!validation.valid) {
           applyUsernameFeedback("unavailable", validation.message);
+          renderUsernameSuggestions([]);
           return {
             available: false,
             ...validation
@@ -379,6 +385,7 @@
 
         if (!options.force && lastUsernameAvailability && lastUsernameAvailability.sanitized === validation.sanitized) {
           applyUsernameFeedback(lastUsernameAvailability.available ? "available" : "unavailable", lastUsernameAvailability.message);
+          maybeRenderUsernameSuggestions(lastUsernameAvailability, validation.sanitized);
           return lastUsernameAvailability;
         }
 
@@ -396,6 +403,7 @@
 
           lastUsernameAvailability = availability;
           applyUsernameFeedback(availability.available ? "available" : "unavailable", availability.message);
+          await maybeRenderUsernameSuggestions(availability, validation.sanitized);
           return availability;
         } catch (error) {
           if (token !== usernameRequestToken) {
@@ -409,6 +417,7 @@
           };
           lastUsernameAvailability = fallback;
           applyUsernameFeedback("unavailable", fallback.message);
+          renderUsernameSuggestions([]);
           return fallback;
         }
       }
@@ -423,6 +432,50 @@
         usernameAvailabilityFeedback.dataset.state = "";
         usernameAvailabilityFeedback.textContent = "";
         usernameAvailabilityFeedback.classList.add("hidden");
+      }
+
+      async function maybeRenderUsernameSuggestions(availability, seedValue) {
+        if (!availability || availability.available || availability.reason !== "taken") {
+          renderUsernameSuggestions([]);
+          return;
+        }
+
+        const currentToken = usernameRequestToken;
+        const suggestions = typeof window.getUsernameSuggestions === "function"
+          ? await window.getUsernameSuggestions(seedValue, { currentUid: profile.uid || "" })
+          : [];
+
+        if (currentToken !== usernameRequestToken) {
+          return;
+        }
+
+        renderUsernameSuggestions(suggestions);
+      }
+
+      function renderUsernameSuggestions(suggestions) {
+        if (!Array.isArray(suggestions) || !suggestions.length) {
+          usernameSuggestions.innerHTML = "";
+          usernameSuggestions.classList.add("hidden");
+          return;
+        }
+
+        usernameSuggestions.innerHTML = suggestions.map((suggestion) => `
+          <button class="profile-username-suggestion-chip" data-username-suggestion="${escapeAttribute(suggestion)}" type="button">
+            @${escapeHtml(suggestion)}
+          </button>
+        `).join("");
+        usernameSuggestions.classList.remove("hidden");
+      }
+
+      function handleUsernameSuggestionClick(event) {
+        const button = event.target.closest("[data-username-suggestion]");
+        if (!button) return;
+
+        const suggestion = button.dataset.usernameSuggestion || "";
+        usernameInput.value = suggestion;
+        lastUsernameAvailability = null;
+        handleUsernameInput();
+        usernameInput.focus();
       }
 
       function resolveTheme(themeId) {
