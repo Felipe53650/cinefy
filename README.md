@@ -89,34 +89,50 @@ Algumas entregas mais relevantes das ultimas iteracoes:
 - lista compartilhada com permissao de edicao
 - reviews publicas e interacao social em detalhes e perfis
 
-## Capturas da aplicacao
+## Galeria do produto
 
-Esses prints mostram alguns fluxos principais da interface atual.
+Essas capturas priorizam telas publicas e neutras, sem expor dados pessoais reais de usuarios do projeto.
 
-A galeria abaixo privilegia telas publicas e neutras, sem expor dados pessoais reais de usuarios do projeto.
+### Home e descoberta
 
 <p align="center">
   <img src="public/assets/img/screenshots/home.png" alt="Home do CINEfy" width="90%">
 </p>
+
+Na home, o produto concentra descoberta, recomendacoes iniciais, busca global persistente e sinais visuais de lista ja adicionada.
+
+### Acesso e onboarding
 
 <p align="center">
   <img src="public/assets/img/screenshots/login.png" alt="Tela de login do CINEfy" width="44%">
   <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do CINEfy" width="44%">
 </p>
 
-### Outros fluxos importantes da interface atual
+Os fluxos de entrada foram refinados com foco em baixa friccao, feedbacks visiveis e consistencia com os temas globais do produto.
 
-Mesmo sem expor dados sensiveis no repositório, a versao atual do produto ja inclui estes percursos relevantes:
+### Mapa rapido das telas atuais
 
-- busca com cabecalho persistente, filtros, classificacao etaria e cards com estado `Na lista`
-- detalhes do filme com diretores, streaming, reviews da comunidade e acoes sociais
+Mesmo sem publicar capturas que exponham dados pessoais, a versao atual do CINEfy ja cobre estes percursos:
+
+- busca com cabecalho persistente, filtros, classificacao etaria, atalhos de genero e cards com estado `Na lista`
+- detalhes do filme com diretores, disponibilidade em streaming, reviews da comunidade e acoes sociais
 - perfil publico navegavel com amizade, listas abertas e reviews publicas
 - listas compartilhadas com permissao de leitura ou edicao colaborativa
+- modo leitor alinhado ao design system principal
 
-Para uma visao mais completa da estrutura do produto, vale abrir tambem:
+### Onde ver esses fluxos
 
-- [Arquitetura do projeto](./docs/architecture.md)
 - [Demo online](https://cinefy3-83a9a.web.app)
+- [Arquitetura do projeto](./docs/architecture.md)
+
+### Observacao sobre screenshots
+
+O repositório evita subir capturas que mostrem dados pessoais reais de usuarios. A proxima rodada de atualizacao visual deve incluir novos prints publicos e anonimizados de:
+
+- busca com filtros e resultados
+- detalhes do filme
+- perfil publico
+- lista compartilhada em modo leitor e em modo colaborativo
 
 ## Stack
 
