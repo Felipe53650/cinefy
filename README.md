@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Plataforma web social para descobrir filmes, montar listas, compartilhar curadorias, publicar reviews e navegar por perfis cinefilos com uma interface temática.
+  Plataforma web social para descobrir filmes, montar listas, compartilhar curadorias, publicar reviews e navegar por perfis cinefilos com uma interface tematica.
 </p>
 
 <p align="center">
@@ -18,14 +18,25 @@
 
 ## Visao geral
 
-O CINEfy evoluiu de uma ideia de curadoria pessoal para um produto web com camada social real. Hoje ele permite descobrir filmes, criar listas proprias, compartilhar listas por link, navegar em perfis publicos, acompanhar reviews da comunidade e manter uma identidade visual personalizada por tema.
+O CINEfy e um produto web focado em curadoria cinematografica com camada social. A aplicacao permite descobrir filmes, montar listas proprias, compartilhar selecoes por link, navegar em perfis publicos, publicar reviews e interagir com outras pessoas da comunidade.
 
-O projeto foi desenvolvido com foco em:
+Mais do que uma landing page ou um CRUD simples, o projeto foi trabalhado como um produto real:
 
-- experiencia de uso em desktop e mobile
-- descoberta cinematografica com baixo atrito
-- compartilhamento social de listas e opinioes
-- arquitetura simples de manter, com frontend em JavaScript vanilla e Firebase como base de produto
+- fluxo publico e autenticado
+- identidade visual consistente
+- descoberta de conteudo com baixo atrito
+- recursos sociais distribuidos por varias telas
+- infraestrutura real com Firebase e Cloud Functions
+
+## O que este projeto demonstra
+
+Para recrutadores, avaliadores ou clientes, o CINEfy mostra:
+
+- construcao de produto end-to-end com foco em UX
+- frontend em JavaScript vanilla organizado em escala de aplicacao
+- integracao real com Auth, Firestore, Storage, Hosting e Functions
+- hardening de seguranca em app web ja em producao
+- capacidade de evoluir uma base vibecodada para um produto mais consistente e mais vendavel
 
 ## O que a aplicacao entrega hoje
 
@@ -42,9 +53,18 @@ O projeto foi desenvolvido com foco em:
 - upload de avatar e poster manual com Firebase Storage
 - proxy seguro do TMDB via Cloud Functions
 
+## O que faz o CINEfy se destacar
+
+- busca global persistente no cabecalho
+- recomendacoes personalizadas baseadas no comportamento do usuario
+- perfis publicos navegaveis por clique em cards, reviews e amizades
+- lista compartilhada com permissao de leitura ou edicao colaborativa
+- fluxo social com baixa friccao em desktop e mobile
+- cuidado tecnico com acessibilidade, contraste, feedbacks e responsividade
+
 ## Capturas da aplicacao
 
-Esses prints mostram os fluxos principais da interface atual do projeto no GitHub.
+Esses prints mostram alguns fluxos principais da interface atual.
 
 <p align="center">
   <img src="public/assets/img/screenshots/home.png" alt="Home do CINEfy" width="90%">
@@ -55,7 +75,7 @@ Esses prints mostram os fluxos principais da interface atual do projeto no GitHu
   <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do CINEfy" width="44%">
 </p>
 
-## Stack e arquitetura
+## Stack
 
 ### Frontend
 
@@ -77,18 +97,17 @@ Esses prints mostram os fluxos principais da interface atual do projeto no GitHu
 - TMDB como fonte principal de catalogo, metadados, streaming e IDs externos
 - links auxiliares para IMDb, Letterboxd e AdoroCinema
 
-## Diferenciais tecnicos do projeto
+## Decisoes tecnicas importantes
 
-- busca global persistente no cabecalho
-- listas compartilhadas com niveis diferentes de acesso
-- perfis publicos navegaveis por clique em cards, reviews e amizades
-- motor inicial de recomendacao baseado em comportamento do usuario
-- hardening de seguranca com CSP, HSTS, rules de Firestore/Storage e proxy do TMDB no backend
-- tratamento de UX com foco em friccao baixa, responsividade e coerencia visual entre telas
+- TMDB saiu do frontend e passou a ser consumido por um proxy em Cloud Function
+- regras de Firestore e Storage foram endurecidas para reduzir confianca excessiva no cliente
+- uploads de avatar e poster passaram a usar Storage
+- a camada social foi distribuida por perfil publico, reviews, amizades e listas compartilhadas
+- o design system ficou orientado por tema, com variaveis globais e componentes reutilizaveis
 
-## Seguranca do repositório
+## Seguranca do repositorio
 
-### O que e publico por natureza e pode continuar no repo
+### O que deve continuar publico no repo
 
 - `robots.txt`
 - `sitemap.xml`
@@ -97,7 +116,7 @@ Esses prints mostram os fluxos principais da interface atual do projeto no GitHu
 - `firestore.rules`
 - `storage.rules`
 
-Esses arquivos nao sao segredos. Pelo contrario: fazem parte da configuracao normal do projeto e devem ser versionados.
+Esses arquivos nao sao segredos. Eles fazem parte da configuracao normal do projeto e devem ser versionados.
 
 ### O que nao deve ser publicado
 
@@ -113,7 +132,7 @@ Esses arquivos nao sao segredos. Pelo contrario: fazem parte da configuracao nor
 - a chave do TMDB nao fica mais exposta no frontend
 - o projeto usa `TMDB_API_KEY` como secret nas Cloud Functions
 - o `.gitignore` foi reforcado para ignorar `.env`, `.env.*` e arquivos locais de segredo
-- o README nao expoe dados sensiveis de usuarios reais
+- o README evita expor dados sensiveis de usuarios reais
 
 ## Estrutura do projeto
 
@@ -134,7 +153,7 @@ docs/
   architecture.md
 ```
 
-## Rodando localmente
+## Como executar localmente
 
 ### 1. Instale as dependencias do frontend
 
@@ -156,15 +175,15 @@ npm install
 cd ..
 ```
 
-### 4. Rode localmente
+### 4. Suba os emuladores
 
-Para uma experiencia completa com Hosting, Firestore, Auth, Storage e Functions:
+Para a experiencia mais completa:
 
 ```powershell
 firebase emulators:start
 ```
 
-Se quiser apenas abrir a interface rapidamente, tambem e possivel servir a pasta `public`, mas recursos que dependem do rewrite `/api/tmdb` e das regras do Firebase funcionam melhor com os emuladores.
+Tambem e possivel servir apenas a pasta `public`, mas os fluxos com rewrite `/api/tmdb`, Auth, Storage e regras do Firebase ficam melhores com os emuladores.
 
 ## Deploy
 
@@ -174,7 +193,7 @@ Se quiser apenas abrir a interface rapidamente, tambem e possivel servir a pasta
 firebase deploy --only "hosting"
 ```
 
-### Regras e backend
+### Backend e regras
 
 ```powershell
 firebase deploy --only "functions,firestore:rules,storage"
@@ -188,17 +207,17 @@ firebase deploy --only "functions,firestore:rules,storage"
 
 O CINEfy ja esta acima de um MVP visual. Hoje ele tem base funcional para:
 
-- portfólio tecnico forte
+- portfolio tecnico forte
 - produto white-label para nichos ligados a cinema
 - evolucao para SaaS social de curadoria cinematografica
 
 ## Proximos passos naturais
 
 - aprofundar ranking de recomendacao personalizada
-- adicionar mais acoes sociais em pontos de descoberta
-- evoluir analiticos e observabilidade
-- enriquecer dados externos com mais fontes sem quebrar a base TMDB
+- ampliar analytics e observabilidade
+- enriquecer dados externos sem quebrar a base TMDB
 - adicionar cobertura automatizada de testes para fluxos criticos
+- evoluir a camada social com mais sinais de conexao entre usuarios
 
 ## Autor
 
