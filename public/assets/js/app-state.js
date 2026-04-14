@@ -23,6 +23,7 @@
   const MAX_REVIEW_COUNT = 250;
   const MAX_REVIEW_COMMENT_LENGTH = 1600;
   const ALLOWED_THEMES = new Set(["ember", "ocean", "emerald", "aurora", "sunset", "rose", "noir", "golden-age"]);
+  const USERNAME_DISALLOWED_PATTERN = /[\s<>`"'\\/|@]/g;
 
   const defaultProfile = {
     username: "felipecine",
@@ -148,10 +149,10 @@
 
   function sanitizeUsername(value) {
     return String(value ?? "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9_]/g, "")
+      .normalize("NFKC")
+      .trim()
+      .replace(USERNAME_DISALLOWED_PATTERN, "")
+      .replace(/[\u0000-\u001f\u007f]/g, "")
       .slice(0, MAX_USERNAME_LENGTH) || "cinefyuser";
   }
 
@@ -212,6 +213,10 @@
       ...safeProfile,
       uid: truncate(String(safeProfile.uid || ""), 128),
       username: sanitizeUsername(safeProfile.username || safeProfile.email || safeProfile.displayName || defaultProfile.username),
+      usernameKey: sanitizeUsername(safeProfile.username || safeProfile.email || safeProfile.displayName || defaultProfile.username)
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase(),
       displayName: sanitizeText(safeProfile.displayName || safeProfile.name || defaultProfile.displayName, MAX_PROFILE_NAME_LENGTH) || defaultProfile.displayName,
       bio: sanitizeMultilineText(safeProfile.bio || defaultProfile.bio, MAX_BIO_LENGTH) || defaultProfile.bio,
       avatar: sanitizeUrl(safeProfile.avatar) || defaultProfile.avatar,

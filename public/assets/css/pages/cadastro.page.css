@@ -48,6 +48,30 @@
       background: rgba(255, 255, 255, 0.14);
     }
 
+    .username-feedback {
+      margin-top: -0.4rem;
+      padding-inline: 0.35rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .username-feedback:not(.hidden) {
+      display: block;
+    }
+
+    .username-feedback[data-state="available"] {
+      color: rgb(var(--theme-success-rgb, 52 211 153));
+    }
+
+    .username-feedback[data-state="unavailable"] {
+      color: rgb(var(--theme-accent-rgb, 232 59 36));
+    }
+
+    .username-feedback[data-state="checking"] {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
     @media (max-width: 767px) {
       body {
         background-attachment: scroll;

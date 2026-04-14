@@ -34,6 +34,7 @@ service cloud.firestore {
           "uid",
           "displayName",
           "username",
+          "usernameKey",
           "avatar",
           "bio",
           "location",
@@ -46,6 +47,7 @@ service cloud.firestore {
           "uid",
           "displayName",
           "username",
+          "usernameKey",
           "avatar",
           "bio",
           "location",
@@ -56,11 +58,32 @@ service cloud.firestore {
         validShortText(request.resource.data.uid, 128) &&
         validShortText(request.resource.data.displayName, 80) &&
         validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.usernameKey, 32) &&
         validShortText(request.resource.data.avatar, 2048) &&
         validShortText(request.resource.data.bio, 280) &&
         validShortText(request.resource.data.location, 120) &&
         validTheme(request.resource.data.theme) &&
         validShortText(request.resource.data.authProvider, 24);
+    }
+
+    function isValidUsernameRegistry(usernameId) {
+      return request.resource.data.keys().hasOnly([
+          "uid",
+          "username",
+          "usernameKey",
+          "createdAt",
+          "updatedAt"
+        ]) &&
+        request.resource.data.keys().hasAll([
+          "uid",
+          "username",
+          "usernameKey"
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.usernameKey == usernameId &&
+        validShortText(request.resource.data.uid, 128) &&
+        validShortText(request.resource.data.username, 24) &&
+        validShortText(request.resource.data.usernameKey, 32);
     }
 
     function isAppStateBasePayload() {
@@ -311,6 +334,13 @@ service cloud.firestore {
       allow create, update: if isSelf(userId) && isValidUserDocument(userId);
       allow read: if isSignedIn();
       allow delete: if isSelf(userId);
+    }
+
+    match /usernames/{usernameId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isSignedIn() && isValidUsernameRegistry(usernameId);
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
 
     match /users/{userId}/app_state/{documentId} {

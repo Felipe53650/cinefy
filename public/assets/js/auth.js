@@ -5,6 +5,43 @@
   const PROFILE_KEY = "cinefy-user-profile";
   const AUTH_PAGES = new Set(["login", "cadastro"]);
   const PUBLIC_PAGES = new Set(["index", "busca", "detalhes", "404", "modoleitor"]);
+  const USERNAME_MIN_LENGTH = 3;
+  const USERNAME_MAX_LENGTH = 24;
+  const USERNAME_DISALLOWED_PATTERN = /[\s<>`"'\\/|@]/g;
+  const RESERVED_USERNAME_TERMS = [
+    "admin",
+    "administrador",
+    "mod",
+    "moderador",
+    "suporte",
+    "support",
+    "staff",
+    "owner",
+    "official",
+    "oficial",
+    "cinefy",
+    "sistema",
+    "system",
+    "root",
+    "null",
+    "undefined"
+  ];
+  const BLOCKED_USERNAME_TERMS = [
+    "fdp",
+    "fdputa",
+    "filhodaputa",
+    "caralho",
+    "porra",
+    "buceta",
+    "piranha",
+    "arrombado",
+    "arrombada",
+    "nazista",
+    "hitler",
+    "racista",
+    "estuprador",
+    "estupradora"
+  ];
   let firebaseAuthResolved = false;
   const defaultAvatar =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
@@ -81,11 +118,101 @@
 
   function sanitizeUsername(value) {
     return (value || "")
-      .normalize("NFD")
+      .normalize("NFKC")
+      .trim()
+      .replace(USERNAME_DISALLOWED_PATTERN, "")
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .slice(0, USERNAME_MAX_LENGTH) || "cinefyuser";
+  }
+
+  function buildUsernameKey(value) {
+    return sanitizeUsername(value)
+      .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "")
-      .slice(0, 24) || "cinefyuser";
+      .toLowerCase();
+  }
+
+  function getUsernameDocId(value) {
+    return encodeURIComponent(buildUsernameKey(value));
+  }
+
+  function getUsernameDocsCollection() {
+    return hasFirestore() ? getFirestore().collection("usernames") : null;
+  }
+
+  function getModerationKey(value) {
+    return buildUsernameKey(value).replace(/[^a-z0-9]+/g, "");
+  }
+
+  function isReservedUsername(moderationKey) {
+    return RESERVED_USERNAME_TERMS.some((term) => (
+      moderationKey === term ||
+      new RegExp(`^${term}[0-9]+$`).test(moderationKey)
+    ));
+  }
+
+  function validateUsernameCandidate(value) {
+    const sanitized = sanitizeUsername(value);
+    const key = buildUsernameKey(sanitized);
+    const moderationKey = getModerationKey(sanitized);
+
+    if (!sanitized) {
+      return {
+        valid: false,
+        sanitized,
+        key,
+        reason: "empty",
+        message: "Escolha um nome de usuario para continuar."
+      };
+    }
+
+    if (sanitized.length < USERNAME_MIN_LENGTH) {
+      return {
+        valid: false,
+        sanitized,
+        key,
+        reason: "too-short",
+        message: `Use pelo menos ${USERNAME_MIN_LENGTH} caracteres.`
+      };
+    }
+
+    if (!/^[^\s<>`"'\\/|@]+$/u.test(sanitized)) {
+      return {
+        valid: false,
+        sanitized,
+        key,
+        reason: "invalid-chars",
+        message: "Use letras, numeros e simbolos comuns, sem espacos, barras ou arroba."
+      };
+    }
+
+    if (isReservedUsername(moderationKey)) {
+      return {
+        valid: false,
+        sanitized,
+        key,
+        reason: "reserved",
+        message: "Esse nome nao esta disponivel no CINEfy."
+      };
+    }
+
+    if (BLOCKED_USERNAME_TERMS.some((term) => moderationKey.includes(term))) {
+      return {
+        valid: false,
+        sanitized,
+        key,
+        reason: "moderation",
+        message: "Esse nome nao atende as regras de boa convivencia da rede."
+      };
+    }
+
+    return {
+      valid: true,
+      sanitized,
+      key,
+      docId: getUsernameDocId(sanitized),
+      message: "Nome de usuario disponivel."
+    };
   }
 
   function sanitizeEmail(value) {
@@ -110,20 +237,23 @@
     const store = getStore();
     const baseProfile = store ? clone(store.defaultProfile) : {
       username: "cinefyuser",
+      usernameKey: "cinefyuser",
       displayName: "Novo Usuario",
       bio: "Personalize este texto quando quiser para apresentar seu perfil no CINEfy.",
       avatar: defaultAvatar,
       location: "Brasil"
     };
 
-    const displayName = data.displayName || data.name || "Novo Usuario";
-    const usernameSeed = data.username || data.email || displayName;
+    const usernameSeed = data.username || data.email || data.displayName || data.name || "cinefyuser";
+    const username = sanitizeUsername(usernameSeed);
+    const displayName = data.displayName || data.name || username || "Novo Usuario";
 
     return {
       ...baseProfile,
       uid: data.uid || "",
       displayName,
-      username: sanitizeUsername(usernameSeed),
+      username,
+      usernameKey: buildUsernameKey(data.usernameKey || username),
       bio: data.bio || baseProfile.bio,
       avatar: data.avatar || baseProfile.avatar || defaultAvatar,
       location: data.location || baseProfile.location || "Brasil",
@@ -152,6 +282,7 @@
       avatar: safeProfile.avatar || defaultAvatar,
       authProvider: safeProfile.authProvider || "email",
       username: safeProfile.username || "cinefyuser",
+      usernameKey: safeProfile.usernameKey || buildUsernameKey(safeProfile.username || "cinefyuser"),
       theme: safeProfile.theme || "ember"
     });
   }
@@ -209,35 +340,135 @@
     });
   }
 
+  async function checkUsernameAvailability(value, options = {}) {
+    const validation = validateUsernameCandidate(value);
+    if (!validation.valid) {
+      return {
+        available: false,
+        ...validation
+      };
+    }
+
+    if (!hasFirestore()) {
+      return {
+        available: true,
+        ...validation
+      };
+    }
+
+    const snapshot = await getUsernameDocsCollection().doc(validation.docId).get();
+    const ownerUid = snapshot.exists ? String((snapshot.data() || {}).uid || "") : "";
+    const currentUid = String(options.currentUid || "");
+    const available = !snapshot.exists || (currentUid && ownerUid === currentUid);
+
+    return {
+      available,
+      ...validation,
+      ownerUid,
+      message: available ? "Nome de usuario disponivel." : "Esse nome de usuario ja esta em uso."
+    };
+  }
+
+  async function findAvailableUsernameVariant(value, currentUid) {
+    const baseValidation = validateUsernameCandidate(value);
+    if (!baseValidation.valid) {
+      throw new Error(baseValidation.message);
+    }
+
+    const base = baseValidation.sanitized.slice(0, USERNAME_MAX_LENGTH - 3) || "cinefyuser";
+    const directAvailability = await checkUsernameAvailability(baseValidation.sanitized, { currentUid });
+    if (directAvailability.available) {
+      return directAvailability.sanitized;
+    }
+
+    for (let index = 2; index <= 40; index += 1) {
+      const candidate = `${base}${index}`;
+      const availability = await checkUsernameAvailability(candidate, { currentUid });
+      if (availability.available) {
+        return availability.sanitized;
+      }
+    }
+
+    throw new Error("Nao foi possivel gerar um nome de usuario disponivel agora.");
+  }
+
   async function saveUserProfileToFirestore(profile) {
     const safeProfile = sanitizeProfilePayload(profile);
     if (!hasFirestore() || !safeProfile.uid) return safeProfile;
 
     const firestore = getFirestore();
     const now = window.firebase.firestore.FieldValue.serverTimestamp();
-    const removeField = window.firebase.firestore.FieldValue.delete();
     const docRef = firestore.collection("users").doc(safeProfile.uid);
-    const existingSnapshot = await docRef.get();
-    const existingData = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
+    const desiredAvailability = await checkUsernameAvailability(safeProfile.username, { currentUid: safeProfile.uid });
+    if (!desiredAvailability.available) {
+      const error = new Error(desiredAvailability.message);
+      error.code = desiredAvailability.reason === "moderation" || desiredAvailability.reason === "reserved"
+        ? "cinefy/username-disallowed"
+        : "cinefy/username-taken";
+      throw error;
+    }
 
-    await docRef.set(
-      {
-        uid: safeProfile.uid,
-        displayName: safeProfile.displayName,
-        username: safeProfile.username,
-        email: removeField,
-        avatar: safeProfile.avatar || defaultAvatar,
-        bio: safeProfile.bio || "",
-        location: safeProfile.location || "Brasil",
-        theme: safeProfile.theme || "ember",
-        authProvider: safeProfile.authProvider || "email",
-        updatedAt: now,
-        createdAt: existingData.createdAt || now
-      },
-      { merge: true }
-    );
+    await firestore.runTransaction(async (transaction) => {
+      const existingSnapshot = await transaction.get(docRef);
+      const existingData = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
+      const previousUsername = existingData.username || "";
+      const previousKey = previousUsername ? buildUsernameKey(previousUsername) : "";
+      const usernameRef = firestore.collection("usernames").doc(desiredAvailability.docId);
+      const usernameSnapshot = await transaction.get(usernameRef);
 
-    return safeProfile;
+      if (usernameSnapshot.exists) {
+        const usernameData = usernameSnapshot.data() || {};
+        if (String(usernameData.uid || "") !== safeProfile.uid) {
+          const error = new Error("Esse nome de usuario ja esta em uso.");
+          error.code = "cinefy/username-taken";
+          throw error;
+        }
+      }
+
+      transaction.set(
+        docRef,
+        {
+          uid: safeProfile.uid,
+          displayName: safeProfile.displayName,
+          username: desiredAvailability.sanitized,
+          usernameKey: desiredAvailability.key,
+          avatar: safeProfile.avatar || defaultAvatar,
+          bio: safeProfile.bio || "",
+          location: safeProfile.location || "Brasil",
+          theme: safeProfile.theme || "ember",
+          authProvider: safeProfile.authProvider || "email",
+          updatedAt: now,
+          createdAt: existingData.createdAt || now
+        },
+        { merge: true }
+      );
+
+      transaction.set(
+        usernameRef,
+        {
+          uid: safeProfile.uid,
+          username: desiredAvailability.sanitized,
+          usernameKey: desiredAvailability.key,
+          updatedAt: now,
+          createdAt: usernameSnapshot.exists ? (usernameSnapshot.data() || {}).createdAt || now : now
+        },
+        { merge: true }
+      );
+
+      if (previousKey && previousKey !== desiredAvailability.key) {
+        const previousRef = firestore.collection("usernames").doc(getUsernameDocId(previousUsername));
+        const previousSnapshot = await transaction.get(previousRef);
+        if (previousSnapshot.exists && String((previousSnapshot.data() || {}).uid || "") === safeProfile.uid) {
+          transaction.delete(previousRef);
+        }
+      }
+    });
+
+    return {
+      ...safeProfile,
+      username: desiredAvailability.sanitized,
+      usernameKey: desiredAvailability.key
+    };
   }
 
   async function getUserProfileFromFirestore(uid) {
@@ -272,13 +503,35 @@
         || firebaseProfile.theme
     });
 
-    await saveUserProfileToFirestore(mergedProfile);
-    return mergedProfile;
+    try {
+      return await saveUserProfileToFirestore(mergedProfile);
+    } catch (error) {
+      if ((error && error.code === "cinefy/username-taken") && authProvider !== "email") {
+        const fallbackUsername = await findAvailableUsernameVariant(mergedProfile.username, user.uid);
+        return saveUserProfileToFirestore({
+          ...mergedProfile,
+          username: fallbackUsername,
+          displayName: mergedProfile.displayName || fallbackUsername
+        });
+      }
+
+      throw error;
+    }
   }
 
-  async function register(name, email, password) {
-    if (!name || !email || !password) {
-      throw new Error("Preencha nome, e-mail e senha.");
+  async function register(username, email, password) {
+    const usernameValidation = validateUsernameCandidate(username);
+    if (!username || !email || !password) {
+      throw new Error("Preencha nome de usuario, e-mail e senha.");
+    }
+
+    if (!usernameValidation.valid) {
+      throw new Error(usernameValidation.message);
+    }
+
+    const usernameAvailability = await checkUsernameAvailability(usernameValidation.sanitized);
+    if (!usernameAvailability.available) {
+      throw new Error(usernameAvailability.message);
     }
 
     if (String(password).length > 256) {
@@ -292,21 +545,43 @@
     const user = credential.user;
 
     if (user && typeof user.updateProfile === "function") {
-      await user.updateProfile({ displayName: name });
+      await user.updateProfile({ displayName: usernameValidation.sanitized });
     }
 
-    const refreshedUser = auth.currentUser || user;
-    if (refreshedUser && typeof refreshedUser.sendEmailVerification === "function") {
-      await refreshedUser.sendEmailVerification();
+    try {
+      const refreshedUser = auth.currentUser || user;
+      if (refreshedUser && typeof refreshedUser.sendEmailVerification === "function") {
+        await refreshedUser.sendEmailVerification();
+      }
+
+      const profile = await buildUserProfile(refreshedUser, "email", {
+        displayName: usernameValidation.sanitized,
+        username: usernameValidation.sanitized
+      });
+
+      syncProfile(profile);
+      await auth.signOut();
+      saveAuthFlash("Conta criada com sucesso. Verifique seu e-mail antes de fazer login.", "success");
+      redirectTo("login.html");
+      return profile;
+    } catch (error) {
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser && typeof currentUser.delete === "function") {
+          await currentUser.delete();
+        }
+      } catch (cleanupError) {
+        console.error("Nao foi possivel limpar o usuario apos falha de cadastro:", cleanupError);
+      }
+
+      try {
+        await auth.signOut();
+      } catch (signOutError) {
+        console.error("Nao foi possivel encerrar a sessao apos falha de cadastro:", signOutError);
+      }
+
+      throw error;
     }
-
-    const profile = await buildUserProfile(refreshedUser, "email", { displayName: name });
-
-    syncProfile(profile);
-    await auth.signOut();
-    saveAuthFlash("Conta criada com sucesso. Verifique seu e-mail antes de fazer login.", "success");
-    redirectTo("login.html");
-    return profile;
   }
 
   async function login(email, password) {
@@ -415,12 +690,14 @@
       }
     }
 
-    startSession(safeProfile);
-
     if (hasFirestore() && safeProfile.uid) {
-      await saveUserProfileToFirestore(safeProfile);
+      const persistedProfile = await saveUserProfileToFirestore(safeProfile);
+      startSession(persistedProfile);
+      await syncStoreFromCloud();
+      return persistedProfile;
     }
 
+    startSession(safeProfile);
     await syncStoreFromCloud();
 
     return safeProfile;
@@ -514,6 +791,8 @@
   window.logout = logout;
   window.getCurrentUser = getCurrentUser;
   window.saveCurrentProfile = saveCurrentProfile;
+  window.checkUsernameAvailability = checkUsernameAvailability;
+  window.validateUsernameCandidate = validateUsernameCandidate;
   window.mapFirebaseError = mapFirebaseError;
   window.consumeAuthFlash = consumeAuthFlash;
 
