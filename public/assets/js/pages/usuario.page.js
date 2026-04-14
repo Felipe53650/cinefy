@@ -400,15 +400,73 @@
             <h3 class="truncate text-lg font-black text-white">${escapeHtml(review.title || "Filme avaliado")}</h3>
             <p class="public-profile-review-card__film">Atualizada em ${escapeHtml(formatDate(review.updatedAt))}</p>
           </div>
-          <div class="public-profile-review-card__rating">
-            <span class="material-symbols-outlined fill-icon text-yellow-400 text-sm">star</span>
-            <span>${escapeHtml(review.ratingLabel)}</span>
+          <div class="public-profile-review-card__meta">
+            <div class="public-profile-review-card__rating">
+              <span class="material-symbols-outlined fill-icon text-yellow-400 text-sm">star</span>
+              <span>${escapeHtml(review.ratingLabel)}</span>
+            </div>
+            ${renderReviewSocialAction()}
           </div>
         </div>
         <p class="public-profile-review-card__body">${escapeHtml(review.comment)}</p>
         <p class="public-profile-review-card__footer">${escapeHtml(review.sourceLabel)}</p>
       </article>
     `).join("");
+
+    publicProfileReviewsList.querySelectorAll("[data-profile-review-action]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const action = button.getAttribute("data-profile-review-action");
+        if (action === "add") {
+          await sendFriendRequest();
+          return;
+        }
+
+        if (action === "accept") {
+          await acceptIncomingFriendRequest();
+        }
+      });
+    });
+  }
+
+  function renderReviewSocialAction() {
+    const isOwnProfile = Boolean(state.targetUid && state.viewerUid && state.targetUid === state.viewerUid);
+    if (!state.viewerSignedIn || isOwnProfile) {
+      return "";
+    }
+
+    if (state.social.status === "friend") {
+      return `
+        <button class="public-profile-review-action public-profile-review-action--state" disabled type="button">
+          <span class="material-symbols-outlined text-sm">group</span>
+          <span>Amigo</span>
+        </button>
+      `;
+    }
+
+    if (state.social.status === "outgoing") {
+      return `
+        <button class="public-profile-review-action public-profile-review-action--state" disabled type="button">
+          <span class="material-symbols-outlined text-sm">schedule</span>
+          <span>Pedido enviado</span>
+        </button>
+      `;
+    }
+
+    if (state.social.status === "incoming") {
+      return `
+        <button class="public-profile-review-action public-profile-review-action--primary" ${state.social.busy ? "disabled" : ""} data-profile-review-action="accept" type="button">
+          <span class="material-symbols-outlined text-sm">person_add</span>
+          <span>${escapeHtml(state.social.busy ? "Aceitando..." : "Aceitar amizade")}</span>
+        </button>
+      `;
+    }
+
+    return `
+      <button class="public-profile-review-action public-profile-review-action--primary" ${state.social.busy ? "disabled" : ""} data-profile-review-action="add" type="button">
+        <span class="material-symbols-outlined text-sm">person_add</span>
+        <span>${escapeHtml(state.social.busy ? "Enviando..." : "Adicionar amigo")}</span>
+      </button>
+    `;
   }
 
   function renderNotice(title, copy, actions = []) {
