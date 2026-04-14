@@ -75,6 +75,32 @@
       box-shadow: 0 18px 38px rgb(var(--theme-accent-strong-rgb) / 0.28);
     }
 
+    .forgot-password-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.5rem;
+      padding: 0.3rem 0.2rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: rgb(var(--theme-text-rgb) / 0.94);
+      text-decoration: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 0.22rem;
+      text-decoration-color: rgb(var(--theme-accent-rgb) / 0.46);
+      transition: color 180ms ease, text-decoration-color 180ms ease, transform 180ms ease;
+    }
+
+    .forgot-password-link:hover,
+    .forgot-password-link:focus-visible {
+      color: rgb(var(--theme-text-rgb));
+      text-decoration-color: rgb(var(--theme-accent-rgb) / 0.9);
+    }
+
+    .forgot-password-link:active {
+      transform: translateY(1px);
+    }
+
     @media (max-width: 767px) {
       body {
         background-attachment: scroll;
