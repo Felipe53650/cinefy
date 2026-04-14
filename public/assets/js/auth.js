@@ -379,20 +379,32 @@
     const baseSource = validation.sanitized.replace(/[._-]+$/g, "") || validation.sanitized;
     const candidates = [];
     const seen = new Set([validation.sanitized]);
-    const separators = [".", "_", "-", ""];
+    const themedSuffixes = ["cine", "filmes", "lista", "club", "watch"];
 
-    for (let index = 2; index <= 20 && candidates.length < 6; index += 1) {
-      for (const separator of separators) {
-        const suffix = `${separator}${index}`;
-        const trimmedBase = baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - suffix.length, USERNAME_MIN_LENGTH));
-        const candidate = sanitizeUsername(`${trimmedBase}${suffix}`);
-        if (!candidate || seen.has(candidate)) continue;
-        seen.add(candidate);
-        candidates.push(candidate);
-        if (candidates.length >= 12) {
-          break;
-        }
-      }
+    function queueCandidate(rawCandidate) {
+      const candidate = sanitizeUsername(rawCandidate);
+      if (!candidate || seen.has(candidate) || candidate.length < USERNAME_MIN_LENGTH) return;
+      seen.add(candidate);
+      candidates.push(candidate);
+    }
+
+    themedSuffixes.forEach((suffix) => {
+      const dottedBase = baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - (`.${suffix}`).length, USERNAME_MIN_LENGTH));
+      const underscoredBase = baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - (`_${suffix}`).length, USERNAME_MIN_LENGTH));
+      queueCandidate(`${dottedBase}.${suffix}`);
+      queueCandidate(`${underscoredBase}_${suffix}`);
+    });
+
+    for (let index = 2; index <= 20 && candidates.length < 18; index += 1) {
+      const dotSuffix = `.${index}`;
+      const underscoreSuffix = `_${index}`;
+      const dashSuffix = `-${index}`;
+      const plainSuffix = `${index}`;
+
+      queueCandidate(`${baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - dotSuffix.length, USERNAME_MIN_LENGTH))}${dotSuffix}`);
+      queueCandidate(`${baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - underscoreSuffix.length, USERNAME_MIN_LENGTH))}${underscoreSuffix}`);
+      queueCandidate(`${baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - dashSuffix.length, USERNAME_MIN_LENGTH))}${dashSuffix}`);
+      queueCandidate(`${baseSource.slice(0, Math.max(USERNAME_MAX_LENGTH - plainSuffix.length, USERNAME_MIN_LENGTH))}${plainSuffix}`);
     }
 
     const suggestions = [];
