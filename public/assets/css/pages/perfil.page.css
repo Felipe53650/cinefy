@@ -93,6 +93,29 @@
         position: relative;
       }
 
+      .profile-username-feedback {
+        margin-top: 0.6rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: rgb(var(--theme-muted-rgb) / 0.84);
+      }
+
+      .profile-username-feedback:not(.hidden) {
+        display: block;
+      }
+
+      .profile-username-feedback[data-state="available"] {
+        color: rgb(var(--theme-success-rgb, 52 211 153));
+      }
+
+      .profile-username-feedback[data-state="unavailable"] {
+        color: rgb(var(--theme-accent-rgb));
+      }
+
+      .profile-username-feedback[data-state="checking"] {
+        color: rgb(var(--theme-text-rgb) / 0.86);
+      }
+
       .profile-location-panel {
         position: absolute;
         left: 0;

@@ -10,6 +10,8 @@
       const removeAvatarButton = document.getElementById("removeAvatarButton");
       const logoutButton = document.getElementById("logoutButton");
       const feedback = document.getElementById("profileFeedback");
+      const usernameInput = document.getElementById("usernameInput");
+      const usernameAvailabilityFeedback = document.getElementById("usernameAvailabilityFeedback");
       const themeSelectorGrid = document.getElementById("themeSelectorGrid");
       const themeFeedback = document.getElementById("themeFeedback");
       const locationInput = document.getElementById("locationInput");
@@ -26,6 +28,9 @@
       const preparedMunicipalities = brazilMunicipalities.map(prepareMunicipality);
       let activeLocationIndex = -1;
       let visibleLocationSuggestions = [];
+      let usernameCheckTimer = null;
+      let usernameRequestToken = 0;
+      let lastUsernameAvailability = null;
 
       profile.theme = resolveTheme(profile.theme);
 
@@ -40,6 +45,8 @@
       locationInput.addEventListener("focus", handleLocationFocus);
       locationInput.addEventListener("keydown", handleLocationKeydown);
       locationInput.addEventListener("blur", handleLocationBlur);
+      usernameInput.addEventListener("input", handleUsernameInput);
+      usernameInput.addEventListener("blur", handleUsernameBlur);
       locationSuggestionsList.addEventListener("mousedown", handleLocationOptionMouseDown);
       locationSuggestionsList.addEventListener("click", handleLocationOptionClick);
       document.addEventListener("click", handleLocationOutsideClick);
@@ -99,12 +106,24 @@
       async function handleProfileSubmit(event) {
         event.preventDefault();
         try {
+          const usernameValidation = validateUsernameLocally(usernameInput.value);
+          if (!usernameValidation.valid) {
+            applyUsernameFeedback("unavailable", usernameValidation.message);
+            return;
+          }
+
+          const availability = await resolveUsernameAvailability(usernameValidation.sanitized, { force: true });
+          if (!availability.available) {
+            applyUsernameFeedback("unavailable", availability.message);
+            return;
+          }
+
           profile.displayName = document.getElementById("displayNameInput").value.trim();
-          profile.username = sanitizeUsername(document.getElementById("usernameInput").value);
+          profile.username = usernameValidation.sanitized;
           profile.bio = document.getElementById("bioInput").value.trim();
           profile.location = canonicalizeLocation(document.getElementById("locationInput").value.trim());
           if (typeof window.saveCurrentProfile === "function") {
-            await window.saveCurrentProfile(profile);
+            profile = await window.saveCurrentProfile(profile);
           } else {
             store.saveProfile(profile);
           }
@@ -266,8 +285,144 @@
         window.location.href = "index.html";
       }
 
+      function handleUsernameInput() {
+        const rawValue = usernameInput.value;
+        const sanitized = sanitizeUsername(rawValue);
+
+        if (sanitized !== rawValue) {
+          usernameInput.value = sanitized;
+        }
+
+        feedback.textContent = "";
+        if (!sanitized) {
+          hideUsernameFeedback();
+          return;
+        }
+
+        const validation = validateUsernameLocally(sanitized);
+        if (!validation.valid) {
+          applyUsernameFeedback("unavailable", validation.message);
+          return;
+        }
+
+        scheduleUsernameAvailabilityCheck();
+      }
+
+      function handleUsernameBlur() {
+        if (!usernameInput.value.trim()) {
+          hideUsernameFeedback();
+          return;
+        }
+
+        scheduleUsernameAvailabilityCheck({ immediate: true });
+      }
+
       function sanitizeUsername(value) {
-        return value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 24) || "cinefyuser";
+        if (store && typeof store.sanitizeUsername === "function") {
+          return store.sanitizeUsername(value);
+        }
+
+        return String(value || "").trim().slice(0, 24) || "cinefyuser";
+      }
+
+      function validateUsernameLocally(value) {
+        if (typeof window.validateUsernameCandidate === "function") {
+          return window.validateUsernameCandidate(value);
+        }
+
+        const sanitized = sanitizeUsername(value);
+        if (!sanitized) {
+          return {
+            valid: false,
+            sanitized,
+            message: "Escolha um nome de usuario para continuar."
+          };
+        }
+
+        return {
+          valid: sanitized.length >= 3,
+          sanitized,
+          message: sanitized.length >= 3 ? "Nome de usuario disponivel." : "Use pelo menos 3 caracteres."
+        };
+      }
+
+      function scheduleUsernameAvailabilityCheck(options = {}) {
+        window.clearTimeout(usernameCheckTimer);
+
+        const validation = validateUsernameLocally(usernameInput.value);
+        if (!validation.valid) {
+          applyUsernameFeedback("unavailable", validation.message);
+          return;
+        }
+
+        applyUsernameFeedback("checking", "Verificando disponibilidade...");
+
+        if (options.immediate) {
+          resolveUsernameAvailability(validation.sanitized);
+          return;
+        }
+
+        usernameCheckTimer = window.setTimeout(() => {
+          resolveUsernameAvailability(validation.sanitized);
+        }, 260);
+      }
+
+      async function resolveUsernameAvailability(value, options = {}) {
+        const validation = validateUsernameLocally(value);
+        if (!validation.valid) {
+          applyUsernameFeedback("unavailable", validation.message);
+          return {
+            available: false,
+            ...validation
+          };
+        }
+
+        if (!options.force && lastUsernameAvailability && lastUsernameAvailability.sanitized === validation.sanitized) {
+          applyUsernameFeedback(lastUsernameAvailability.available ? "available" : "unavailable", lastUsernameAvailability.message);
+          return lastUsernameAvailability;
+        }
+
+        const token = usernameRequestToken + 1;
+        usernameRequestToken = token;
+
+        try {
+          const availability = typeof window.checkUsernameAvailability === "function"
+            ? await window.checkUsernameAvailability(validation.sanitized, { currentUid: profile.uid || "" })
+            : { available: true, sanitized: validation.sanitized, message: "Nome de usuario disponivel." };
+
+          if (token !== usernameRequestToken) {
+            return availability;
+          }
+
+          lastUsernameAvailability = availability;
+          applyUsernameFeedback(availability.available ? "available" : "unavailable", availability.message);
+          return availability;
+        } catch (error) {
+          if (token !== usernameRequestToken) {
+            throw error;
+          }
+
+          const fallback = {
+            available: false,
+            sanitized: validation.sanitized,
+            message: "Nao foi possivel verificar esse nome agora."
+          };
+          lastUsernameAvailability = fallback;
+          applyUsernameFeedback("unavailable", fallback.message);
+          return fallback;
+        }
+      }
+
+      function applyUsernameFeedback(state, message) {
+        usernameAvailabilityFeedback.dataset.state = state;
+        usernameAvailabilityFeedback.textContent = message;
+        usernameAvailabilityFeedback.classList.remove("hidden");
+      }
+
+      function hideUsernameFeedback() {
+        usernameAvailabilityFeedback.dataset.state = "";
+        usernameAvailabilityFeedback.textContent = "";
+        usernameAvailabilityFeedback.classList.add("hidden");
       }
 
       function resolveTheme(themeId) {
