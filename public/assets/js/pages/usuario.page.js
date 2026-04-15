@@ -14,7 +14,7 @@
     noir: "Noir",
     "golden-age": "Golden Age"
   };
-  const defaultAvatar = "/assets/img/logo.png";
+  const defaultAvatar = "/assets/img/logo.svg";
   const state = {
     targetUid: "",
     viewerSignedIn: false,

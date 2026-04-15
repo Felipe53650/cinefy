@@ -14,7 +14,7 @@
     uid: localProfile.uid || "",
     username: localProfile.username || "cinefyuser",
     displayName: localProfile.displayName || "Cinefilo",
-    avatar: localProfile.avatar || "/assets/img/logo.png"
+    avatar: localProfile.avatar || "/assets/img/logo.svg"
   };
   let activeListState = normalizeSharedListState(localListState);
   let activeShareSettings = {
@@ -440,7 +440,7 @@
     readerMovieCountInline.textContent = "0";
     readerOwnerName.textContent = "Cinefy Club";
     readerOwnerHandle.textContent = "@cinefy";
-    readerOwnerAvatar.src = "/assets/img/logo.png";
+    readerOwnerAvatar.src = "/assets/img/logo.svg";
     readerStatusValue.textContent = "Indisponivel";
     readerExperienceCopy.textContent = "O link nao pode ser aberto no momento.";
     if (readerEditorPanel) {
@@ -540,7 +540,7 @@
 
   function safeAvatarUrl(value) {
     const candidate = String(value || "").trim();
-    if (!candidate) return "/assets/img/logo.png";
+    if (!candidate) return "/assets/img/logo.svg";
 
     if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
       return candidate;
@@ -552,10 +552,10 @@
         return parsedUrl.href;
       }
     } catch (error) {
-      return "/assets/img/logo.png";
+      return "/assets/img/logo.svg";
     }
 
-    return "/assets/img/logo.png";
+    return "/assets/img/logo.svg";
   }
 
   function getPublicProfileHref(user) {

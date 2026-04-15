@@ -435,7 +435,7 @@
       }
 
       function safeAvatarUrl(value) {
-        const fallbackAvatar = currentProfile.avatar || "assets/img/logo.png";
+        const fallbackAvatar = currentProfile.avatar || "assets/img/logo.svg";
         const candidate = String(value || "").trim();
         if (!candidate) return fallbackAvatar;
 

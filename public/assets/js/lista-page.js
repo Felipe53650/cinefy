@@ -662,7 +662,7 @@
 
   function safeAvatarUrl(value) {
     const candidate = String(value || "").trim();
-    if (!candidate) return "/assets/img/logo.png";
+    if (!candidate) return "/assets/img/logo.svg";
 
     if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
       return candidate;
@@ -674,10 +674,10 @@
         return parsedUrl.href;
       }
     } catch (error) {
-      return "/assets/img/logo.png";
+      return "/assets/img/logo.svg";
     }
 
-    return "/assets/img/logo.png";
+    return "/assets/img/logo.svg";
   }
 
   function setPosterMode(mode) {
