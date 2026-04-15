@@ -13,21 +13,21 @@
       font-size="42"
       font-style="italic"
       font-weight="800"
-      letter-spacing="-2.8"
+      letter-spacing="-2.25"
       x="0"
       y="0"
     >
       Cinefy
     </text>
     <text
-      fill="#f4f4f5"
+      fill="#f2f0f8"
       font-family="Sora, sans-serif"
-      font-size="28"
+      font-size="24"
       font-style="italic"
-      font-weight="500"
-      letter-spacing="-1.2"
-      x="150"
-      y="0"
+      font-weight="450"
+      letter-spacing="-0.6"
+      x="156"
+      y="-1"
     >
       Club
     </text>
