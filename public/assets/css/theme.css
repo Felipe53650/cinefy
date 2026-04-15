@@ -228,6 +228,34 @@ body[data-page="cadastro"] {
   margin: 0;
 }
 
+.cinefy-brand-lockup {
+  display: inline-block;
+  overflow: visible;
+  line-height: 0;
+}
+
+.cinefy-brand-lockup__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cinefy-brand-lockup--header {
+  width: clamp(8.75rem, 17vw, 11.5rem);
+}
+
+.cinefy-brand-lockup--footer {
+  width: clamp(8.6rem, 16vw, 10.75rem);
+}
+
+.cinefy-brand-lockup--hero {
+  width: clamp(10.5rem, 22vw, 15rem);
+}
+
+.cinefy-brand-lockup--compact {
+  width: clamp(8.75rem, 34vw, 10.5rem);
+}
+
 .cinefy-brand-mark {
     display: inline-flex;
     align-items: baseline;
@@ -1084,6 +1112,22 @@ body[data-page="modoleitor"] .max-w-7xl {
 
   .cinefy-brand {
       font-size: 1.72rem !important;
+    }
+
+    .cinefy-brand-lockup--header {
+      width: 8.9rem;
+    }
+
+    .cinefy-brand-lockup--footer {
+      width: 8.7rem;
+    }
+
+    .cinefy-brand-lockup--hero {
+      width: min(13.2rem, 58vw);
+    }
+
+    .cinefy-brand-lockup--compact {
+      width: min(9.8rem, 42vw);
     }
 
     .cinefy-brand-mark {
