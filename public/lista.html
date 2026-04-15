@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
@@ -28,7 +28,7 @@
 <link href="assets/css/theme.css" rel="stylesheet"/>
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col" data-page="lista">
-<header data-layout="navbar" aria-label="Cabecalho do site"></header>
+<header data-layout="navbar" aria-label="Cabeçalho do site"></header>
 <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-28 md:pt-24 max-w-7xl mx-auto w-full">
 <section class="mb-8 overflow-hidden rounded-[1.8rem] glass-card relative md:rounded-[2.25rem]">
 <div class="absolute inset-0 bg-gradient-to-r from-red-600/10 via-transparent to-red-500/5"></div>
@@ -40,7 +40,7 @@
 </div>
 <div class="mt-4 flex flex-col gap-3 md:flex-row">
 <label class="sr-only" for="newListNameInput">Nome da nova lista</label>
-<input class="w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="newListNameInput" maxlength="60" placeholder="Ex.: Recomendacoes para Ana" type="text"/>
+<input class="w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="newListNameInput" maxlength="60" placeholder="Ex.: Recomendações para Ana" type="text"/>
 <button class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 font-black text-black transition-all hover:bg-zinc-200 active:scale-95" id="createListButton" type="button">
 <span class="material-symbols-outlined">add_circle</span>
 <span>Criar lista</span>
@@ -78,15 +78,15 @@
 <p class="mt-2 text-2xl font-black text-white" id="movieCount">0</p>
 </div>
 <div class="glass-card rounded-2xl p-4 text-center">
-<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Publica</p>
+<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Pública</p>
 <p class="mt-2 text-2xl font-black text-white" id="privacyLabel">Sim</p>
 </div>
 <div class="glass-card rounded-2xl p-4 text-center">
-<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Genero lider</p>
-<p class="mt-2 text-lg font-black text-white" id="topGenre">Sem genero</p>
+<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Gênero líder</p>
+<p class="mt-2 text-lg font-black text-white" id="topGenre">Sem gênero</p>
 </div>
 <div class="glass-card rounded-2xl p-4 text-center">
-<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Ultima edicao</p>
+<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Última edição</p>
 <p class="mt-2 text-sm font-bold text-white" id="updatedAt">Agora</p>
 </div>
 </div>
@@ -95,7 +95,7 @@
 <div class="glass-card rounded-2xl p-5 md:p-6">
 <div class="flex items-center justify-between gap-4 mb-4">
 <div class="section-heading">
-<h2 class="text-lg font-bold text-white">Editar informacoes da lista</h2>
+<h2 class="text-lg font-bold text-white">Editar informações da lista</h2>
 </div>
 </div>
 <form class="grid gap-4 md:grid-cols-2" id="listSettingsForm">
@@ -106,7 +106,7 @@
 <label class="md:col-span-1">
 <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Privacidade</span>
 <select class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="listPrivacyInput">
-<option value="publica">Publica</option>
+<option value="publica">Pública</option>
 <option value="privada">Privada</option>
 </select>
 </label>
@@ -114,29 +114,29 @@
 <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Acesso do link</span>
 <select class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="listShareAccessInput">
 <option value="reader">Somente leitura</option>
-<option value="editor">Edicao compartilhada</option>
+<option value="editor">Edição compartilhada</option>
 </select>
 </label>
 <label class="md:col-span-2 hidden" id="shareEditorScopeField">
 <span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Quem pode editar</span>
 <select class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="listShareEditorScopeInput">
-<option value="link">Usuarios logados com o link</option>
-<option value="except_selected">Usuarios logados com o link, exceto...</option>
+<option value="link">Usuários logados com o link</option>
+<option value="except_selected">Usuários logados com o link, exceto...</option>
 </select>
 </label>
 <div class="md:col-span-2 hidden rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4" id="shareReaderOnlyField">
 <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
 <div>
 <p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Somente leitura para</p>
-<p class="mt-2 text-sm text-zinc-400">Escolha amigos que continuam vendo a lista, mas sem poder editar o conteudo compartilhado.</p>
+<p class="mt-2 text-sm text-zinc-400">Escolha amigos que continuam vendo a lista, mas sem poder editar o conteúdo compartilhado.</p>
 </div>
 <div class="rounded-full border border-zinc-700 px-3 py-1 text-xs font-semibold text-zinc-300" id="shareReaderOnlyCountBadge">0 leitores forçados</div>
 </div>
 <div class="mt-4 grid gap-3 sm:grid-cols-2" id="shareReaderOnlyList"></div>
-<p class="mt-3 text-xs text-zinc-500" id="shareReaderOnlyHint">A colaboracao compartilhada exige sessao ativa. Quem nao entrar continua com acesso somente leitura.</p>
+<p class="mt-3 text-xs text-zinc-500" id="shareReaderOnlyHint">A colaboração compartilhada exige sessão ativa. Quem não entrar continua com acesso somente leitura.</p>
 </div>
 <label class="md:col-span-2">
-<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Descricao</span>
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Descrição</span>
 <textarea class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 min-h-28 focus:border-red-500 focus:ring-red-500" id="listDescriptionInput" maxlength="220"></textarea>
 </label>
 <div class="md:col-span-2 flex flex-wrap items-center gap-3">
@@ -153,7 +153,7 @@
 <h2 class="text-lg font-bold text-white">Compartilhar lista</h2>
 </div>
 <div class="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/55 p-4">
-<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Permissao ativa</p>
+<p class="text-xs uppercase tracking-[0.2em] text-zinc-500">Permissão ativa</p>
 <p class="mt-2 text-sm font-semibold text-white" id="shareAccessSummary">Somente leitura por link.</p>
 <p class="mt-1 text-sm text-zinc-400" id="shareAccessDescription">Quem receber o link consegue visualizar essa lista em modo leitor.</p>
 </div>
@@ -193,7 +193,7 @@
 </label>
 <div class="grid md:grid-cols-2 gap-4">
 <label class="block">
-<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Genero</span>
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Gênero</span>
 <input class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 focus:border-red-500 focus:ring-red-500" id="movieGenre" placeholder="Drama" required type="text"/>
 </label>
 <label class="block">
@@ -208,7 +208,7 @@
 </label>
 </div>
 <label class="block">
-<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Comentario rapido</span>
+<span class="text-xs uppercase tracking-[0.2em] text-zinc-500">Comentário rápido</span>
 <textarea class="mt-2 w-full rounded-2xl border border-zinc-700 bg-zinc-950/70 text-white px-4 py-3 min-h-24 focus:border-red-500 focus:ring-red-500" id="movieNote" maxlength="180" placeholder="Por que esse filme merece entrar na lista?"></textarea>
 </label>
 <div class="rounded-[1.6rem] border border-zinc-800 bg-zinc-950/70 p-4">
@@ -225,7 +225,7 @@
 <span class="material-symbols-outlined text-4xl text-zinc-500">cloud_upload</span>
 <p class="mt-3 text-sm text-zinc-300">Arraste uma imagem ou <span class="text-red-300">clique aqui</span></p>
 <p class="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">PNG, JPG ou WEBP</p>
-<p class="mt-3 text-xs text-zinc-500" id="moviePosterFeedback">Nenhum poster selecionado.</p>
+<p class="mt-3 text-xs text-zinc-500" id="moviePosterFeedback">Nenhum pôster selecionado.</p>
 </button>
 <input accept="image/png,image/jpeg,image/webp" class="hidden" id="moviePosterFile" type="file"/>
 </div>
@@ -237,22 +237,22 @@
 </div>
 <div class="poster-preview-shell flex items-center gap-4 rounded-[1.35rem] border border-zinc-800 bg-black/20 p-3">
 <div class="poster-preview-frame overflow-hidden rounded-[1rem] border border-white/10 bg-zinc-900/90">
-<img alt="Previa do poster selecionado" class="h-full w-full object-cover" id="moviePosterPreviewImage" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80"/>
+<img alt="Prévia do pôster selecionado" class="h-full w-full object-cover" id="moviePosterPreviewImage" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80"/>
 </div>
 <div class="min-w-0 flex-1">
-<p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Previa do poster</p>
-<p class="mt-2 text-sm font-bold text-white" id="moviePosterPreviewTitle">Poster padrao</p>
-<p class="mt-1 text-sm text-zinc-400" id="moviePosterPreviewMeta">Sera usado se nenhuma imagem for enviada.</p>
+<p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Prévia do pôster</p>
+<p class="mt-2 text-sm font-bold text-white" id="moviePosterPreviewTitle">Pôster padrão</p>
+<p class="mt-1 text-sm text-zinc-400" id="moviePosterPreviewMeta">Será usado se nenhuma imagem for enviada.</p>
 </div>
 </div>
 <div class="flex flex-wrap justify-end gap-2">
 <button class="inline-flex items-center gap-2 rounded-full border border-zinc-700/80 px-4 py-2 text-xs font-bold text-zinc-200 transition-all hover:border-white/30 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50" id="openPosterPreviewButton" type="button">
 <span class="material-symbols-outlined text-base">zoom_in</span>
-<span>Ampliar previa</span>
+<span>Ampliar prévia</span>
 </button>
 <button class="inline-flex items-center gap-2 rounded-full border border-zinc-700/80 px-4 py-2 text-xs font-bold text-zinc-300 transition-all hover:border-red-500/40 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50" id="clearPosterSelectionButton" type="button">
 <span class="material-symbols-outlined text-base">close</span>
-<span>Remover poster</span>
+<span>Remover pôster</span>
 </button>
 </div>
 </div>
@@ -278,8 +278,8 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5" id="movieGrid"></div>
 <div class="hidden glass-card rounded-3xl p-10 text-center" id="emptyState">
 <span class="material-symbols-outlined text-red-400 text-5xl">local_movies</span>
-<h3 class="mt-4 text-2xl font-black text-white">Sua lista esta vazia</h3>
-<p class="mt-3 text-sm leading-relaxed text-zinc-400 md:text-base">Comece com um filme que voce ama ou use um atalho rapido para entrar no catalogo sem partir do zero.</p>
+<h3 class="mt-4 text-2xl font-black text-white">Sua lista está vazia</h3>
+<p class="mt-3 text-sm leading-relaxed text-zinc-400 md:text-base">Comece com um filme que você ama ou use um atalho rápido para entrar no catálogo sem partir do zero.</p>
 <div class="mt-6 flex flex-col items-center gap-3">
 <a class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-black text-black transition-all hover:bg-zinc-200 active:scale-95" href="busca.html">
 <span class="material-symbols-outlined">search</span>
@@ -289,7 +289,7 @@
 <a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=acao">Ação</a>
 <a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=ficcao%20cientifica">Ficção científica</a>
 <a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=terror">Terror</a>
-<a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=animacao">Animação</a>
+<a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=animação">Animação</a>
 <a class="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white" href="busca.html?q=romance">Romance</a>
 </div>
 </div>
@@ -303,10 +303,10 @@
 <div class="flex items-start justify-between gap-4">
 <div class="min-w-0">
 <p class="text-xs uppercase tracking-[0.18em] text-zinc-500">Poster ampliado</p>
-<h3 class="mt-2 text-xl font-black text-white" id="posterPreviewDialogTitle">Poster padrao</h3>
-<p class="mt-1 text-sm text-zinc-400" id="posterPreviewDialogMeta">Sera usado se nenhuma imagem for enviada.</p>
+<h3 class="mt-2 text-xl font-black text-white" id="posterPreviewDialogTitle">Pôster padrão</h3>
+<p class="mt-1 text-sm text-zinc-400" id="posterPreviewDialogMeta">Será usado se nenhuma imagem for enviada.</p>
 </div>
-<button aria-label="Fechar ampliacao do poster" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-700/80 text-zinc-200 transition-all hover:border-red-500/40 hover:text-red-200" data-poster-preview-close="true" type="button">
+<button aria-label="Fechar ampliação do pôster" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-700/80 text-zinc-200 transition-all hover:border-red-500/40 hover:text-red-200" data-poster-preview-close="true" type="button">
 <span class="material-symbols-outlined">close</span>
 </button>
 </div>
@@ -315,7 +315,7 @@
 </div>
 </div>
 </div>
-<footer data-layout="footer" aria-label="Rodape do site"></footer>
+<footer data-layout="footer" aria-label="Rodapé do site"></footer>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>

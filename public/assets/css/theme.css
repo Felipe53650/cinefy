@@ -228,6 +228,25 @@ body[data-page="cadastro"] {
   margin: 0;
 }
 
+.cinefy-brand-mark {
+  display: inline-block;
+  color: transparent !important;
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--theme-accent-soft-rgb)),
+    rgb(var(--theme-accent-rgb)) 46%,
+    rgb(var(--theme-accent-strong-rgb))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 14px 36px rgb(var(--theme-accent-strong-rgb) / 0.14);
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.cinefy-brand-mark:hover {
+  filter: brightness(1.08);
+}
+
 .cinefy-user-link {
   color: inherit;
   text-decoration: none;

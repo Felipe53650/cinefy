@@ -29,7 +29,7 @@
 
   // Páginas que exigem login
   const navItems = [
-    { key: "home", label: "Inicio", mobileLabel: "Home", href: "index.html", icon: "home" },
+    { key: "home", label: "Início", mobileLabel: "Home", href: "index.html", icon: "home" },
     { key: "lista", label: "Minha Lista", mobileLabel: "Lista", href: "lista.html", icon: "movie_filter" },
     { key: "buscar", label: "Buscar Filmes", mobileLabel: "Buscar", href: "busca.html", icon: "search" },
     { key: "amigos", label: "Amigos", mobileLabel: "Amigos", href: "amigos.html", icon: "group" }
@@ -55,7 +55,7 @@
 
   function buildHeaderTrustLinks() {
     return `
-      <div aria-label="Sinais de confianca" class="cinefy-header-trust hidden xl:flex">
+      <div aria-label="Sinais de confiança" class="cinefy-header-trust hidden xl:flex">
         <a
           class="cinefy-header-trust-link"
           href="https://github.com/Felipe53650/cinefy"
@@ -88,7 +88,7 @@
       <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
         <label class="sr-only" for="globalSearchInput">Buscar filmes no Cinefy Club</label>
         <span class="material-symbols-outlined cinefy-global-search__icon">search</span>
-        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, genero ou clima..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
+        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, gênero ou clima..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
         <button class="cinefy-global-search__button" type="submit">Buscar</button>
       </form>
     `;
@@ -111,7 +111,7 @@
     if (!notifications.length) {
       return `
         <div class="rounded-[1.25rem] border border-white/8 bg-[#241213] p-4 text-sm text-zinc-400">
-          Nenhuma notificacao por enquanto.
+          Nenhuma notificação por enquanto.
         </div>
       `;
     }
@@ -135,10 +135,10 @@
       <div class="cinefy-topbar fixed inset-x-0 top-0 z-[80] px-3 pt-3 md:px-6 md:pt-4">
         <div class="cinefy-topbar__inner mx-auto flex min-h-[4.5rem] w-full max-w-[1440px] items-center justify-between gap-3 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 py-2 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
           <div class="cinefy-topbar__primary flex min-w-0 items-center gap-3 md:gap-5">
-            <a class="cinefy-brand min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
+            <a class="cinefy-brand cinefy-brand-mark min-w-0 text-2xl font-black italic tracking-[-0.08em] md:text-[1.9rem]" href="index.html">
               Cinefy Club
             </a>
-            <nav aria-label="Navegacao principal" class="cinefy-nav-links-shell hidden items-center gap-1.5 lg:flex">
+            <nav aria-label="Navegação principal" class="cinefy-nav-links-shell hidden items-center gap-1.5 lg:flex">
               ${buildDesktopLinks()}
             </nav>
           </div>
@@ -152,7 +152,7 @@
             <div class="cinefy-topbar__actions flex items-center gap-3 md:gap-4">
             ${session ? `
             <div class="relative">
-              <button class="cinefy-notifications-button relative rounded-[0.95rem] border border-[#5a2b2d] bg-[#2a1516] p-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] active:scale-95" id="notificationsButton" type="button" aria-label="Notificacoes">
+              <button class="cinefy-notifications-button relative rounded-[0.95rem] border border-[#5a2b2d] bg-[#2a1516] p-2.5 transition hover:border-red-500/30 hover:bg-[#341a1b] active:scale-95" id="notificationsButton" type="button" aria-label="Notificações">
                 <span class="material-symbols-outlined text-zinc-300">notifications</span>
                 ${unreadCount ? `<span class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">${Math.min(unreadCount, 9)}</span>` : ""}
               </button>
@@ -160,7 +160,7 @@
                 <div class="mb-4 flex items-center justify-between gap-4">
                   <div>
                     <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Central</p>
-                    <p class="mt-1 text-lg font-black text-white">Notificacoes</p>
+                    <p class="mt-1 text-lg font-black text-white">Notificações</p>
                   </div>
                   <button class="text-sm font-bold text-red-300 transition hover:text-red-200" id="markNotificationsReadButton" type="button">Marcar como lidas</button>
                 </div>
@@ -183,7 +183,7 @@
           </div>
         </div>
       </div>
-      <nav aria-label="Navegacao principal mobile" class="cinefy-mobile-nav fixed bottom-2 left-2 right-2 z-50 flex justify-around rounded-[1rem] border border-[#5a2b2d] bg-[#201011] py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
+      <nav aria-label="Navegação principal mobile" class="cinefy-mobile-nav fixed bottom-2 left-2 right-2 z-50 flex justify-around rounded-[1rem] border border-[#5a2b2d] bg-[#201011] py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:hidden">
         ${buildMobileLinks()}
       </nav>
     `;
@@ -193,10 +193,10 @@
     return `
       <div class="cinefy-footer-shell mt-auto px-3 pb-[calc(6.75rem+env(safe-area-inset-bottom))] pt-10 md:px-6 md:pb-12 md:pt-14">
         <div class="cinefy-footer-shell__inner mx-auto w-full max-w-[1440px] rounded-[2rem] border border-white/10 bg-zinc-950/78 px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:px-7 md:py-6">
-          <a class="inline-block text-xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-2xl" href="index.html">Cinefy Club</a>
+          <a class="cinefy-brand-mark inline-block text-xl font-black italic tracking-[-0.08em] md:text-2xl" href="index.html">Cinefy Club</a>
           <p class="mt-2 text-sm text-zinc-400">Sua curadoria social de filmes</p>
-          <nav aria-label="Rodape" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
-            <a class="text-zinc-300 transition-colors hover:text-red-300" href="index.html">Inicio</a>
+          <nav aria-label="Rodapé" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
+            <a class="text-zinc-300 transition-colors hover:text-red-300" href="index.html">Início</a>
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="busca.html">Buscar</a>
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="mailto:felipe53650@outlook.com">Suporte</a>
           </nav>
@@ -431,9 +431,9 @@
 
     const diffMinutes = Math.max(1, Math.round((Date.now() - date.getTime()) / 60000));
 
-    if (diffMinutes < 60) return `ha ${diffMinutes} min`;
-    if (diffMinutes < 1440) return `ha ${Math.round(diffMinutes / 60)} h`;
-    return `ha ${Math.round(diffMinutes / 1440)} dia(s)`;
+    if (diffMinutes < 60) return `há ${diffMinutes} min`;
+    if (diffMinutes < 1440) return `há ${Math.round(diffMinutes / 60)} h`;
+    return `há ${Math.round(diffMinutes / 1440)} dia(s)`;
   }
 
   function resolveNotificationHref(href) {

@@ -1,21 +1,21 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Cinefy Club - Detalhes</title>
-  <meta name="description" content="Veja detalhes, avaliacoes e informacoes tecnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
+  <meta name="description" content="Veja detalhes, avaliações e informações técnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
   <meta name="robots" content="noindex,follow"/>
   <meta name="theme-color" content="#e83b24"/>
   <link rel="canonical" href="https://cinefy3-83a9a.web.app/detalhes"/>
   <meta property="og:title" content="Cinefy Club - Detalhes"/>
-  <meta property="og:description" content="Veja detalhes, avaliacoes e informacoes tecnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
+  <meta property="og:description" content="Veja detalhes, avaliações e informações técnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://cinefy3-83a9a.web.app/detalhes"/>
   <meta property="og:image" content="/assets/img/github-cover.svg"/>
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Cinefy Club - Detalhes"/>
-  <meta name="twitter:description" content="Veja detalhes, avaliacoes e informacoes tecnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
+  <meta name="twitter:description" content="Veja detalhes, avaliações e informações técnicas dos filmes no Cinefy Club, sua curadoria social de filmes."/>
   <meta name="twitter:image" content="/assets/img/github-cover.svg"/>
 <link rel="icon" sizes="any" type="image/svg+xml" href="/assets/img/favicon-club.svg"/>
   <script src="assets/js/theme.js"></script>
@@ -28,7 +28,7 @@
   <link href="assets/css/theme.css" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-background text-on-background" data-page="detalhes">
-  <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+  <header data-layout="navbar" aria-label="Cabeçalho do site"></header>
 
   <main class="pt-16 md:pt-20">
     <section class="relative min-h-[460px] overflow-hidden rounded-b-[2rem] border-b border-white/10 md:min-h-[680px] md:rounded-b-[2.5rem]">
@@ -39,7 +39,7 @@
         <div class="max-w-4xl">
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
           <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
-          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informacoes do filme no TMDB.</p>
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
           <div class="mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
             <button class="details-list-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined" id="addToListButtonIcon">add</span>
@@ -57,7 +57,7 @@
     <section class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:gap-10 md:px-6 md:py-12 lg:grid-cols-[1.15fr,0.85fr]">
       <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
         <div class="section-heading">
-          <h2 class="font-display text-3xl font-bold text-white">Sua avaliacao</h2>
+          <h2 class="font-display text-3xl font-bold text-white">Sua avaliação</h2>
           <p class="text-sm uppercase tracking-[0.24em] text-zinc-500">Salva localmente para este filme</p>
         </div>
         <div class="mt-8">
@@ -65,19 +65,19 @@
           <input class="mt-3 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="ratingInput" max="5" min="0" step="0.5" type="number"/>
         </div>
         <div class="mt-6">
-          <label class="text-sm font-medium text-zinc-300" for="commentInput">Comentario</label>
-          <textarea class="mt-3 min-h-40 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="commentInput" placeholder="O que voce achou do filme?"></textarea>
+          <label class="text-sm font-medium text-zinc-300" for="commentInput">Comentário</label>
+          <textarea class="mt-3 min-h-40 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="commentInput" placeholder="O que você achou do filme?"></textarea>
         </div>
         <div class="mt-6 flex flex-wrap items-center gap-4">
-          <button class="rounded-full bg-gradient-to-r from-primary to-red-900 px-6 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110" id="saveReviewButton" type="button">Salvar avaliacao</button>
-          <p aria-live="polite" class="text-sm text-zinc-400" id="reviewFeedback" role="status">Sua opiniao aparece salva aqui quando voce voltar.</p>
+          <button class="rounded-full bg-gradient-to-r from-primary to-red-900 px-6 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110" id="saveReviewButton" type="button">Salvar avaliação</button>
+          <p aria-live="polite" class="text-sm text-zinc-400" id="reviewFeedback" role="status">Sua opinião aparece salva aqui quando você voltar.</p>
         </div>
       </div>
 
       <div class="space-y-6">
         <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <div class="section-heading">
-            <h3 class="font-display text-xl font-bold text-white">Ficha tecnica</h3>
+            <h3 class="font-display text-xl font-bold text-white">Ficha técnica</h3>
           </div>
           <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
@@ -85,11 +85,11 @@
               <p class="mt-2 font-bold text-white" id="movieYear">-</p>
             </div>
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
-              <p class="text-zinc-500">Duracao</p>
+              <p class="text-zinc-500">Duração</p>
               <p class="mt-2 font-bold text-white" id="movieRuntime">-</p>
             </div>
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
-              <p class="text-zinc-500">Genero</p>
+              <p class="text-zinc-500">Gênero</p>
               <p class="mt-2 font-bold text-white" id="movieGenres">-</p>
             </div>
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
@@ -97,7 +97,7 @@
               <p class="mt-2 font-bold text-white" id="movieScore">-</p>
             </div>
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
-              <p class="text-zinc-500">Classificacao</p>
+              <p class="text-zinc-500">Classificação</p>
               <p class="mt-2 font-bold text-white" id="movieCertification">-</p>
             </div>
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
@@ -105,7 +105,7 @@
               <p class="mt-2 font-bold text-white" id="movieProvidersSummary">-</p>
             </div>
             <div class="col-span-2 rounded-2xl border border-white/6 bg-black/20 p-4">
-              <p class="text-zinc-500">Direcao</p>
+              <p class="text-zinc-500">Direção</p>
               <p class="mt-2 font-bold text-white" id="movieDirectors">-</p>
             </div>
           </div>
@@ -127,8 +127,8 @@
 
         <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <div class="section-heading">
-            <h3 class="font-display text-xl font-bold text-white">Ver tambem em</h3>
-            <p class="mt-1 text-sm text-zinc-400" id="externalLinksCaption">Atalhos rapidos para continuar a descoberta em outras comunidades e guias de cinema.</p>
+            <h3 class="font-display text-xl font-bold text-white">Ver também em</h3>
+            <p class="mt-1 text-sm text-zinc-400" id="externalLinksCaption">Atalhos rápidos para continuar a descoberta em outras comunidades e guias de cinema.</p>
           </div>
           <div class="mt-5 flex flex-wrap gap-3" id="externalLinksGrid"></div>
         </div>
@@ -150,7 +150,7 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="section-heading">
             <h2 class="font-display text-3xl font-bold text-white">Reviews da comunidade</h2>
-            <p class="mt-1 text-sm text-zinc-400" id="communityReviewsCaption">Leituras publicas para ajudar voce a decidir o proximo play.</p>
+            <p class="mt-1 text-sm text-zinc-400" id="communityReviewsCaption">Leituras públicas para ajudar você a decidir o próximo play.</p>
           </div>
           <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/12" href="#" id="communityReviewsLink" rel="noopener noreferrer" target="_blank">
             <span class="material-symbols-outlined text-base">open_in_new</span>
@@ -162,7 +162,7 @@
     </section>
   </main>
 
-  <footer data-layout="footer" aria-label="Rodape do site"></footer>
+  <footer data-layout="footer" aria-label="Rodapé do site"></footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
