@@ -241,6 +241,8 @@ body[data-page="cadastro"] {
 
 .cinefy-brand-mark__core {
   display: inline-block;
+  overflow: visible;
+  padding-bottom: 0.08em;
   color: transparent !important;
   background-image: linear-gradient(
     135deg,
@@ -250,7 +252,7 @@ body[data-page="cadastro"] {
   );
   -webkit-background-clip: text;
   background-clip: text;
-  line-height: 1;
+  line-height: 1.12;
   text-shadow: 0 14px 36px rgb(var(--theme-accent-strong-rgb) / 0.14);
   letter-spacing: -0.085em;
 }
@@ -263,7 +265,7 @@ body[data-page="cadastro"] {
   font-style: italic;
   font-weight: 600;
   letter-spacing: -0.045em;
-  line-height: 1;
+  line-height: 1.08;
   text-shadow: none;
   transform: translateY(-0.02em);
 }
