@@ -22,14 +22,14 @@
     <text
       fill="#f2f0f8"
       font-family="Sora, sans-serif"
-      font-size="24"
-      font-style="italic"
-      font-weight="450"
-      letter-spacing="-0.6"
-      x="156"
+      font-size="18"
+      font-style="normal"
+      font-weight="600"
+      letter-spacing="1.8"
+      x="166"
       y="-1"
     >
-      Club
+      CLUB
     </text>
   </g>
 </svg>
