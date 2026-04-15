@@ -21,15 +21,16 @@
     </text>
     <text
       fill="#f2f0f8"
-      font-family="Sora, sans-serif"
-      font-size="18"
+      fill-opacity="0.82"
+      font-family="Outfit, sans-serif"
+      font-size="21"
       font-style="normal"
-      font-weight="600"
-      letter-spacing="1.8"
-      x="166"
-      y="-1"
+      font-weight="400"
+      letter-spacing="0.15"
+      x="168"
+      y="0"
     >
-      CLUB
+      club
     </text>
   </g>
 </svg>

@@ -259,16 +259,17 @@ body[data-page="cadastro"] {
 
 .cinefy-brand-mark__suffix {
   display: inline-block;
-  margin-left: 0.24em;
-  color: rgb(var(--theme-text-rgb) / 0.84);
-  font-size: 0.56em;
+  margin-left: 0.28em;
+  color: rgb(var(--theme-text-rgb) / 0.72);
+  font-family: "Outfit", sans-serif;
+  font-size: 0.5em;
   font-style: normal;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 400;
+  letter-spacing: 0.015em;
   line-height: 1.08;
-  text-transform: uppercase;
+  text-transform: none;
   text-shadow: none;
-  transform: translateY(-0.08em);
+  transform: translateY(-0.03em);
 }
 
 .cinefy-brand-mark:hover {
@@ -276,7 +277,7 @@ body[data-page="cadastro"] {
 }
 
 .cinefy-brand-mark:hover .cinefy-brand-mark__suffix {
-  color: rgb(var(--theme-text-rgb));
+  color: rgb(var(--theme-text-rgb) / 0.86);
 }
 
 .cinefy-user-link {
@@ -1094,11 +1095,11 @@ body[data-page="modoleitor"] .max-w-7xl {
     }
 
     .cinefy-brand-mark__suffix {
-      margin-left: 0.18em;
-      font-size: 0.5em;
-      font-weight: 600;
-      letter-spacing: 0.11em;
-      transform: translateY(-0.06em);
+      margin-left: 0.22em;
+      font-size: 0.46em;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      transform: translateY(-0.015em);
     }
 
   .cinefy-topbar__primary {
