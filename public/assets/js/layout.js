@@ -25,9 +25,10 @@
     ""
   ).trim();
 
-  const buildBrandLockup = (variant = "header") => `
-    <span class="cinefy-brand-lockup cinefy-brand-lockup--${variant}" aria-label="Cinefy Club">
-      <img alt="Cinefy Club" class="cinefy-brand-lockup__image" src="/assets/img/logo.svg"/>
+  const buildBrandWordmark = (extraClass = "") => `
+    <span class="cinefy-brand-mark${extraClass ? ` ${extraClass}` : ""}" aria-label="Cinefy Club">
+      <span class="cinefy-brand-mark__core">Cinefy</span>
+      <span class="cinefy-brand-mark__suffix">Club</span>
     </span>
   `;
 
@@ -141,8 +142,8 @@
       <div class="cinefy-topbar fixed inset-x-0 top-0 z-[80] px-3 pt-3 md:px-6 md:pt-4">
         <div class="cinefy-topbar__inner mx-auto flex min-h-[4.5rem] w-full max-w-[1440px] items-center justify-between gap-3 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 py-2 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
           <div class="cinefy-topbar__primary flex min-w-0 items-center gap-3 md:gap-5">
-            <a class="cinefy-brand min-w-0" href="index.html">
-              ${buildBrandLockup("header")}
+            <a class="cinefy-brand min-w-0 text-2xl font-black italic md:text-[1.9rem]" href="index.html">
+              ${buildBrandWordmark()}
             </a>
             <nav aria-label="Navegação principal" class="cinefy-nav-links-shell hidden items-center gap-1.5 lg:flex">
               ${buildDesktopLinks()}
@@ -199,7 +200,7 @@
     return `
       <div class="cinefy-footer-shell mt-auto px-3 pb-[calc(6.75rem+env(safe-area-inset-bottom))] pt-10 md:px-6 md:pb-12 md:pt-14">
         <div class="cinefy-footer-shell__inner mx-auto w-full max-w-[1440px] rounded-[2rem] border border-white/10 bg-zinc-950/78 px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:px-7 md:py-6">
-          <a class="inline-block" href="index.html">${buildBrandLockup("footer")}</a>
+          <a class="inline-block text-xl font-black italic md:text-2xl" href="index.html">${buildBrandWordmark()}</a>
           <p class="mt-2 text-sm text-zinc-400">Sua curadoria social de filmes</p>
           <nav aria-label="Rodapé" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="index.html">Início</a>
