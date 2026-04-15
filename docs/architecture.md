@@ -1,4 +1,4 @@
-# Arquitetura do CINEfy
+# Arquitetura do Cinefy Club
 
 Este documento resume a arquitetura atual do projeto e ajuda a orientar futuras evolucoes.
 
@@ -154,7 +154,7 @@ flowchart TD
 
 ## 5. MVP atual
 
-O MVP funcional do CINEfy hoje ja cobre:
+O MVP funcional do Cinefy Club hoje ja cobre:
 
 - descoberta de filmes
 - criacao e organizacao de listas

@@ -173,8 +173,8 @@
 
   function renderPage() {
     document.title = state.profile.username
-      ? `CINEfy - @${state.profile.username}`
-      : "CINEfy - Perfil publico";
+      ? `Cinefy Club - @${state.profile.username}`
+      : "Cinefy Club - Perfil publico";
 
     publicProfileAvatar.src = state.profile.avatar || defaultAvatar;
     publicProfileName.textContent = state.profile.displayName || "Cinefilo";
@@ -203,7 +203,7 @@
     }
 
     if (state.social.status === "friend") {
-      publicProfileStatus.textContent = "Amigos no CINEfy";
+      publicProfileStatus.textContent = "Amigos no Cinefy Club";
       publicProfileStatusCopy.textContent = "Voce ja acompanha esse perfil na sua rede e pode abrir listas e reviews sem desvio.";
       return;
     }
@@ -226,7 +226,7 @@
       return;
     }
 
-    publicProfileStatus.textContent = "Comunidade CINEfy";
+    publicProfileStatus.textContent = "Comunidade Cinefy Club";
     publicProfileStatusCopy.textContent = "Abra listas publicas, leia reviews recentes e descubra o gosto cinematografico desse perfil com poucos cliques.";
   }
 
@@ -354,7 +354,7 @@
         </div>
         <div>
           <h3 class="text-xl font-black text-white">${escapeHtml(list.title || "Lista compartilhada")}</h3>
-          <p class="mt-2 text-sm leading-relaxed text-zinc-400">${escapeHtml(list.description || "Curadoria compartilhada no CINEfy.")}</p>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-400">${escapeHtml(list.description || "Curadoria compartilhada no Cinefy Club.")}</p>
         </div>
         <div class="flex items-center justify-between gap-3 text-sm">
           <span class="text-zinc-400">Atualizada em ${escapeHtml(formatDate(list.updatedAt))}</span>
@@ -374,19 +374,19 @@
         <div class="public-profile-empty">
           <span class="material-symbols-outlined text-5xl text-red-300">login</span>
           <p class="text-xl font-black text-white">Reviews protegidas pela comunidade.</p>
-          <p class="text-sm leading-relaxed">As opinioes publicas aparecem para usuarios autenticados, ajudando a manter o contexto social do CINEfy.</p>
+          <p class="text-sm leading-relaxed">As opinioes publicas aparecem para usuarios autenticados, ajudando a manter o contexto social do Cinefy Club.</p>
         </div>
       `;
       return;
     }
 
     if (!state.reviews.length) {
-      publicProfileReviewsCaption.textContent = "Esse usuario ainda nao publicou reviews publicas no CINEfy.";
+      publicProfileReviewsCaption.textContent = "Esse usuario ainda nao publicou reviews publicas no Cinefy Club.";
       publicProfileReviewsList.innerHTML = `
         <div class="public-profile-empty">
           <span class="material-symbols-outlined text-5xl text-red-300">rate_review</span>
           <p class="text-xl font-black text-white">Sem reviews publicas por enquanto.</p>
-          <p class="text-sm leading-relaxed">Quando esse usuario avaliar filmes no CINEfy, as reviews mais recentes aparecem aqui.</p>
+          <p class="text-sm leading-relaxed">Quando esse usuario avaliar filmes no Cinefy Club, as reviews mais recentes aparecem aqui.</p>
         </div>
       `;
       return;
@@ -699,7 +699,7 @@
       slug: sanitizeText(safeList.slug || "", 120),
       privacy: sanitizeText(safeList.privacy || "publica", 20),
       title: sanitizeText(safeList.title || "Lista compartilhada", 80) || "Lista compartilhada",
-      description: sanitizeMultilineText(safeList.description || "Curadoria compartilhada no CINEfy.", 240) || "Curadoria compartilhada no CINEfy.",
+      description: sanitizeMultilineText(safeList.description || "Curadoria compartilhada no Cinefy Club.", 240) || "Curadoria compartilhada no Cinefy Club.",
       updatedAt: sanitizeText(safeList.updatedAt || "", 40),
       movies: Array.isArray(safeList.movies) ? safeList.movies.slice(0, 120) : []
     };
@@ -719,7 +719,7 @@
       comment: comment || "Sem comentario adicional.",
       updatedAt: sanitizeText(safeReview.updatedAt || "", 40),
       ratingLabel,
-      sourceLabel: "Review publica no CINEfy"
+      sourceLabel: "Review publica no Cinefy Club"
     };
   }
 

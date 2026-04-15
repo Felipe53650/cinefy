@@ -130,7 +130,7 @@
   }
 
   function renderReaderMode() {
-    document.title = `CINEfy - Lista de @${activeOwner.username || "cinefyuser"}`;
+    document.title = `Cinefy Club - Lista de @${activeOwner.username || "cinefyuser"}`;
     readerTitle.textContent = shareId
       ? `Voce esta visualizando a lista de @${activeOwner.username || "cinefyuser"}`
       : `Voce esta visualizando a lista de @${activeOwner.username || "cinefyuser"}`;
@@ -433,12 +433,12 @@
   }
 
   function renderUnavailableState(message) {
-    document.title = "CINEfy - Lista compartilhada indisponivel";
+    document.title = "Cinefy Club - Lista compartilhada indisponivel";
     readerTitle.textContent = "Lista compartilhada indisponivel";
     readerDescription.textContent = message;
     readerMovieCount.textContent = "0";
     readerMovieCountInline.textContent = "0";
-    readerOwnerName.textContent = "CINEfy";
+    readerOwnerName.textContent = "Cinefy Club";
     readerOwnerHandle.textContent = "@cinefy";
     readerOwnerAvatar.src = "/assets/img/logo.png";
     readerStatusValue.textContent = "Indisponivel";

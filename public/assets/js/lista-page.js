@@ -179,7 +179,7 @@
     if (!friends.length) {
       shareReaderOnlyList.innerHTML = `
         <div class="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-zinc-400 sm:col-span-2">
-          Adicione amigos no CINEfy para escolher excecoes de edicao aqui.
+          Adicione amigos no Cinefy Club para escolher excecoes de edicao aqui.
         </div>
       `;
       shareReaderOnlyCountBadge.textContent = "0 leitores forcados";

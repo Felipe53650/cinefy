@@ -1,6 +1,6 @@
 // main.js - Manipulação Global da UI
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("CINEfy inicializado.");
+    console.log("Cinefy Club inicializado.");
 
 // Exemplo: Carregar filmes em destaque no Dashboard
 if (document.getElementById('featured-movies')) {

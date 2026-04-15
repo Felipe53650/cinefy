@@ -1,11 +1,11 @@
-# CINEfy
+# Cinefy Club
 
 <p align="center">
-  <img src="public/assets/img/github-cover.svg" alt="Capa do projeto CINEfy" width="100%">
+  <img src="public/assets/img/github-cover.svg" alt="Capa do projeto Cinefy Club" width="100%">
 </p>
 
 <p align="center">
-  Plataforma web social para descobrir filmes, montar listas, compartilhar curadorias, publicar reviews e navegar por perfis cinefilos com uma interface tematica.
+  Cinefy Club, sua curadoria social de filmes.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## Visao geral
 
-O CINEfy e um produto web focado em curadoria cinematografica com camada social. A aplicacao permite descobrir filmes, montar listas proprias, compartilhar selecoes por link, navegar em perfis publicos, publicar reviews e interagir com outras pessoas da comunidade.
+O Cinefy Club e um produto web focado em curadoria cinematografica com camada social. A aplicacao permite descobrir filmes, montar listas proprias, compartilhar selecoes por link, navegar em perfis publicos, publicar reviews e interagir com outras pessoas da comunidade.
 
 Mais do que uma landing page ou um CRUD simples, o projeto foi trabalhado como um produto real:
 
@@ -30,7 +30,7 @@ Mais do que uma landing page ou um CRUD simples, o projeto foi trabalhado como u
 
 ## O que este projeto demonstra
 
-Para recrutadores, avaliadores ou clientes, o CINEfy mostra:
+Para recrutadores, avaliadores ou clientes, o Cinefy Club mostra:
 
 - construcao de produto end-to-end com foco em UX
 - frontend em JavaScript vanilla organizado em escala de aplicacao
@@ -47,13 +47,13 @@ Para recrutadores, avaliadores ou clientes, o CINEfy mostra:
 - compartilhamento de listas em modo leitor ou edicao colaborativa
 - perfil proprio editavel
 - perfil publico de usuarios
-- reviews publicas do CINEfy e camada social nos detalhes do filme
+- reviews publicas do Cinefy Club e camada social nos detalhes do filme
 - sistema de amizades com pedidos, aceite e navegacao entre perfis
 - temas visuais globais
 - upload de avatar e poster manual com Firebase Storage
 - proxy seguro do TMDB via Cloud Functions
 
-## O que faz o CINEfy se destacar
+## O que faz o Cinefy Club se destacar
 
 - busca global persistente no cabecalho
 - recomendacoes personalizadas baseadas no comportamento do usuario
@@ -72,7 +72,7 @@ Para recrutadores, avaliadores ou clientes, o CINEfy mostra:
 
 ## Casos de uso
 
-O CINEfy pode ser posicionado para:
+O Cinefy Club pode ser posicionado para:
 
 - cinefilos que querem organizar e compartilhar curadorias
 - criadores de conteudo que desejam publicar listas tematicas
@@ -96,7 +96,7 @@ Essas capturas priorizam telas publicas e neutras, sem expor dados pessoais reai
 ### Home e descoberta
 
 <p align="center">
-  <img src="public/assets/img/screenshots/home.png" alt="Home do CINEfy" width="90%">
+  <img src="public/assets/img/screenshots/home.png" alt="Home do Cinefy Club" width="90%">
 </p>
 
 Na home, o produto concentra descoberta, recomendacoes iniciais, busca global persistente e sinais visuais de lista ja adicionada.
@@ -104,15 +104,15 @@ Na home, o produto concentra descoberta, recomendacoes iniciais, busca global pe
 ### Acesso e onboarding
 
 <p align="center">
-  <img src="public/assets/img/screenshots/login.png" alt="Tela de login do CINEfy" width="44%">
-  <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do CINEfy" width="44%">
+  <img src="public/assets/img/screenshots/login.png" alt="Tela de login do Cinefy Club" width="44%">
+  <img src="public/assets/img/screenshots/cadastro.png" alt="Tela de cadastro do Cinefy Club" width="44%">
 </p>
 
 Os fluxos de entrada foram refinados com foco em baixa friccao, feedbacks visiveis e consistencia com os temas globais do produto.
 
 ### Mapa rapido das telas atuais
 
-Mesmo sem publicar capturas que exponham dados pessoais, a versao atual do CINEfy ja cobre estes percursos:
+Mesmo sem publicar capturas que exponham dados pessoais, a versao atual do Cinefy Club ja cobre estes percursos:
 
 - busca com cabecalho persistente, filtros, classificacao etaria, atalhos de genero e cards com estado `Na lista`
 - detalhes do filme com diretores, disponibilidade em streaming, reviews da comunidade e acoes sociais
@@ -175,7 +175,7 @@ O repositório evita subir capturas que mostrem dados pessoais reais de usuarios
 
 ## Antes e depois
 
-No inicio, o projeto funcionava mais como uma interface de curadoria com autenticacao e algumas telas principais. Ao longo da evolucao, o CINEfy ganhou camadas mais proximas de produto:
+No inicio, o projeto funcionava mais como uma interface de curadoria com autenticacao e algumas telas principais. Ao longo da evolucao, o Cinefy Club ganhou camadas mais proximas de produto:
 
 - de listas simples para listas compartilhadas com leitura e edicao colaborativa
 - de perfil apenas proprio para perfis publicos navegaveis
@@ -187,7 +187,7 @@ O resultado hoje e um produto bem mais coerente, navegavel e apresentavel tanto 
 
 ## Roadmap comercial do produto
 
-Hoje o CINEfy ja pode ser entendido em tres camadas de valor:
+Hoje o Cinefy Club ja pode ser entendido em tres camadas de valor:
 
 - portfolio tecnico forte, mostrando construcao real de produto com Firebase, UX e camada social
 - base white-label para nichos ligados a cinema, creators, clubes e curadoria cultural
@@ -300,7 +300,7 @@ firebase deploy --only "functions,firestore:rules,storage"
 
 ## Estado atual do produto
 
-O CINEfy ja esta acima de um MVP visual. Hoje ele tem base funcional para:
+O Cinefy Club ja esta acima de um MVP visual. Hoje ele tem base funcional para:
 
 - portfolio tecnico forte
 - produto white-label para nichos ligados a cinema

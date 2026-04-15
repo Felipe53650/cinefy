@@ -406,7 +406,7 @@
         if (personalized.length >= 4) {
           return {
             title: "Recomendado para voce",
-            subtitle: "Escolhas puxadas do seu historico no CINEfy para facilitar a descoberta.",
+            subtitle: "Escolhas puxadas do seu historico no Cinefy Club para facilitar a descoberta.",
             movies: personalized.slice(0, 8)
           };
         }

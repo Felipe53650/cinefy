@@ -70,7 +70,7 @@
         </a>
         <a
           class="cinefy-header-trust-link"
-          href="mailto:felipe53650@outlook.com?subject=Contato%20CINEfy"
+          href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club"
           title="Entrar em contato"
         >
           <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@
   function buildGlobalSearch() {
     return `
       <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
-        <label class="sr-only" for="globalSearchInput">Buscar filmes no CINEfy</label>
+        <label class="sr-only" for="globalSearchInput">Buscar filmes no Cinefy Club</label>
         <span class="material-symbols-outlined cinefy-global-search__icon">search</span>
         <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, genero ou clima..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
         <button class="cinefy-global-search__button" type="submit">Buscar</button>
@@ -136,7 +136,7 @@
         <div class="cinefy-topbar__inner mx-auto flex min-h-[4.5rem] w-full max-w-[1440px] items-center justify-between gap-3 rounded-[1.2rem] border border-[#5a2b2d] bg-[#201011] px-3 py-2 shadow-[0_18px_48px_rgba(0,0,0,0.4)] backdrop-blur-xl md:gap-4 md:px-5">
           <div class="cinefy-topbar__primary flex min-w-0 items-center gap-3 md:gap-5">
             <a class="cinefy-brand min-w-0 text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-[1.9rem]" href="index.html">
-              CINEfy
+              Cinefy Club
             </a>
             <nav aria-label="Navegacao principal" class="cinefy-nav-links-shell hidden items-center gap-1.5 lg:flex">
               ${buildDesktopLinks()}
@@ -193,7 +193,8 @@
     return `
       <div class="cinefy-footer-shell mt-auto px-3 pb-[calc(6.75rem+env(safe-area-inset-bottom))] pt-10 md:px-6 md:pb-12 md:pt-14">
         <div class="cinefy-footer-shell__inner mx-auto w-full max-w-[1440px] rounded-[2rem] border border-white/10 bg-zinc-950/78 px-5 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl text-center md:px-7 md:py-6">
-          <a class="inline-block text-2xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500" href="index.html">CINEfy</a>
+          <a class="inline-block text-xl font-black italic tracking-[-0.08em] text-red-600 transition hover:text-red-500 md:text-2xl" href="index.html">Cinefy Club</a>
+          <p class="mt-2 text-sm text-zinc-400">Sua curadoria social de filmes</p>
           <nav aria-label="Rodape" class="mt-4 flex justify-center gap-x-4 gap-y-2 text-sm">
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="index.html">Inicio</a>
             <a class="text-zinc-300 transition-colors hover:text-red-300" href="busca.html">Buscar</a>
@@ -213,7 +214,7 @@
             </a>
             <a
               class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-zinc-200 transition-colors hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white"
-              href="mailto:felipe53650@outlook.com?subject=Contato%20CINEfy"
+              href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club"
             >
               <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
                 <path d="M4 6h16v12H4z"></path>
@@ -223,7 +224,7 @@
             </a>
             <a
               class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-zinc-200 transition-colors hover:border-red-500/35 hover:bg-white/[0.08] hover:text-white"
-              href="mailto:felipe53650@outlook.com?subject=Quero%20receber%20novidades%20do%20CINEfy"
+              href="mailto:felipe53650@outlook.com?subject=Quero%20receber%20novidades%20do%20Cinefy%20Club"
             >
               <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
                 <path d="M12 3v18"></path>

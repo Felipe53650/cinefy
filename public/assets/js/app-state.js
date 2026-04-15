@@ -115,7 +115,7 @@
       id: "friend-request-clara",
       type: "friend_request",
       title: "Pedido de amizade recebido",
-      message: "Clara Torres quer entrar para a sua rede no CINEfy.",
+      message: "Clara Torres quer entrar para a sua rede no Cinefy Club.",
       href: "amigos.html",
       read: false,
       createdAt: "2026-03-29T15:00:00.000Z"

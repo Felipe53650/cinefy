@@ -5,7 +5,7 @@
     {
       id: "ember",
       label: "Ember",
-      description: "O vermelho cinematografico classico do CINEfy.",
+      description: "O vermelho cinematografico classico do Cinefy Club.",
       accent: "#e83b24",
       accentStrong: "#9f170d",
       accentSoft: "#ff9a8d",

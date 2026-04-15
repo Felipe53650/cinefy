@@ -192,7 +192,7 @@
         sanitized,
         key,
         reason: "reserved",
-        message: "Esse nome nao esta disponivel no CINEfy."
+        message: "Esse nome nao esta disponivel no Cinefy Club."
       };
     }
 
@@ -239,7 +239,7 @@
       username: "cinefyuser",
       usernameKey: "cinefyuser",
       displayName: "Novo Usuario",
-      bio: "Personalize este texto quando quiser para apresentar seu perfil no CINEfy.",
+      bio: "Personalize este texto quando quiser para apresentar seu perfil no Cinefy Club.",
       avatar: defaultAvatar,
       location: "Brasil"
     };

@@ -115,7 +115,7 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
   currentExternalLinks = externalLinks;
   currentTmdbReviews = Array.isArray(reviewsResponse && reviewsResponse.results) ? reviewsResponse.results : [];
 
-  document.title = `CINEfy - ${movie.title}`;
+  document.title = `Cinefy Club - ${movie.title}`;
   document.getElementById("movieBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
   document.getElementById("movieTitle").textContent = movie.title;
   document.getElementById("movieOverview").textContent = movie.overview || "Sem sinopse disponivel.";
@@ -156,7 +156,7 @@ function renderLocalMovie(movie) {
   currentExternalLinks = externalLinks;
   currentTmdbReviews = [];
 
-  document.title = `CINEfy - ${movie.title}`;
+  document.title = `Cinefy Club - ${movie.title}`;
   document.getElementById("movieBackdrop").src = movie.poster || fallbackPoster;
   document.getElementById("movieTitle").textContent = movie.title;
   document.getElementById("movieOverview").textContent = movie.note || (shareId
@@ -411,7 +411,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
     caption.textContent = "Itens manuais nao possuem reviews sincronizadas com bases externas.";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
-        Esse titulo foi criado por voce, entao ainda nao existe uma trilha de reviews publicas vinculada a ele aqui no CINEfy.
+        Esse titulo foi criado por voce, entao ainda nao existe uma trilha de reviews publicas vinculada a ele aqui no Cinefy Club.
       </div>
     `;
     return;
@@ -427,7 +427,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
     caption.textContent = "Ainda nao encontramos reviews da comunidade para este filme.";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
-        Ainda nao ha comentarios publicos aqui. Avalie este filme para comecar a conversa no CINEfy ou use os atalhos acima para continuar a leitura em outras comunidades.
+        Ainda nao ha comentarios publicos aqui. Avalie este filme para comecar a conversa no Cinefy Club ou use os atalhos acima para continuar a leitura em outras comunidades.
       </div>
     `;
     return;
@@ -439,7 +439,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
     sections.push(`
       <section class="space-y-4">
         <div class="flex items-center justify-between gap-4">
-          <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">No CINEfy</h3>
+          <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">No Cinefy Club</h3>
           <span class="text-xs uppercase tracking-[0.16em] text-zinc-500">${cinefyReviews.length} review(s)</span>
         </div>
         ${cinefyReviews.map((review) => `
@@ -520,7 +520,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
 
   caption.textContent = cinefyReviews.length
     ? "Suas reviews e as dos seus amigos aparecem primeiro, seguidas das leituras publicas do TMDB."
-    : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do CINEfy crescer aqui.";
+    : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do Cinefy Club crescer aqui.";
   grid.innerHTML = sections.join("");
 
   grid.querySelectorAll("[data-review-social-action]").forEach((button) => {
@@ -816,7 +816,7 @@ async function loadFriendCinefyReviews() {
         authorName: data.authorName || friend.displayName || friend.name || "Amigo",
         authorUsername: data.authorUsername || friend.username || "",
         authorAvatar: data.authorAvatar || friend.avatar || fallbackPoster,
-        sourceLabel: "Amigo no CINEfy",
+        sourceLabel: "Amigo no Cinefy Club",
         isOwn: false
       });
     })
@@ -870,7 +870,7 @@ function normalizeCinefyReviewRecord(review) {
     authorAvatar: review.authorAvatar || fallbackPoster,
     comment: comment || "Sem comentario.",
     updatedAt: review.updatedAt || "",
-    sourceLabel: review.sourceLabel || "Review no CINEfy",
+    sourceLabel: review.sourceLabel || "Review no Cinefy Club",
     isOwn: Boolean(review.isOwn),
     ratingLabel: Number.isFinite(ratingNumber) ? `${ratingNumber.toFixed(1)}/5` : "Sem nota",
     updatedLabel: formatReviewDate(review.updatedAt),
@@ -891,7 +891,7 @@ function buildReviewTags(review) {
 
   if (review.isOwn) {
     tags.push("Sua review");
-  } else if (review.sourceLabel === "Amigo no CINEfy") {
+  } else if (review.sourceLabel === "Amigo no Cinefy Club") {
     tags.push("Amigo");
   } else {
     tags.push("Comunidade");

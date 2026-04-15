@@ -1,4 +1,4 @@
-# CINEfy Brand Guide
+# Cinefy Club Brand Guide
 
 ## Logo
 - **Arquivo**: `assets/img/logo.svg`
