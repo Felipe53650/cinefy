@@ -1,18 +1,23 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="clubGradient" x1="10" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f15b3a"/>
-      <stop offset="1" stop-color="#9f170d"/>
+    <linearGradient id="favCore" x1="12" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB7AC"/>
+      <stop offset="0.46" stop-color="#E83B24"/>
+      <stop offset="1" stop-color="#7A1A12"/>
     </linearGradient>
   </defs>
+
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#14090A"/>
+  <rect x="4.5" y="4.5" width="55" height="55" rx="15.5" stroke="white" stroke-opacity="0.12"/>
+
   <path
-    d="M45 16.5C40.7 12 35.1 9.2 28.8 9.2C17.1 9.2 7.8 19 7.8 32C7.8 45 17.1 54.8 28.8 54.8C35 54.8 40.6 52.1 44.9 47.6"
-    stroke="url(#clubGradient)"
-    stroke-width="11"
+    d="M42 18.5C38.7 15.3 34.4 13.4 29.6 13.4C20.1 13.4 13 21.2 13 31.6C13 42.1 20.1 49.9 29.6 49.9C34.2 49.9 38.6 48 41.8 44.8"
+    stroke="url(#favCore)"
+    stroke-width="8"
     stroke-linecap="round"
     stroke-linejoin="round"
-    transform="matrix(1 0 -0.14 1 6 0)"
   />
-  <circle cx="47.5" cy="16.5" r="6.5" fill="#14090A"/>
-  <path d="M47.5 12.5v8M43.5 16.5h8" stroke="url(#clubGradient)" stroke-width="2.8" stroke-linecap="round"/>
+
+  <path d="M46.5 18.5L51 23" stroke="#FFE7E2" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M51 18.5L46.5 23" stroke="#FFE7E2" stroke-width="2.8" stroke-linecap="round"/>
 </svg>

@@ -6,13 +6,15 @@
 - **Positioning**: plataforma social de descoberta, organizacao, curadoria e compartilhamento de filmes
 
 ## Active Assets
-- **Primary wordmark (SVG)**: `public/assets/img/logo.svg`
+- **Runtime wordmark**: `public/assets/css/theme.css` via `.cinefy-brand-mark`
+- **Primary emblem (SVG)**: `public/assets/img/logo.svg`
 - **Primary wordmark (PNG)**: `public/assets/img/logo.png`
 - **Favicon**: `public/assets/img/favicon-club.svg`
 - **GitHub / social cover**: `public/assets/img/github-cover.svg`
 
 ## Usage Notes
-- Use `logo.svg` by default inside the product whenever possible.
+- Use the runtime wordmark inside the product header, footer and auth surfaces.
+- Use `logo.svg` as the square emblem for avatar fallbacks and compact brand contexts.
 - Use `logo.png` for contexts that require raster fallback or external upload flows.
 - Use `favicon-club.svg` as the browser tab icon.
 - Use `github-cover.svg` for Open Graph, Twitter cards and repository presentation when a wide cover image is needed.
@@ -50,7 +52,9 @@
 - Dark cinematic atmosphere by default
 - Glassmorphism panels with blur and soft borders
 - Rounded containers with generous radius
-- Warm ember gradients for brand emphasis
+- A bold runtime wordmark with theme-aware gradient on `Cinefy`
+- A compact capsule signature for `Club`
+- A square emblem for compact contexts such as avatar fallback and favicon
 - Theme-aware UI accents across cards, pills, buttons and section markers
 
 ## Voice And Tone
@@ -85,7 +89,8 @@
 - `robots.txt`, `sitemap.xml` and `.gitignore` are expected repository files and are not sensitive by themselves.
 
 ## Quick Reference
-- **Use in app header/footer**: `logo.svg`
+- **Use in app header/footer**: runtime wordmark from `theme.css`
+- **Use for avatar fallback / compact badge**: `logo.svg`
 - **Use for external uploads / fallback image fields**: `logo.png`
 - **Use in browser tabs**: `favicon-club.svg`
 - **Use in GitHub README cards / social embeds**: `github-cover.svg`

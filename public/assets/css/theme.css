@@ -230,13 +230,13 @@ body[data-page="cadastro"] {
 
 .cinefy-brand-mark {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   width: max-content;
   max-width: 100%;
-  gap: 0.16em;
+  gap: 0.54em;
   overflow: visible;
-  padding: 0.1em 0.34em 0.28em 0.02em;
-  line-height: 1;
+  padding: 0.08em 0.3em 0.14em 0.04em;
+  line-height: 1.02;
   white-space: nowrap;
   transition: filter 160ms ease, transform 160ms ease;
 }
@@ -244,40 +244,50 @@ body[data-page="cadastro"] {
 .cinefy-brand-mark__core {
   display: inline-block;
   overflow: visible;
-  padding-bottom: 0.08em;
+  padding-bottom: 0.06em;
   color: transparent !important;
-  background-image: linear-gradient(135deg, #9af9b8 0%, #54e48a 48%, #23bb61 100%);
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--theme-accent-soft-rgb)),
+    rgb(var(--theme-accent-rgb)) 42%,
+    rgb(var(--theme-accent-strong-rgb))
+  );
   -webkit-background-clip: text;
   background-clip: text;
   font-family: "Sora", sans-serif;
-  font-style: italic;
+  font-style: normal;
   font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.082em;
-  text-shadow: 0 12px 32px rgb(35 187 97 / 0.18);
+  line-height: 1.04;
+  letter-spacing: -0.07em;
+  text-shadow: 0 14px 32px rgb(var(--theme-accent-rgb) / 0.18);
 }
 
 .cinefy-brand-mark__suffix {
   display: inline-block;
-  margin-left: 0;
-  padding-bottom: 0.03em;
-  color: transparent !important;
-  background-image: linear-gradient(135deg, #9af9b8 0%, #54e48a 48%, #23bb61 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  font-family: "Sora", sans-serif;
-  font-size: 0.64em;
-  font-style: italic;
+  flex: 0 0 auto;
+  padding: 0.42em 0.82em 0.38em 1em;
+  border: 1px solid rgb(var(--theme-accent-rgb) / 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(var(--theme-surface-strong-rgb) / 0.64), rgb(var(--theme-surface-rgb) / 0.9)),
+    linear-gradient(135deg, rgb(var(--theme-accent-rgb) / 0.12), rgb(var(--theme-accent-soft-rgb) / 0.08));
+  color: rgb(var(--theme-text-rgb) / 0.92);
+  font-family: "Outfit", sans-serif;
+  font-size: 0.34em;
+  font-style: normal;
   font-weight: 700;
-  letter-spacing: -0.052em;
-  line-height: 1.02;
-  text-transform: none;
-  text-shadow: 0 10px 24px rgb(35 187 97 / 0.16);
-  transform: translateY(-0.01em);
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-indent: 0.28em;
+  text-transform: uppercase;
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 10px 22px rgb(0 0 0 / 0.16);
+  transform: translateY(0.02em);
 }
 
 .cinefy-brand-mark:hover {
   filter: brightness(1.06);
+  transform: translateY(-0.5px);
 }
 
 .cinefy-user-link {
@@ -1099,15 +1109,17 @@ body[data-page="modoleitor"] .max-w-7xl {
   }
 
   .cinefy-brand-mark {
-    gap: 0.14em;
-    padding-right: 0.26em;
-    padding-bottom: 0.24em;
+    gap: 0.34em;
+    padding-right: 0.2em;
+    padding-bottom: 0.18em;
   }
 
   .cinefy-brand-mark__suffix {
-    font-size: 0.6em;
-    letter-spacing: -0.05em;
-    transform: translateY(-0.02em);
+    padding: 0.38em 0.7em 0.34em 0.86em;
+    font-size: 0.33em;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    transform: translateY(0.01em);
   }
 
   .cinefy-topbar__primary {
