@@ -233,8 +233,8 @@ body[data-page="cadastro"] {
     align-items: baseline;
     gap: 0.06em;
     overflow: visible;
-    padding: 0.08em 0.16em 0.18em 0;
-    line-height: 1.08;
+    padding: 0.08em 0.24em 0.24em 0;
+    line-height: 1.1;
     white-space: nowrap;
     transition: filter 160ms ease, transform 160ms ease;
   }
@@ -242,7 +242,7 @@ body[data-page="cadastro"] {
 .cinefy-brand-mark__core {
   display: inline-block;
   overflow: visible;
-  padding-bottom: 0.08em;
+  padding-bottom: 0.1em;
   color: transparent !important;
   background-image: linear-gradient(
     135deg,
@@ -252,24 +252,24 @@ body[data-page="cadastro"] {
   );
   -webkit-background-clip: text;
   background-clip: text;
-  line-height: 1.12;
+  line-height: 1.14;
   text-shadow: 0 14px 36px rgb(var(--theme-accent-strong-rgb) / 0.14);
   letter-spacing: -0.07em;
 }
 
 .cinefy-brand-mark__suffix {
   display: inline-block;
-  margin-left: 0.28em;
-  color: rgb(var(--theme-text-rgb) / 0.72);
-  font-family: "Outfit", sans-serif;
-  font-size: 0.5em;
-  font-style: normal;
-  font-weight: 400;
-  letter-spacing: 0.015em;
+  margin-left: 0.34em;
+  color: rgb(var(--theme-text-rgb));
+  font-family: "Sora", sans-serif;
+  font-size: 0.56em;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   line-height: 1.08;
   text-transform: none;
   text-shadow: none;
-  transform: translateY(-0.03em);
+  transform: translateY(-0.05em);
 }
 
 .cinefy-brand-mark:hover {
@@ -277,7 +277,7 @@ body[data-page="cadastro"] {
 }
 
 .cinefy-brand-mark:hover .cinefy-brand-mark__suffix {
-  color: rgb(var(--theme-text-rgb) / 0.86);
+  color: rgb(var(--theme-text-rgb));
 }
 
 .cinefy-user-link {
@@ -1090,16 +1090,16 @@ body[data-page="modoleitor"] .max-w-7xl {
 
     .cinefy-brand-mark {
       gap: 0.045em;
-      padding-right: 0.12em;
-      padding-bottom: 0.2em;
+      padding-right: 0.18em;
+      padding-bottom: 0.22em;
     }
 
     .cinefy-brand-mark__suffix {
-      margin-left: 0.22em;
-      font-size: 0.46em;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-      transform: translateY(-0.015em);
+      margin-left: 0.28em;
+      font-size: 0.5em;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      transform: translateY(-0.04em);
     }
 
   .cinefy-topbar__primary {
