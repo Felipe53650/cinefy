@@ -229,20 +229,23 @@ body[data-page="cadastro"] {
 }
 
 .cinefy-brand-mark {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.06em;
-    overflow: visible;
-    padding: 0.08em 0.24em 0.24em 0;
-    line-height: 1.1;
-    white-space: nowrap;
-    transition: filter 160ms ease, transform 160ms ease;
-  }
+  display: inline-flex;
+  align-items: flex-end;
+  width: max-content;
+  max-width: 100%;
+  gap: 0.08em;
+  overflow: visible;
+  padding: 0.08em 0.34em 0.34em 0.04em;
+  line-height: 1.16;
+  white-space: nowrap;
+  transition: filter 160ms ease, transform 160ms ease;
+}
 
 .cinefy-brand-mark__core {
   display: inline-block;
   overflow: visible;
-  padding-bottom: 0.1em;
+  padding-right: 0.02em;
+  padding-bottom: 0.12em;
   color: transparent !important;
   background-image: linear-gradient(
     135deg,
@@ -252,24 +255,24 @@ body[data-page="cadastro"] {
   );
   -webkit-background-clip: text;
   background-clip: text;
-  line-height: 1.14;
+  line-height: 1.18;
   text-shadow: 0 14px 36px rgb(var(--theme-accent-strong-rgb) / 0.14);
   letter-spacing: -0.07em;
 }
 
 .cinefy-brand-mark__suffix {
   display: inline-block;
-  margin-left: 0.34em;
+  margin-left: 0.42em;
   color: rgb(var(--theme-text-rgb));
   font-family: "Sora", sans-serif;
   font-size: 0.56em;
-  font-style: italic;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.08;
-  text-transform: none;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.11em;
+  line-height: 1.12;
+  text-transform: uppercase;
   text-shadow: none;
-  transform: translateY(-0.05em);
+  transform: translateY(-0.02em);
 }
 
 .cinefy-brand-mark:hover {
@@ -892,12 +895,22 @@ body[data-page="modoleitor"] .max-w-7xl {
 }
 
 .cinefy-topbar__primary {
-  min-width: 0;
-  flex: 0 1 auto;
+  min-width: max-content;
+  flex: 0 0 auto;
+  padding-right: 0.25rem;
+}
+
+.cinefy-brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  min-width: max-content;
+  line-height: 1;
 }
 
 .cinefy-topbar__secondary {
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .cinefy-nav-links-shell {
@@ -1085,25 +1098,30 @@ body[data-page="modoleitor"] .max-w-7xl {
   }
 
   .cinefy-brand {
-      font-size: 1.72rem !important;
-    }
+    font-size: 1.72rem !important;
+  }
 
-    .cinefy-brand-mark {
-      gap: 0.045em;
-      padding-right: 0.18em;
-      padding-bottom: 0.22em;
-    }
+  .cinefy-brand-mark {
+    gap: 0.055em;
+    padding-right: 0.26em;
+    padding-bottom: 0.28em;
+  }
 
-    .cinefy-brand-mark__suffix {
-      margin-left: 0.28em;
-      font-size: 0.5em;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      transform: translateY(-0.04em);
-    }
+  .cinefy-brand-mark__core {
+    line-height: 1.16;
+  }
+
+  .cinefy-brand-mark__suffix {
+    margin-left: 0.34em;
+    font-size: 0.48em;
+    letter-spacing: 0.12em;
+    transform: translateY(-0.01em);
+  }
 
   .cinefy-topbar__primary {
-    gap: 0.65rem !important;
+    min-width: 0;
+    gap: 0.78rem !important;
+    padding-right: 0.12rem;
   }
 
   .cinefy-topbar__secondary {
