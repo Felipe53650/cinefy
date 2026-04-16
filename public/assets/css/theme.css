@@ -233,9 +233,9 @@ body[data-page="cadastro"] {
   align-items: center;
   width: max-content;
   max-width: 100%;
-  gap: 0.54em;
+  gap: 0.42em;
   overflow: visible;
-  padding: 0.08em 0.3em 0.14em 0.04em;
+  padding: 0.08em 0.26em 0.14em 0.04em;
   line-height: 1.02;
   white-space: nowrap;
   transition: filter 160ms ease, transform 160ms ease;
@@ -244,7 +244,8 @@ body[data-page="cadastro"] {
 .cinefy-brand-mark__core {
   display: inline-block;
   overflow: visible;
-  padding-bottom: 0.06em;
+  padding-right: 0.08em;
+  padding-bottom: 0.08em;
   color: transparent !important;
   background-image: linear-gradient(
     135deg,
@@ -255,17 +256,17 @@ body[data-page="cadastro"] {
   -webkit-background-clip: text;
   background-clip: text;
   font-family: "Sora", sans-serif;
-  font-style: normal;
+  font-style: italic;
   font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: -0.07em;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   text-shadow: 0 14px 32px rgb(var(--theme-accent-rgb) / 0.18);
 }
 
 .cinefy-brand-mark__suffix {
   display: inline-block;
   flex: 0 0 auto;
-  padding: 0.42em 0.82em 0.38em 1em;
+  padding: 0.42em 0.82em 0.38em 0.92em;
   border: 1px solid rgb(var(--theme-accent-rgb) / 0.22);
   border-radius: 999px;
   background:
@@ -1109,7 +1110,7 @@ body[data-page="modoleitor"] .max-w-7xl {
   }
 
   .cinefy-brand-mark {
-    gap: 0.34em;
+    gap: 0.26em;
     padding-right: 0.2em;
     padding-bottom: 0.18em;
   }
