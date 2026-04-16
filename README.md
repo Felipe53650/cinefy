@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://cinefy3-83a9a.web.app">Demo online</a>
+  <a href="https://cinefyclub.com.br">Demo online</a>
   &middot;
   <a href="https://github.com/Felipe53650/cinefy">Repositorio</a>
   &middot;
@@ -122,7 +122,7 @@ Mesmo sem publicar capturas que exponham dados pessoais, a versao atual do Cinef
 
 ### Onde ver esses fluxos
 
-- [Demo online](https://cinefy3-83a9a.web.app)
+- [Demo online](https://cinefyclub.com.br)
 - [Arquitetura do projeto](./docs/architecture.md)
 
 ### Observacao sobre screenshots
