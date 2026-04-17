@@ -1,7 +1,7 @@
 (function () {
   const firebaseConfig = {
     apiKey: "AIzaSyBYth4q2GuR4ROosgQLU-hcT55hopYa6KI",
-    authDomain: "cinefy3-83a9a.firebaseapp.com",
+    authDomain: "cinefyclub.com.br",
     projectId: "cinefy3-83a9a",
     storageBucket: "cinefy3-83a9a.firebasestorage.app",
     messagingSenderId: "681789753745",

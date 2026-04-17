@@ -688,6 +688,14 @@
     } catch (error) {
       console.error(`Erro no login com ${providerName}:`, error && error.code ? { code: error.code } : error);
 
+      if (error && error.code === "auth/unauthorized-domain") {
+        error.cinefyMessage = "Este dominio ainda nao foi autorizado no Firebase Authentication. Adicione cinefyclub.com.br e www.cinefyclub.com.br em Authentication > Settings > Authorized domains.";
+      }
+
+      if (error && error.code === "auth/operation-not-supported-in-this-environment") {
+        error.cinefyMessage = "O login social nao conseguiu abrir o fluxo seguro neste navegador. Tente novamente apos permitir pop-ups ou revise a configuracao do dominio personalizado no Firebase Auth.";
+      }
+
       if (error && error.code === "auth/invalid-credential") {
         error.cinefyMessage = providerName === "facebook"
           ? "O Facebook autenticou sua conta, mas o Firebase recusou a credencial. Confira se o provedor Facebook esta ativado no Firebase Auth e se o App ID e App Secret sao exatamente os mesmos do Meta."
