@@ -40,10 +40,13 @@
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
           <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
           <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
-          <p class="details-quick-summary mt-4 max-w-3xl text-sm leading-relaxed text-zinc-300 md:text-base" id="movieQuickSummary">Organizando direção, elenco e contexto rápido deste título.</p>
+          <div class="mt-4 max-w-3xl">
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">Contexto rápido</p>
+            <p class="details-quick-summary mt-2 text-sm leading-relaxed text-zinc-300 md:text-base" id="movieQuickSummary">Organizando direção, elenco e contexto rápido deste título.</p>
+          </div>
           <div class="details-hero-stats mt-5 flex flex-wrap gap-3" id="movieHeroStats"></div>
           <div class="details-community-signal mt-4 hidden" id="movieCommunitySignal"></div>
-          <div class="mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
+          <div class="details-hero-actions mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
             <button class="details-list-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined" id="addToListButtonIcon">add</span>
               <span id="addToListButtonLabel">Adicionar a Minha Lista</span>
@@ -57,8 +60,18 @@
       </div>
     </section>
 
+    <section class="mx-auto max-w-7xl px-4 pt-5 md:px-6 md:pt-6">
+      <nav aria-label="Atalhos da página de detalhes" class="details-quick-nav">
+        <a class="details-quick-nav__chip" href="#yourReviewSection">Sua avaliação</a>
+        <a class="details-quick-nav__chip" href="#movieSpecsSection">Ficha técnica</a>
+        <a class="details-quick-nav__chip" href="#watchSection">Onde assistir</a>
+        <a class="details-quick-nav__chip" href="#similarSection">Filmes parecidos</a>
+        <a class="details-quick-nav__chip" href="#communityReviewsSection">Reviews</a>
+      </nav>
+    </section>
+
     <section class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:gap-10 md:px-6 md:py-12 lg:grid-cols-[1.15fr,0.85fr]">
-      <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
+      <div class="glass-card details-anchor-section rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8" id="yourReviewSection">
         <div class="section-heading">
           <h2 class="font-display text-3xl font-bold text-white">Sua avaliação</h2>
           <p class="text-sm uppercase tracking-[0.24em] text-zinc-500">Salva localmente para este filme</p>
@@ -80,7 +93,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
+        <div class="glass-card details-anchor-section rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6" id="movieSpecsSection">
           <div class="section-heading">
             <h3 class="font-display text-xl font-bold text-white">Ficha técnica</h3>
           </div>
@@ -124,7 +137,7 @@
           </div>
         </div>
 
-        <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
+        <div class="glass-card details-anchor-section rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6" id="watchSection">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="section-heading">
               <h3 class="font-display text-xl font-bold text-white">Onde assistir</h3>
@@ -163,7 +176,7 @@
     </section>
 
     <section class="mx-auto max-w-7xl px-4 pb-8 md:px-6 md:pb-10">
-      <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
+      <div class="glass-card details-anchor-section rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8" id="similarSection">
         <div class="section-heading">
           <h2 class="font-display text-3xl font-bold text-white">Filmes parecidos</h2>
           <p class="mt-1 text-sm text-zinc-400">Alternativas rapidas se este nao for o seu proximo play.</p>
