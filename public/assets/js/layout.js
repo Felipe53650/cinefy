@@ -240,6 +240,11 @@
               <span>Receber novidades</span>
             </a>
           </div>
+          <nav aria-label="Links utilitarios" class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs uppercase tracking-[0.18em] text-zinc-500">
+            <a class="transition-colors hover:text-zinc-200" href="privacidade.html">Privacidade</a>
+            <a class="transition-colors hover:text-zinc-200" href="termos.html">Termos</a>
+            <a class="transition-colors hover:text-zinc-200" href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club">Contato</a>
+          </nav>
           <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Powered by TMDB</p>
         </div>
       </div>

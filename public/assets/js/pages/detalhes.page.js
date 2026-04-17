@@ -11,6 +11,7 @@ let currentMovie = null;
 let currentExternalLinks = buildExternalLinks({});
 let currentTmdbReviews = [];
 let currentCinefyReviews = [];
+let currentWatchProvidersPayload = null;
 const relationshipState = {
   friends: new Set(),
   incoming: new Set(),
@@ -22,10 +23,16 @@ const addToListButton = document.getElementById("addToListButton");
 const addToListButtonIcon = document.getElementById("addToListButtonIcon");
 const addToListButtonLabel = document.getElementById("addToListButtonLabel");
 const watchProvidersLink = document.getElementById("watchProvidersLink");
+const watchProvidersRegionSelect = document.getElementById("watchProvidersRegion");
 const communityReviewsLink = document.getElementById("communityReviewsLink");
+const ratingInput = document.getElementById("ratingInput");
+const ratingStars = document.getElementById("ratingStars");
 
 document.getElementById("saveReviewButton").addEventListener("click", saveReview);
 addToListButton.addEventListener("click", toggleCurrentMovieInList);
+ratingInput.addEventListener("input", syncRatingStars);
+watchProvidersRegionSelect.addEventListener("change", handleWatchProviderRegionChange);
+syncRatingStars();
 
 void loadViewerRelationshipState();
 loadMovie();
@@ -43,17 +50,18 @@ async function loadMovie() {
   }
 
   try {
-    const [movie, credits, releaseDates, watchProviders, externalIds, reviews] = await Promise.all([
+    const [movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations] = await Promise.all([
       window.TMDB.getMovieDetails(movieId),
       window.TMDB.getMovieCredits(movieId),
       window.TMDB.getMovieReleaseDates(movieId),
       window.TMDB.getMovieWatchProviders(movieId),
       window.TMDB.getMovieExternalIds(movieId),
-      window.TMDB.getMovieReviews(movieId)
+      window.TMDB.getMovieReviews(movieId),
+      window.TMDB.getMovieRecommendations(movieId)
     ]);
 
     currentMovie = movie;
-    renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews);
+    renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations);
     hydrateReview();
     syncAddButtonState();
   } catch (error) {
@@ -104,16 +112,19 @@ async function findLocalMovie() {
   return store.loadListState().movies.find((movie) => String(movie.id) === localMovieId);
 }
 
-function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviewsResponse) {
+function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviewsResponse, recommendations = []) {
   const certification = getMovieCertification(releaseDates);
-  const providerData = getPreferredWatchProviders(watchProviders);
   const cast = Array.isArray(credits && credits.cast) ? credits.cast : [];
   const crew = Array.isArray(credits && credits.crew) ? credits.crew : [];
   const directors = getMovieDirectors(crew);
+  const leadCast = getLeadCastNames(cast);
   const externalLinks = buildExternalLinks(movie, externalIds);
 
   currentExternalLinks = externalLinks;
   currentTmdbReviews = Array.isArray(reviewsResponse && reviewsResponse.results) ? reviewsResponse.results : [];
+  currentWatchProvidersPayload = watchProviders && typeof watchProviders === "object" ? watchProviders : null;
+
+  const providerData = buildWatchProviderState(currentWatchProvidersPayload, "BR");
 
   document.title = `Cinefy Club - ${movie.title}`;
   document.getElementById("movieBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
@@ -126,6 +137,8 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
   document.getElementById("movieCertification").textContent = certification || "Nao informado";
   document.getElementById("movieProvidersSummary").textContent = getProvidersSummary(providerData);
   document.getElementById("movieDirectors").textContent = directors.length ? directors.join(", ") : "Nao informado";
+  document.getElementById("movieLeadCast").textContent = leadCast.length ? leadCast.join(", ") : "Nao informado";
+  document.getElementById("movieOriginalLanguage").textContent = formatLanguageLabel(movie.original_language);
   document.getElementById("movieBadges").innerHTML = `
     ${(movie.genres || []).slice(0, 3).map((genre) => `<span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(genre.name)}</span>`).join("")}
     <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${movie.release_date ? movie.release_date.slice(0, 4) : "Sem ano"}</span>
@@ -133,17 +146,28 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
     <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(certification || "Classificacao nao informada")}</span>
   `;
 
+  renderHeroStats({
+    score: movie.vote_average,
+    voteCount: movie.vote_count,
+    certification,
+    runtime: movie.runtime
+  });
   renderWatchProviders(providerData);
   renderExternalLinks(externalLinks);
+  renderSimilarMovies(recommendations);
   renderCommunityReviews(currentTmdbReviews, externalLinks);
   loadCinefyCommunityReviews();
 
   document.getElementById("castGrid").innerHTML = cast.slice(0, 6).map((person) => `
-    <article class="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+    <a class="details-cast-card rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 transition hover:border-white/18 hover:bg-white/[0.04]" href="https://www.themoviedb.org/person/${escapeHtml(String(person.id || ""))}" rel="noopener noreferrer" target="_blank">
       <img alt="${escapeHtml(person.name)}" class="mb-3 h-16 w-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${person.profile_path ? window.TMDB.getImageUrl(person.profile_path, fallbackPoster) : fallbackPoster}" />
       <p class="text-sm font-bold text-white">${escapeHtml(person.name)}</p>
       <p class="mt-1 text-xs text-zinc-400">${escapeHtml(person.character || "Elenco")}</p>
-    </article>
+      <span class="mt-3 inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-zinc-300">
+        Ver perfil
+        <span class="material-symbols-outlined text-sm">open_in_new</span>
+      </span>
+    </a>
   `).join("") || `
     <div class="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-sm text-zinc-400">
       O TMDB nao retornou elenco principal para este filme.
@@ -155,6 +179,7 @@ function renderLocalMovie(movie) {
   const externalLinks = buildExternalLinks(movie);
   currentExternalLinks = externalLinks;
   currentTmdbReviews = [];
+  currentWatchProvidersPayload = null;
 
   document.title = `Cinefy Club - ${movie.title}`;
   document.getElementById("movieBackdrop").src = movie.poster || fallbackPoster;
@@ -169,6 +194,8 @@ function renderLocalMovie(movie) {
   document.getElementById("movieCertification").textContent = "Personalizado";
   document.getElementById("movieProvidersSummary").textContent = "Indisponivel";
   document.getElementById("movieDirectors").textContent = "Nao informado";
+  document.getElementById("movieLeadCast").textContent = "Nao informado";
+  document.getElementById("movieOriginalLanguage").textContent = "Nao informado";
   document.getElementById("movieBadges").innerHTML = `
     <span class="rounded-full bg-red-600/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-red-300">${escapeHtml(movie.genre || "Personalizado")}</span>
     <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">${escapeHtml(String(movie.year || "Sem ano"))}</span>
@@ -176,8 +203,16 @@ function renderLocalMovie(movie) {
     <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">Classificacao personalizada</span>
   `;
 
+  renderHeroStats({
+    score: typeof movie.rating === "number" ? movie.rating : 0,
+    voteCount: 1,
+    certification: "Personalizado",
+    runtime: 0,
+    isManual: true
+  });
   renderWatchProviders(null, true);
   renderExternalLinks(externalLinks);
+  renderSimilarMovies([], true);
   renderCommunityReviews([], externalLinks, true, []);
 
   document.getElementById("castGrid").innerHTML = `
@@ -199,12 +234,44 @@ function hydrateReview() {
   const reviews = loadReviews();
   const review = reviews[getReviewStorageKey()];
   if (!review) {
+    syncRatingStars();
     return;
   }
 
   document.getElementById("ratingInput").value = review.rating || "";
   document.getElementById("commentInput").value = review.comment || "";
   document.getElementById("reviewFeedback").textContent = "Avaliacao restaurada do seu navegador.";
+  syncRatingStars();
+}
+
+function syncRatingStars() {
+  if (!ratingStars) {
+    return;
+  }
+
+  const value = sanitizeReviewRating(ratingInput.value);
+  ratingStars.innerHTML = Array.from({ length: 5 }, (_, index) => {
+    const starValue = index + 1;
+    const icon = value >= starValue ? "star" : value >= starValue - 0.5 ? "star_half" : "star_outline";
+
+    return `
+      <button
+        class="details-rating-star ${value >= starValue ? "is-active" : ""}"
+        data-rating-value="${starValue}"
+        type="button"
+      >
+        <span class="material-symbols-outlined filled-icon">${icon}</span>
+        <span class="sr-only">Dar nota ${starValue}</span>
+      </button>
+    `;
+  }).join("");
+
+  ratingStars.querySelectorAll("[data-rating-value]").forEach((button) => {
+    button.addEventListener("click", () => {
+      ratingInput.value = button.getAttribute("data-rating-value") || "";
+      syncRatingStars();
+    });
+  });
 }
 
 async function saveReview() {
@@ -333,8 +400,9 @@ function renderWatchProviders(providerData, isManual = false) {
   const grid = document.getElementById("watchProvidersGrid");
   const caption = document.getElementById("watchProvidersCaption");
 
-  if (isManual || !providerData || !providerData.groups.length) {
+  if (isManual || !providerData || !providerData.hasAnyData) {
     watchProvidersLink.classList.add("hidden");
+    watchProvidersRegionSelect.classList.add("hidden");
     caption.textContent = isManual
       ? "Filmes manuais nao possuem disponibilidade sincronizada com o TMDB."
       : "O TMDB nao informou plataformas para este filme na regiao consultada.";
@@ -343,6 +411,23 @@ function renderWatchProviders(providerData, isManual = false) {
         ${isManual
           ? "Como este item foi criado manualmente, nao existe uma lista de plataformas para exibir aqui."
           : "Nenhuma plataforma foi encontrada no TMDB para streaming, aluguel ou compra deste titulo no momento."}
+      </div>
+    `;
+    return;
+  }
+
+  renderWatchProviderRegionOptions(providerData);
+
+  if (!providerData.groups.length) {
+    watchProvidersLink.classList.add("hidden");
+    caption.textContent = providerData.selectedRegion.code === "BR"
+      ? "Ainda nao encontramos plataformas no Brasil. Troque a regiao para continuar a busca."
+      : `Ainda nao encontramos plataformas em ${providerData.regionLabel}. Tente outra regiao.`;
+    grid.innerHTML = `
+      <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        ${providerData.selectedRegion.code === "BR"
+          ? "Este titulo ainda nao tem disponibilidade confirmada para o Brasil no TMDB. Use o seletor acima para consultar outras regioes suportadas."
+          : `Nao ha plataformas listadas para ${escapeHtml(providerData.regionLabel)} neste momento.`}
       </div>
     `;
     return;
@@ -402,6 +487,7 @@ function renderExternalLinks(externalLinks) {
 function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = false, cinefyReviews = []) {
   const grid = document.getElementById("communityReviewsGrid");
   const caption = document.getElementById("communityReviewsCaption");
+  const summary = document.getElementById("communityReviewsSummary");
   const letterboxdHref = externalLinks.letterboxd ? externalLinks.letterboxd.href : "#";
   currentCinefyReviews = Array.isArray(cinefyReviews) ? cinefyReviews : [];
   communityReviewsLink.href = letterboxdHref;
@@ -409,6 +495,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
 
   if (isManual) {
     caption.textContent = "Itens manuais nao possuem reviews sincronizadas com bases externas.";
+    summary.innerHTML = "";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
         Esse titulo foi criado por voce, entao ainda nao existe uma trilha de reviews publicas vinculada a ele aqui no Cinefy Club.
@@ -425,6 +512,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
 
   if (!cinefyReviews.length && !tmdbReviews.length) {
     caption.textContent = "Ainda nao encontramos reviews da comunidade para este filme.";
+    summary.innerHTML = "";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
         Ainda nao ha comentarios publicos aqui. Avalie este filme para comecar a conversa no Cinefy Club ou use os atalhos acima para continuar a leitura em outras comunidades.
@@ -521,6 +609,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
   caption.textContent = cinefyReviews.length
     ? "Suas reviews e as dos seus amigos aparecem primeiro, seguidas das leituras publicas do TMDB."
     : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do Cinefy Club crescer aqui.";
+  summary.innerHTML = buildReviewSummaryCards(cinefyReviews.length, tmdbReviews.length);
   grid.innerHTML = sections.join("");
 
   grid.querySelectorAll("[data-review-social-action]").forEach((button) => {
@@ -617,24 +706,42 @@ function extractCertification(releaseDates, countryCode, preferredTypes) {
   return countryCode === "BR" ? certification : `${certification} (${countryCode})`;
 }
 
-function getPreferredWatchProviders(watchProviders) {
-  const results = watchProviders && watchProviders.results ? watchProviders.results : {};
-  const countries = [
-    { code: "BR", label: "Brasil" },
-    { code: "US", label: "Estados Unidos" },
-    { code: "PT", label: "Portugal" }
-  ];
-
-  let selectedRegion = countries.find((country) => results[country.code]);
-  if (!selectedRegion) {
-    const firstRegionCode = Object.keys(results)[0];
-    if (!firstRegionCode) {
-      return null;
-    }
-    selectedRegion = { code: firstRegionCode, label: firstRegionCode };
+function handleWatchProviderRegionChange() {
+  if (!currentWatchProvidersPayload) {
+    return;
   }
 
-  const regionData = results[selectedRegion.code] || {};
+  const providerState = buildWatchProviderState(currentWatchProvidersPayload, watchProvidersRegionSelect.value || "BR");
+  renderWatchProviders(providerState);
+  document.getElementById("movieProvidersSummary").textContent = getProvidersSummary(providerState);
+}
+
+function renderWatchProviderRegionOptions(providerData) {
+  if (!providerData || !Array.isArray(providerData.availableRegions) || providerData.availableRegions.length <= 1) {
+    watchProvidersRegionSelect.classList.add("hidden");
+    watchProvidersRegionSelect.innerHTML = "";
+    return;
+  }
+
+  watchProvidersRegionSelect.classList.remove("hidden");
+  watchProvidersRegionSelect.innerHTML = providerData.availableRegions.map((region) => `
+    <option value="${escapeHtml(region.code)}" ${region.code === providerData.selectedRegion.code ? "selected" : ""}>
+      ${escapeHtml(region.label)}
+    </option>
+  `).join("");
+}
+
+function buildWatchProviderState(watchProviders, selectedRegionCode = "BR") {
+  const results = watchProviders && watchProviders.results ? watchProviders.results : {};
+  const availableCodes = Object.keys(results);
+
+  if (!availableCodes.length) {
+    return null;
+  }
+
+  const normalizedRegionCode = String(selectedRegionCode || "BR").toUpperCase();
+  const regionCode = normalizedRegionCode || "BR";
+  const regionData = results[regionCode] || null;
   const mappings = [
     { key: "flatrate", label: "Streaming" },
     { key: "free", label: "Gratis" },
@@ -646,26 +753,251 @@ function getPreferredWatchProviders(watchProviders) {
   const groups = mappings
     .map((mapping) => ({
       label: mapping.label,
-      providers: Array.isArray(regionData[mapping.key]) ? regionData[mapping.key] : []
+      providers: Array.isArray(regionData && regionData[mapping.key]) ? regionData[mapping.key] : []
     }))
     .filter((group) => group.providers.length);
 
+  const allOptions = new Map();
+  allOptions.set(regionCode, {
+    code: regionCode,
+    label: regionData ? getRegionLabel(regionCode) : `${getRegionLabel(regionCode)} (sem dados)`
+  });
+
+  availableCodes
+    .sort((left, right) => getRegionLabel(left).localeCompare(getRegionLabel(right), "pt-BR"))
+    .forEach((code) => {
+      allOptions.set(code, {
+        code,
+        label: getRegionLabel(code)
+      });
+    });
+
   return {
-    regionCode: selectedRegion.code,
-    regionLabel: selectedRegion.label,
-    link: regionData.link || "",
-    groups
+    hasAnyData: availableCodes.length > 0,
+    hasRequestedRegionData: Boolean(regionData),
+    selectedRegion: {
+      code: regionCode,
+      label: getRegionLabel(regionCode)
+    },
+    regionLabel: getRegionLabel(regionCode),
+    link: regionData && regionData.link ? regionData.link : "",
+    groups,
+    availableRegions: Array.from(allOptions.values())
   };
 }
 
 function getProvidersSummary(providerData) {
-  if (!providerData || !providerData.groups.length) {
+  if (!providerData) {
     return "Nao informado";
+  }
+
+  if (!providerData.groups.length) {
+    return providerData.selectedRegion && providerData.selectedRegion.code === "BR"
+      ? "Indisponivel no Brasil"
+      : "Indisponivel";
   }
 
   const names = providerData.groups[0].providers.slice(0, 2).map((provider) => provider.provider_name);
   const suffix = providerData.groups[0].providers.length > 2 ? " e outras" : "";
   return `${names.join(", ")}${suffix}`;
+}
+
+function renderHeroStats({ score, voteCount, certification, runtime, isManual = false }) {
+  const heroStats = document.getElementById("movieHeroStats");
+  if (!heroStats) {
+    return;
+  }
+
+  const stats = isManual
+    ? [
+      {
+        label: "Sua nota",
+        value: Number.isFinite(Number(score)) && Number(score) > 0 ? Number(score).toFixed(1) : "Sem nota"
+      },
+      {
+        label: "Tipo",
+        value: "Filme manual"
+      },
+      {
+        label: "Classificacao",
+        value: certification || "Personalizada"
+      }
+    ]
+    : [
+      {
+        label: "Nota TMDB",
+        value: buildStarSummaryLabel(score)
+      },
+      {
+        label: "Avaliacoes",
+        value: voteCount ? `${window.TMDB.formatVoteCount(voteCount)} no TMDB` : "Sem volume informado"
+      },
+      {
+        label: "Classificacao",
+        value: certification || "Nao informada"
+      },
+      {
+        label: "Duracao",
+        value: runtime ? `${runtime} min` : "Nao informada"
+      }
+    ];
+
+  heroStats.innerHTML = stats.map((stat) => `
+    <div class="details-hero-stat">
+      <span class="details-hero-stat__label">${escapeHtml(stat.label)}</span>
+      <span class="details-hero-stat__value">${escapeHtml(stat.value)}</span>
+    </div>
+  `).join("");
+}
+
+function buildStarSummaryLabel(score) {
+  const normalizedScore = Number(score || 0);
+  if (!Number.isFinite(normalizedScore) || normalizedScore <= 0) {
+    return "Sem nota";
+  }
+
+  return `★ ${normalizedScore.toFixed(1)}`;
+}
+
+function getLeadCastNames(cast) {
+  if (!Array.isArray(cast)) {
+    return [];
+  }
+
+  return cast
+    .slice(0, 4)
+    .map((person) => String(person && person.name ? person.name : "").trim())
+    .filter(Boolean);
+}
+
+function formatLanguageLabel(languageCode) {
+  const normalizedCode = String(languageCode || "").trim().toLowerCase();
+  if (!normalizedCode) {
+    return "Nao informado";
+  }
+
+  const knownLabels = {
+    pt: "Portugues",
+    en: "Ingles",
+    es: "Espanhol",
+    fr: "Frances",
+    it: "Italiano",
+    de: "Alemao",
+    ja: "Japones",
+    ko: "Coreano"
+  };
+
+  if (knownLabels[normalizedCode]) {
+    return knownLabels[normalizedCode];
+  }
+
+  if (typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
+    try {
+      const displayNames = new Intl.DisplayNames(["pt-BR"], { type: "language" });
+      return displayNames.of(normalizedCode) || normalizedCode.toUpperCase();
+    } catch (error) {
+      return normalizedCode.toUpperCase();
+    }
+  }
+
+  return normalizedCode.toUpperCase();
+}
+
+function renderSimilarMovies(recommendations, isManual = false) {
+  const grid = document.getElementById("similarMoviesGrid");
+  if (!grid) {
+    return;
+  }
+
+  if (isManual) {
+    grid.innerHTML = `
+      <div class="details-empty-state rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        Filmes manuais nao recebem recomendacoes automaticas do TMDB.
+      </div>
+    `;
+    return;
+  }
+
+  const validRecommendations = Array.isArray(recommendations)
+    ? recommendations.filter((item) => item && item.id && item.poster_path)
+    : [];
+
+  if (!validRecommendations.length) {
+    grid.innerHTML = `
+      <div class="details-empty-state rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
+        Ainda nao encontramos titulos parecidos para este filme. Tente explorar o elenco, as reviews ou os links externos acima.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = validRecommendations.slice(0, 8).map((item) => `
+    <a class="details-similar-card" href="detalhes.html?id=${escapeHtml(String(item.id))}">
+      <img alt="${escapeHtml(item.title || "Filme recomendado")}" class="details-similar-card__poster" decoding="async" loading="lazy" src="${window.TMDB.getImageUrl(item.poster_path, fallbackPoster)}" />
+      <div class="details-similar-card__body">
+        <div class="details-similar-card__meta">
+          <span>${escapeHtml(item.release_date ? item.release_date.slice(0, 4) : "Sem ano")}</span>
+          <span>${escapeHtml(buildStarSummaryLabel(item.vote_average))}</span>
+        </div>
+        <h3 class="details-similar-card__title">${escapeHtml(item.title || "Sem titulo")}</h3>
+        <p class="details-similar-card__cta">
+          Ver detalhes
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </p>
+      </div>
+    </a>
+  `).join("");
+}
+
+function buildReviewSummaryCards(cinefyCount, tmdbCount) {
+  const cards = [
+    {
+      label: "Cinefy Club",
+      value: cinefyCount ? `${cinefyCount} review(s)` : "Sem reviews locais"
+    },
+    {
+      label: "TMDB",
+      value: tmdbCount ? `${tmdbCount} review(s)` : "Sem reviews externas"
+    }
+  ];
+
+  return cards.map((card) => `
+    <div class="details-review-summary__card">
+      <span class="details-review-summary__label">${escapeHtml(card.label)}</span>
+      <strong class="details-review-summary__value">${escapeHtml(card.value)}</strong>
+    </div>
+  `).join("");
+}
+
+function getRegionLabel(regionCode) {
+  const code = String(regionCode || "").toUpperCase();
+  const knownLabels = {
+    BR: "Brasil",
+    US: "Estados Unidos",
+    PT: "Portugal",
+    FR: "Franca",
+    ES: "Espanha",
+    MX: "Mexico",
+    AR: "Argentina",
+    IT: "Italia",
+    DE: "Alemanha",
+    GB: "Reino Unido"
+  };
+
+  if (knownLabels[code]) {
+    return knownLabels[code];
+  }
+
+  if (typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
+    try {
+      const displayNames = new Intl.DisplayNames(["pt-BR"], { type: "region" });
+      return displayNames.of(code) || code;
+    } catch (error) {
+      return code;
+    }
+  }
+
+  return code;
 }
 
 function getMovieDirectors(crew) {
@@ -709,13 +1041,13 @@ function buildExternalLinks(movie, externalIds = {}) {
   if (searchTerm) {
     links.letterboxd = {
       kicker: "Comunidade cinemafila",
-      label: "Buscar no Letterboxd",
+      label: "Ver no Letterboxd",
       href: `https://letterboxd.com/search/${encodeURIComponent(searchTerm)}/`
     };
 
     links.adoroCinema = {
       kicker: "Guia editorial",
-      label: "Buscar no AdoroCinema",
+      label: "Ver no AdoroCinema",
       href: `https://www.adorocinema.com/pesquisar/?q=${encodeURIComponent(searchTerm)}`
     };
   }

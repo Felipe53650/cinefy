@@ -40,6 +40,7 @@
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
           <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
           <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
+          <div class="details-hero-stats mt-5 flex flex-wrap gap-3" id="movieHeroStats"></div>
           <div class="mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
             <button class="details-list-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined" id="addToListButtonIcon">add</span>
@@ -61,6 +62,8 @@
           <p class="text-sm uppercase tracking-[0.24em] text-zinc-500">Salva localmente para este filme</p>
         </div>
         <div class="mt-8">
+          <div class="details-rating-stars" id="ratingStars" aria-label="Selecione sua nota em estrelas" role="group"></div>
+          <p class="mt-3 text-sm text-zinc-400">Toque nas estrelas para marcar uma base rapida e ajuste no campo se quiser usar meio ponto.</p>
           <label class="text-sm font-medium text-zinc-300" for="ratingInput">Nota de 0 a 5</label>
           <input class="mt-3 w-full rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-white focus:border-red-500 focus:ring-red-500" id="ratingInput" max="5" min="0" step="0.5" type="number"/>
         </div>
@@ -79,7 +82,7 @@
           <div class="section-heading">
             <h3 class="font-display text-xl font-bold text-white">Ficha técnica</h3>
           </div>
-          <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
+          <div class="details-spec-grid mt-5 text-sm">
             <div class="rounded-2xl border border-white/6 bg-black/20 p-4">
               <p class="text-zinc-500">Ano</p>
               <p class="mt-2 font-bold text-white" id="movieYear">-</p>
@@ -108,6 +111,14 @@
               <p class="text-zinc-500">Direção</p>
               <p class="mt-2 font-bold text-white" id="movieDirectors">-</p>
             </div>
+            <div class="col-span-2 rounded-2xl border border-white/6 bg-black/20 p-4">
+              <p class="text-zinc-500">Elenco em destaque</p>
+              <p class="mt-2 font-bold text-white" id="movieLeadCast">-</p>
+            </div>
+            <div class="col-span-2 rounded-2xl border border-white/6 bg-black/20 p-4">
+              <p class="text-zinc-500">Idioma original</p>
+              <p class="mt-2 font-bold text-white" id="movieOriginalLanguage">-</p>
+            </div>
           </div>
         </div>
 
@@ -117,10 +128,14 @@
               <h3 class="font-display text-xl font-bold text-white">Onde assistir</h3>
               <p class="mt-1 text-sm text-zinc-400" id="watchProvidersCaption">Disponibilidade consultada no TMDB para sua regiao.</p>
             </div>
-            <a class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/12" href="#" id="watchProvidersLink" rel="noopener noreferrer" target="_blank">
-              <span class="material-symbols-outlined text-base">open_in_new</span>
-              Ver no TMDB
-            </a>
+            <div class="details-watch-actions">
+              <label class="sr-only" for="watchProvidersRegion">Selecionar regiao de streaming</label>
+              <select class="details-region-select hidden" id="watchProvidersRegion"></select>
+              <a class="details-watch-link inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-red-950/20 transition hover:brightness-110" href="#" id="watchProvidersLink" rel="noopener noreferrer" target="_blank">
+                <span class="material-symbols-outlined text-base">play_circle</span>
+                Ver onde assistir
+              </a>
+            </div>
           </div>
           <div class="mt-5 space-y-4" id="watchProvidersGrid"></div>
         </div>
@@ -136,12 +151,22 @@
         <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-6">
           <div class="flex items-center justify-between gap-4">
             <div class="section-heading">
-              <h3 class="font-display text-xl font-bold text-white">Elenco principal</h3>
-              <p class="mt-1 text-sm text-zinc-400">Dados trazidos direto do TMDB</p>
+              <h3 class="font-display text-xl font-bold text-white">Elenco e equipe criativa</h3>
+              <p class="mt-1 text-sm text-zinc-400">Atores principais e atalhos para continuar explorando o filme</p>
             </div>
           </div>
           <div class="mt-5 grid grid-cols-2 gap-3" id="castGrid"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 pb-8 md:px-6 md:pb-10">
+      <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
+        <div class="section-heading">
+          <h2 class="font-display text-3xl font-bold text-white">Filmes parecidos</h2>
+          <p class="mt-1 text-sm text-zinc-400">Alternativas rapidas se este nao for o seu proximo play.</p>
+        </div>
+        <div class="details-similar-grid mt-5" id="similarMoviesGrid"></div>
       </div>
     </section>
 
@@ -157,6 +182,7 @@
             Explorar no Letterboxd
           </a>
         </div>
+        <div class="details-review-summary mt-5" id="communityReviewsSummary"></div>
         <div class="mt-5 space-y-4" id="communityReviewsGrid"></div>
       </div>
     </section>
