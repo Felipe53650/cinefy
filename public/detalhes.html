@@ -40,7 +40,9 @@
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
           <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
           <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
+          <p class="details-quick-summary mt-4 max-w-3xl text-sm leading-relaxed text-zinc-300 md:text-base" id="movieQuickSummary">Organizando direção, elenco e contexto rápido deste título.</p>
           <div class="details-hero-stats mt-5 flex flex-wrap gap-3" id="movieHeroStats"></div>
+          <div class="details-community-signal mt-4 hidden" id="movieCommunitySignal"></div>
           <div class="mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
             <button class="details-list-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined" id="addToListButtonIcon">add</span>
@@ -170,7 +172,7 @@
       </div>
     </section>
 
-    <section class="mx-auto max-w-7xl px-4 pb-8 md:px-6 md:pb-14">
+    <section class="mx-auto max-w-7xl px-4 pb-8 md:px-6 md:pb-14" id="communityReviewsSection">
       <div class="glass-card rounded-[1.6rem] p-5 md:rounded-[2rem] md:p-8">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="section-heading">

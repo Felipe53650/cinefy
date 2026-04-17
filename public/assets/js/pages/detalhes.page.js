@@ -130,6 +130,11 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
   document.getElementById("movieBackdrop").src = window.TMDB.getBackdropUrl(movie.backdrop_path, fallbackPoster);
   document.getElementById("movieTitle").textContent = movie.title;
   document.getElementById("movieOverview").textContent = movie.overview || "Sem sinopse disponivel.";
+  document.getElementById("movieQuickSummary").textContent = buildMovieQuickSummary({
+    directors,
+    leadCast,
+    originalLanguage: movie.original_language
+  });
   document.getElementById("movieYear").textContent = movie.release_date ? movie.release_date.slice(0, 4) : "-";
   document.getElementById("movieRuntime").textContent = movie.runtime ? `${movie.runtime} min` : "-";
   document.getElementById("movieGenres").textContent = movie.genres && movie.genres.length ? movie.genres.map((genre) => genre.name).join(", ") : "-";
@@ -187,6 +192,11 @@ function renderLocalMovie(movie) {
   document.getElementById("movieOverview").textContent = movie.note || (shareId
     ? "Filme adicionado manualmente a uma lista compartilhada."
     : "Filme adicionado manualmente a sua lista.");
+  document.getElementById("movieQuickSummary").textContent = buildMovieQuickSummary({
+    isManual: true,
+    genre: movie.genre,
+    year: movie.year
+  });
   document.getElementById("movieYear").textContent = movie.year || "-";
   document.getElementById("movieRuntime").textContent = "Nao informado";
   document.getElementById("movieGenres").textContent = movie.genre || "-";
@@ -496,6 +506,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
   if (isManual) {
     caption.textContent = "Itens manuais nao possuem reviews sincronizadas com bases externas.";
     summary.innerHTML = "";
+    renderCommunitySignal([], [], true);
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
         Esse titulo foi criado por voce, entao ainda nao existe uma trilha de reviews publicas vinculada a ele aqui no Cinefy Club.
@@ -513,6 +524,7 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
   if (!cinefyReviews.length && !tmdbReviews.length) {
     caption.textContent = "Ainda nao encontramos reviews da comunidade para este filme.";
     summary.innerHTML = "";
+    renderCommunitySignal([], [], false);
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
         Ainda nao ha comentarios publicos aqui. Avalie este filme para comecar a conversa no Cinefy Club ou use os atalhos acima para continuar a leitura em outras comunidades.
@@ -609,7 +621,8 @@ function renderCommunityReviews(tmdbReviewsInput, externalLinks, isManual = fals
   caption.textContent = cinefyReviews.length
     ? "Suas reviews e as dos seus amigos aparecem primeiro, seguidas das leituras publicas do TMDB."
     : "Exibindo reviews publicas do TMDB e abrindo espaco para a comunidade do Cinefy Club crescer aqui.";
-  summary.innerHTML = buildReviewSummaryCards(cinefyReviews.length, tmdbReviews.length);
+  renderCommunitySignal(cinefyReviews, tmdbReviews);
+  summary.innerHTML = buildReviewSummaryCards(cinefyReviews, tmdbReviews);
   grid.innerHTML = sections.join("");
 
   grid.querySelectorAll("[data-review-social-action]").forEach((button) => {
@@ -850,6 +863,39 @@ function renderHeroStats({ score, voteCount, certification, runtime, isManual = 
   `).join("");
 }
 
+function buildMovieQuickSummary({ directors = [], leadCast = [], originalLanguage = "", isManual = false, genre = "", year = "" }) {
+  if (isManual) {
+    const manualParts = [];
+    if (genre) {
+      manualParts.push(`Genero ${genre}`);
+    }
+    if (year) {
+      manualParts.push(`ano ${year}`);
+    }
+    manualParts.push("titulo manual salvo na sua lista");
+    return manualParts.join(" • ");
+  }
+
+  const summaryParts = [];
+  if (Array.isArray(directors) && directors.length) {
+    summaryParts.push(`Direcao de ${directors.slice(0, 2).join(", ")}`);
+  }
+  if (Array.isArray(leadCast) && leadCast.length) {
+    summaryParts.push(`com ${leadCast.slice(0, 3).join(", ")}`);
+  }
+
+  const languageLabel = formatLanguageLabel(originalLanguage);
+  if (languageLabel && languageLabel !== "Nao informado") {
+    summaryParts.push(`idioma original ${languageLabel}`);
+  }
+
+  if (!summaryParts.length) {
+    return "Estamos organizando o contexto rapido deste titulo para voce.";
+  }
+
+  return summaryParts.join(" • ");
+}
+
 function buildStarSummaryLabel(score) {
   const normalizedScore = Number(score || 0);
   if (!Number.isFinite(normalizedScore) || normalizedScore <= 0) {
@@ -949,15 +995,67 @@ function renderSimilarMovies(recommendations, isManual = false) {
   `).join("");
 }
 
-function buildReviewSummaryCards(cinefyCount, tmdbCount) {
+function renderCommunitySignal(cinefyReviews = [], tmdbReviews = [], isManual = false) {
+  const signal = document.getElementById("movieCommunitySignal");
+  if (!signal) {
+    return;
+  }
+
+  if (isManual) {
+    signal.classList.add("hidden");
+    signal.innerHTML = "";
+    return;
+  }
+
+  const cinefyCount = Array.isArray(cinefyReviews) ? cinefyReviews.length : 0;
+  const tmdbCount = Array.isArray(tmdbReviews) ? tmdbReviews.length : 0;
+  const localAverage = calculateAverageReviewRating(cinefyReviews);
+
+  let eyebrow = "Comunidade";
+  let value = "Ainda nao ha conversa suficiente sobre este filme no Cinefy Club.";
+
+  if (cinefyCount) {
+    eyebrow = "No Cinefy Club";
+    value = localAverage
+      ? `${cinefyCount} review(s) locais com media ${localAverage.toFixed(1)}/5.`
+      : `${cinefyCount} review(s) locais ja ajudam a dar o tom da comunidade.`;
+  } else if (tmdbCount) {
+    eyebrow = "Leitura rapida";
+    value = `${tmdbCount} review(s) publicas do TMDB ja estao disponiveis para voce decidir o play com mais contexto.`;
+  }
+
+  signal.classList.remove("hidden");
+  signal.innerHTML = `
+    <div class="details-community-signal__copy">
+      <span class="details-community-signal__eyebrow">${escapeHtml(eyebrow)}</span>
+      <strong class="details-community-signal__value">${escapeHtml(value)}</strong>
+    </div>
+    <a class="details-community-signal__cta" href="#communityReviewsSection">
+      <span class="material-symbols-outlined text-base">forum</span>
+      Ir para reviews
+    </a>
+  `;
+}
+
+function buildReviewSummaryCards(cinefyReviews, tmdbReviews) {
+  const cinefyCount = Array.isArray(cinefyReviews) ? cinefyReviews.length : 0;
+  const tmdbCount = Array.isArray(tmdbReviews) ? tmdbReviews.length : 0;
+  const localAverage = calculateAverageReviewRating(cinefyReviews);
   const cards = [
     {
-      label: "Cinefy Club",
-      value: cinefyCount ? `${cinefyCount} review(s)` : "Sem reviews locais"
+      label: "Media local",
+      value: localAverage ? `${localAverage.toFixed(1)}/5` : "Sem media local",
+      hint: cinefyCount ? "Calculada com base nas reviews do Cinefy Club exibidas nesta pagina." : "A media aparece assim que voce e a comunidade avaliarem este filme."
+    },
+    {
+      label: "Reviews locais",
+      value: cinefyCount ? `${cinefyCount} review(s)` : "Sem reviews locais",
+      hint: cinefyCount ? "Suas reviews e as dos seus amigos entram primeiro nesta conversa." : "Quando alguem avaliar este filme no app, a prova social local comeca aqui."
     },
     {
       label: "TMDB",
-      value: tmdbCount ? `${tmdbCount} review(s)` : "Sem reviews externas"
+      value: tmdbCount ? `${tmdbCount} review(s)` : "Sem reviews externas",
+      hint: tmdbCount ? "Leituras publicas importadas para dar contexto enquanto a comunidade cresce." : "Sem apoio externo no momento."
     }
   ];
 
@@ -965,8 +1063,24 @@ function buildReviewSummaryCards(cinefyCount, tmdbCount) {
     <div class="details-review-summary__card">
       <span class="details-review-summary__label">${escapeHtml(card.label)}</span>
       <strong class="details-review-summary__value">${escapeHtml(card.value)}</strong>
+      <p class="details-review-summary__hint">${escapeHtml(card.hint)}</p>
     </div>
   `).join("");
+}
+
+function calculateAverageReviewRating(reviews) {
+  const values = Array.isArray(reviews)
+    ? reviews
+      .map((review) => Number(review && review.ratingValue))
+      .filter((value) => Number.isFinite(value) && value > 0)
+    : [];
+
+  if (!values.length) {
+    return null;
+  }
+
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return total / values.length;
 }
 
 function getRegionLabel(regionCode) {
@@ -1201,6 +1315,7 @@ function normalizeCinefyReviewRecord(review) {
     authorUsername: review.authorUsername || "",
     authorAvatar: review.authorAvatar || fallbackPoster,
     comment: comment || "Sem comentario.",
+    ratingValue: Number.isFinite(ratingNumber) ? ratingNumber : null,
     updatedAt: review.updatedAt || "",
     sourceLabel: review.sourceLabel || "Review no Cinefy Club",
     isOwn: Boolean(review.isOwn),
