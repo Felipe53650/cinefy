@@ -233,7 +233,7 @@ body[data-page="cadastro"] {
   align-items: center;
   width: max-content;
   max-width: 100%;
-  gap: 0.26em;
+  gap: 0.16em;
   overflow: visible;
   padding: 0.08em 0.26em 0.14em 0.04em;
   line-height: 1.02;
@@ -244,8 +244,8 @@ body[data-page="cadastro"] {
 .cinefy-brand-mark__core {
   display: inline-block;
   overflow: visible;
-  margin-right: 0.07em;
-  padding-right: 0.11em;
+  margin-right: 0.09em;
+  padding-right: 0.18em;
   padding-bottom: 0.08em;
   color: transparent !important;
   background-image: linear-gradient(
@@ -260,7 +260,7 @@ body[data-page="cadastro"] {
   font-style: italic;
   font-weight: 800;
   line-height: 1.08;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.006em;
   text-shadow: 0 14px 32px rgb(var(--theme-accent-rgb) / 0.18);
 }
 
@@ -1111,7 +1111,7 @@ body[data-page="modoleitor"] .max-w-7xl {
   }
 
   .cinefy-brand-mark {
-    gap: 0.18em;
+    gap: 0.14em;
     padding-right: 0.2em;
     padding-bottom: 0.18em;
   }
