@@ -30,23 +30,24 @@
 <body class="min-h-screen bg-background text-on-background" data-page="detalhes">
   <header data-layout="navbar" aria-label="Cabeçalho do site"></header>
 
-  <main class="pt-16 md:pt-20">
-    <section class="relative min-h-[460px] overflow-hidden rounded-b-[2rem] border-b border-white/10 md:min-h-[680px] md:rounded-b-[2.5rem]">
+  <main class="pt-20 md:pt-28">
+    <div class="mx-auto max-w-[1440px] px-4 md:px-8">
+    <section class="showcase-hero mb-8">
       <img alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover" id="movieBackdrop" src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80"/>
       <div class="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-black/30"></div>
       <div class="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent"></div>
-      <div class="relative z-10 mx-auto flex min-h-[460px] max-w-7xl items-end px-4 pb-8 md:min-h-[680px] md:px-6 md:pb-12">
-        <div class="max-w-4xl">
+      <div class="showcase-hero__content">
+        <div class="showcase-hero__text">
           <div class="mb-4 flex flex-wrap gap-2" id="movieBadges"></div>
-          <h1 class="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
-          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
-          <div class="mt-4 max-w-3xl">
+          <h1 class="showcase-hero__title font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-7xl" id="movieTitle">Carregando</h1>
+          <p class="showcase-hero__overview mt-4 text-sm leading-relaxed text-zinc-300 sm:text-base md:text-lg" id="movieOverview">Buscando informações do filme no TMDB.</p>
+          <div class="showcase-hero__summary mt-4">
             <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">Contexto rápido</p>
             <p class="details-quick-summary mt-2 text-sm leading-relaxed text-zinc-300 md:text-base" id="movieQuickSummary">Organizando direção, elenco e contexto rápido deste título.</p>
           </div>
           <div class="details-hero-stats mt-5 flex flex-wrap gap-3" id="movieHeroStats"></div>
           <div class="details-community-signal mt-4 hidden" id="movieCommunitySignal"></div>
-          <div class="details-hero-actions mt-6 flex flex-wrap gap-3 md:mt-8 md:gap-4">
+          <div class="showcase-hero__actions details-hero-actions mt-6 md:mt-8">
             <button class="details-list-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-red-900 px-5 py-3 font-bold text-white shadow-lg shadow-red-950/30 transition hover:brightness-110 md:px-7 md:py-3.5" id="addToListButton" type="button">
               <span class="material-symbols-outlined" id="addToListButtonIcon">add</span>
               <span id="addToListButtonLabel">Adicionar a Minha Lista</span>
@@ -59,6 +60,7 @@
         </div>
       </div>
     </section>
+    </div>
 
     <section class="mx-auto max-w-7xl px-4 pt-5 md:px-6 md:pt-6">
       <nav aria-label="Atalhos da página de detalhes" class="details-quick-nav">
