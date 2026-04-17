@@ -26,14 +26,9 @@
   ).trim();
 
   const buildBrandWordmark = (extraClass = "") => `
-    <span class="cinefy-wordmark${extraClass ? ` ${extraClass}` : ""}" aria-label="Cinefy Club" role="img">
-      <svg aria-hidden="true" class="cinefy-wordmark__svg" focusable="false" preserveAspectRatio="xMinYMid meet" viewBox="0 0 288 72">
-        <text class="cinefy-wordmark__core-text" x="2" y="51">Cinefy</text>
-        <g transform="translate(196 13)">
-          <rect class="cinefy-wordmark__chip" height="31" rx="15.5" width="86" x="0" y="0"></rect>
-          <text class="cinefy-wordmark__suffix-text" x="15" y="20.5">CLUB</text>
-        </g>
-      </svg>
+    <span class="cinefy-brand-mark${extraClass ? ` ${extraClass}` : ""}" aria-label="Cinefy Club">
+      <span class="cinefy-brand-mark__core">Cinefy</span>
+      <span class="cinefy-brand-mark__suffix">Club</span>
     </span>
   `;
 
