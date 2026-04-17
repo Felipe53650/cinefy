@@ -6,6 +6,8 @@ const tmdbApiKey = defineSecret("TMDB_API_KEY");
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const FUNCTION_PREFIX = "/api/tmdb";
 const ALLOWED_ORIGINS = new Set([
+  "https://cinefyclub.com.br",
+  "https://www.cinefyclub.com.br",
   "https://cinefy3-83a9a.web.app",
   "https://cinefy3-83a9a.firebaseapp.com",
   "http://127.0.0.1:5000",
