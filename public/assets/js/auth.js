@@ -272,6 +272,29 @@
     }
   }
 
+  function loadLocalProfileSnapshot() {
+    try {
+      const raw = localStorage.getItem(PROFILE_KEY);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+      const isLegacySeedProfile =
+        parsed &&
+        !parsed.uid &&
+        parsed.username === "felipecine" &&
+        parsed.displayName === "Felipe Martins";
+
+      if (isLegacySeedProfile) {
+        localStorage.removeItem(PROFILE_KEY);
+        return null;
+      }
+
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function startSession(profile) {
     const safeProfile = sanitizeProfilePayload(profile);
     syncProfile(safeProfile);
@@ -467,6 +490,13 @@
       const previousKey = previousUsername ? buildUsernameKey(previousUsername) : "";
       const usernameRef = firestore.collection("usernames").doc(desiredAvailability.docId);
       const usernameSnapshot = await transaction.get(usernameRef);
+      let previousRef = null;
+      let previousSnapshot = null;
+
+      if (previousKey && previousKey !== desiredAvailability.key) {
+        previousRef = firestore.collection("usernames").doc(getUsernameDocId(previousUsername));
+        previousSnapshot = await transaction.get(previousRef);
+      }
 
       if (usernameSnapshot.exists) {
         const usernameData = usernameSnapshot.data() || {};
@@ -507,10 +537,8 @@
         { merge: true }
       );
 
-      if (previousKey && previousKey !== desiredAvailability.key) {
-        const previousRef = firestore.collection("usernames").doc(getUsernameDocId(previousUsername));
-        const previousSnapshot = await transaction.get(previousRef);
-        if (previousSnapshot.exists && String((previousSnapshot.data() || {}).uid || "") === safeProfile.uid) {
+      if (previousRef && previousSnapshot && previousSnapshot.exists) {
+        if (String((previousSnapshot.data() || {}).uid || "") === safeProfile.uid) {
           transaction.delete(previousRef);
         }
       }
@@ -533,10 +561,7 @@
   }
 
   async function buildUserProfile(user, authProvider, overrideData) {
-    const store = getStore();
-    const localProfile = store && typeof store.loadProfile === "function"
-      ? store.loadProfile()
-      : null;
+    const localProfile = loadLocalProfileSnapshot();
     const remoteProfile = await getUserProfileFromFirestore(user.uid);
     const firebaseProfile = normalizeFirebaseUser(user, authProvider);
     const safeLocalProfile = localProfile && (!localProfile.uid || localProfile.uid === user.uid)

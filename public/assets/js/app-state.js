@@ -26,12 +26,12 @@
   const USERNAME_DISALLOWED_PATTERN = /[\s<>`"'\\/|@]/g;
 
   const defaultProfile = {
-    username: "felipecine",
-    displayName: "Felipe Martins",
-    bio: "Cinefilo de drama, ficcao cientifica e listas para compartilhar com os amigos.",
+    username: "cinefyuser",
+    displayName: "Seu perfil",
+    bio: "Conte um pouco sobre seus gostos e compartilhe sua curadoria social de filmes.",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7",
-    location: "Sao Paulo, BR",
+    location: "Brasil",
     theme: "ember"
   };
 
@@ -410,7 +410,17 @@
       const sessionRaw = localStorage.getItem("cinefy-auth-session");
       const session = sessionRaw ? JSON.parse(sessionRaw) : null;
       const raw = localStorage.getItem(PROFILE_KEY);
-      const storedProfile = raw ? JSON.parse(raw) : {};
+      const parsedProfile = raw ? JSON.parse(raw) : {};
+      const isLegacySeedProfile =
+        parsedProfile &&
+        !parsedProfile.uid &&
+        parsedProfile.username === "felipecine" &&
+        parsedProfile.displayName === "Felipe Martins";
+      const storedProfile = isLegacySeedProfile ? {} : parsedProfile;
+
+      if (isLegacySeedProfile) {
+        localStorage.removeItem(PROFILE_KEY);
+      }
       const sameUser = !session || !storedProfile.uid || !session.uid || storedProfile.uid === session.uid;
 
       return {
