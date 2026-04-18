@@ -693,13 +693,21 @@
       }
 
       if (error && error.code === "auth/operation-not-supported-in-this-environment") {
-        error.cinefyMessage = "O login social nao conseguiu abrir o fluxo seguro neste navegador. Tente novamente apos permitir pop-ups ou revise a configuracao do dominio personalizado no Firebase Auth.";
+        error.cinefyMessage = providerName === "google"
+          ? "O Google nao conseguiu abrir o fluxo seguro neste navegador. Permita pop-ups e confira se https://cinefyclub.com.br/__/auth/handler esta autorizado no OAuth do Google."
+          : "O login social nao conseguiu abrir o fluxo seguro neste navegador. Tente novamente apos permitir pop-ups ou revise a configuracao do dominio personalizado no Firebase Auth.";
       }
 
       if (error && error.code === "auth/invalid-credential") {
         error.cinefyMessage = providerName === "facebook"
           ? "O Facebook autenticou sua conta, mas o Firebase recusou a credencial. Confira se o provedor Facebook esta ativado no Firebase Auth e se o App ID e App Secret sao exatamente os mesmos do Meta."
-          : "A credencial retornada por esse provedor foi recusada pelo Firebase. Confira a configuracao do login social no console do Firebase.";
+          : "O Google autenticou a conta, mas o Firebase recusou a credencial. Confira o dominio autorizado no Firebase Auth e a redirect URI https://cinefyclub.com.br/__/auth/handler no cliente OAuth do Google.";
+      }
+
+      if (error && error.code === "auth/popup-blocked") {
+        error.cinefyMessage = providerName === "google"
+          ? "O navegador bloqueou a janela do Google. Permita pop-ups para cinefyclub.com.br e tente novamente."
+          : "O navegador bloqueou a janela de autenticacao. Permita pop-ups para continuar.";
       }
 
       throw error;
