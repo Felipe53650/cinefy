@@ -353,7 +353,7 @@ service cloud.firestore {
     }
 
     match /users/{userId}/friends/{friendId} {
-      allow read: if isSelf(userId);
+      allow read: if isSignedIn();
       allow create, update: if isSignedIn() &&
         (request.auth.uid == userId || request.auth.uid == friendId) &&
         isValidFriendDoc(friendId);

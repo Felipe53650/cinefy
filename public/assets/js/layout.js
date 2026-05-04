@@ -44,7 +44,9 @@
 
   let notifications = store ? store.loadNotifications() : [];
   let unreadCount = store ? store.getUnreadNotificationCount() : 0;
-  const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
+  const defaultAvatar = store && typeof store.resolveProfileAvatar === "function"
+    ? store.resolveProfileAvatar({ username: "cinefyuser" })
+    : "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
 
   function buildDesktopLinks() {
     return navItems.filter((item) => item.key !== "buscar").map((item) => {
@@ -311,12 +313,39 @@
 
     if (target.avatar) {
       const safeAvatar = safeAvatarUrl(target.avatar);
-      if (safeAvatar && safeAvatar !== defaultAvatar) {
+      if (safeAvatar && safeAvatar !== defaultAvatar && /^https?:\/\//i.test(safeAvatar)) {
         params.set("avatar", safeAvatar);
       }
     }
 
     return `usuario.html?${params.toString()}`;
+  }
+
+  function buildPublicFriendsHref(userLike) {
+    const target = normalizeProfileTarget(userLike);
+    if (!target.uid && !target.username) {
+      return "amigos.html";
+    }
+
+    const params = new URLSearchParams();
+    if (target.uid) {
+      params.set("uid", target.uid);
+    }
+    if (target.username) {
+      params.set("u", target.username);
+      params.set("username", target.username);
+    }
+    if (target.displayName) {
+      params.set("name", target.displayName);
+    }
+    if (target.avatar) {
+      const safeAvatar = safeAvatarUrl(target.avatar);
+      if (safeAvatar && safeAvatar !== defaultAvatar && /^https?:\/\//i.test(safeAvatar)) {
+        params.set("avatar", safeAvatar);
+      }
+    }
+
+    return `usuario-amigos.html?${params.toString()}`;
   }
 
   function hideLegacyChrome() {
@@ -456,7 +485,7 @@
       return "index.html";
     }
 
-    if (/^(index|lista|busca|amigos|perfil|usuario|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(safeHref)) {
+    if (/^(index|lista|busca|amigos|perfil|usuario|usuario-amigos|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(safeHref)) {
       return escapeAttribute(safeHref);
     }
 
@@ -480,7 +509,11 @@
     const candidate = String(value || "").trim();
     if (!candidate) return defaultAvatar;
 
-    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+    if (
+      /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+      (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+      candidate.startsWith("blob:")
+    ) {
       return candidate;
     }
 
@@ -498,6 +531,7 @@
 
   window.CinefyProfiles = {
     buildPublicProfileHref,
+    buildPublicFriendsHref,
     normalizeProfileTarget,
     isOwnProfileTarget(userLike) {
       const target = normalizeProfileTarget(userLike);

@@ -4,7 +4,7 @@
   const AUTH_FLASH_KEY = "cinefy-auth-flash";
   const PROFILE_KEY = "cinefy-user-profile";
   const AUTH_PAGES = new Set(["login", "cadastro"]);
-  const PUBLIC_PAGES = new Set(["index", "busca", "detalhes", "404", "modoleitor"]);
+  const PUBLIC_PAGES = new Set(["index", "busca", "detalhes", "404", "modoleitor", "usuario-amigos"]);
   const USERNAME_MIN_LENGTH = 3;
   const USERNAME_MAX_LENGTH = 24;
   const USERNAME_DISALLOWED_PATTERN = /[\s<>`"'\\/|@]/g;
@@ -45,9 +45,32 @@
   let firebaseAuthResolved = false;
   const defaultAvatar =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
+  const LEGACY_PROFILE_DEFAULTS = {
+    displayNames: new Set(["Felipe Martins", "Felipe de Oliveira Santos", "Novo Usuario", "Cinefilo", "Seu perfil"]),
+    bios: new Set([
+      "Cinefilo de drama, ficcao cientifica e listas para compartilhar com os amigos.",
+      "Conte um pouco sobre seus gostos e compartilhe sua curadoria social de filmes.",
+      "Personalize este texto quando quiser para apresentar seu perfil no Cinefy Club."
+    ]),
+    locations: new Set(["Sao Paulo, BR", "São Paulo, BR", "Brasil"])
+  };
 
   function getStore() {
     return window.CinefyStore || null;
+  }
+
+  function normalizePlainText(value) {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isKnownDefault(set, value) {
+    const normalized = normalizePlainText(value);
+    return normalized && Array.from(set).some((candidate) => normalizePlainText(candidate) === normalized);
   }
 
   function clone(value) {
@@ -93,6 +116,7 @@
     if (providerName === "facebook" && window.firebase.auth.FacebookAuthProvider) {
       const provider = new window.firebase.auth.FacebookAuthProvider();
       provider.addScope("public_profile");
+      provider.addScope("email");
       return provider;
     }
 
@@ -238,15 +262,23 @@
     const baseProfile = store ? clone(store.defaultProfile) : {
       username: "cinefyuser",
       usernameKey: "cinefyuser",
-      displayName: "Novo Usuario",
-      bio: "Personalize este texto quando quiser para apresentar seu perfil no Cinefy Club.",
-      avatar: defaultAvatar,
-      location: "Brasil"
+      displayName: "",
+      bio: "",
+      avatar: "",
+      location: ""
     };
 
     const usernameSeed = data.username || data.email || data.displayName || data.name || "cinefyuser";
     const username = sanitizeUsername(usernameSeed);
-    const displayName = data.displayName || data.name || username || "Novo Usuario";
+    const displayName = String(data.displayName || data.name || "").trim();
+    const resolvedAvatar = store && typeof store.resolveProfileAvatar === "function"
+      ? store.resolveProfileAvatar({
+          avatar: data.avatar,
+          displayName,
+          username,
+          email: data.email
+        })
+      : (data.avatar || defaultAvatar);
 
     return {
       ...baseProfile,
@@ -254,9 +286,9 @@
       displayName,
       username,
       usernameKey: buildUsernameKey(data.usernameKey || username),
-      bio: data.bio || baseProfile.bio,
-      avatar: data.avatar || baseProfile.avatar || defaultAvatar,
-      location: data.location || baseProfile.location || "Brasil",
+      bio: data.bio || "",
+      avatar: resolvedAvatar,
+      location: data.location || "",
       theme: data.theme || baseProfile.theme || "ember",
       email: sanitizeEmail(data.email || ""),
       authProvider: data.authProvider || "email"
@@ -278,11 +310,13 @@
       if (!raw) return null;
 
       const parsed = JSON.parse(raw);
+      const store = getStore();
       const isLegacySeedProfile =
         parsed &&
-        !parsed.uid &&
-        parsed.username === "felipecine" &&
-        parsed.displayName === "Felipe Martins";
+        (
+          (!parsed.uid && parsed.username === "felipecine" && parsed.displayName === "Felipe Martins") ||
+          (store && typeof store.isLegacyPlaceholderProfile === "function" && store.isLegacyPlaceholderProfile(parsed))
+        );
 
       if (isLegacySeedProfile) {
         localStorage.removeItem(PROFILE_KEY);
@@ -353,12 +387,85 @@
     }
   }
 
+  function pickStoredValue(defaultSet) {
+    for (let index = 1; index < arguments.length; index += 1) {
+      const candidate = String(arguments[index] || "").trim();
+      if (!candidate) continue;
+      if (defaultSet && isKnownDefault(defaultSet, candidate)) continue;
+      return candidate;
+    }
+
+    return "";
+  }
+
+  function firstNonEmpty() {
+    for (let index = 0; index < arguments.length; index += 1) {
+      const candidate = String(arguments[index] || "").trim();
+      if (candidate) return candidate;
+    }
+
+    return "";
+  }
+
+  function resolveMergedAvatar(options) {
+    const store = getStore();
+    const candidates = [
+      options.overrideAvatar,
+      options.localAvatar,
+      options.remoteAvatar,
+      options.providerAvatar
+    ].map((value) => String(value || "").trim());
+
+    const storedCustomAvatar = candidates.find((candidate) => {
+      if (!candidate) return false;
+      if (store && typeof store.isLegacyDefaultAvatar === "function" && store.isLegacyDefaultAvatar(candidate)) return false;
+      if (store && typeof store.isGeneratedAvatar === "function" && store.isGeneratedAvatar(candidate)) return false;
+      return true;
+    });
+
+    if (storedCustomAvatar) {
+      return storedCustomAvatar;
+    }
+
+    if (options.providerAvatar) {
+      return options.providerAvatar;
+    }
+
+    if (store && typeof store.resolveProfileAvatar === "function") {
+      return store.resolveProfileAvatar({
+        displayName: options.displayName,
+        username: options.username,
+        email: options.email
+      });
+    }
+
+    return defaultAvatar;
+  }
+
   function normalizeFirebaseUser(user, authProvider) {
+    const store = getStore();
+    const providerEntry = Array.isArray(user.providerData)
+      ? user.providerData.find((entry) => String(entry && entry.providerId || "").includes(authProvider))
+      : null;
+    const providerDisplayName = String(
+      (providerEntry && providerEntry.displayName) ||
+      user.displayName ||
+      (user.email ? user.email.split("@")[0] : "") ||
+      ""
+    ).trim();
+    const providerAvatar = String(
+      (providerEntry && providerEntry.photoURL) ||
+      user.photoURL ||
+      ""
+    ).trim();
+
     return createProfile({
       uid: user.uid || "",
-      displayName: user.displayName || user.email?.split("@")[0] || "Cinefilo",
+      displayName: providerDisplayName,
       email: user.email || "",
-      avatar: user.photoURL || defaultAvatar,
+      avatar: providerAvatar || (store && typeof store.buildGeneratedAvatar === "function"
+        ? store.buildGeneratedAvatar(providerDisplayName || user.email?.split("@")[0] || "C")
+        : defaultAvatar),
       authProvider
     });
   }
@@ -516,7 +623,7 @@
           usernameKey: desiredAvailability.key,
           avatar: safeProfile.avatar || defaultAvatar,
           bio: safeProfile.bio || "",
-          location: safeProfile.location || "Brasil",
+          location: safeProfile.location || "",
           theme: safeProfile.theme || "ember",
           authProvider: safeProfile.authProvider || "email",
           updatedAt: now,
@@ -561,18 +668,54 @@
   }
 
   async function buildUserProfile(user, authProvider, overrideData) {
+    const store = getStore();
     const localProfile = loadLocalProfileSnapshot();
     const remoteProfile = await getUserProfileFromFirestore(user.uid);
     const firebaseProfile = normalizeFirebaseUser(user, authProvider);
-    const safeLocalProfile = localProfile && (!localProfile.uid || localProfile.uid === user.uid)
+    const safeLocalProfile = localProfile && (
+      localProfile.uid === user.uid ||
+      (!localProfile.uid && localProfile.email && user.email && sanitizeEmail(localProfile.email) === sanitizeEmail(user.email))
+    )
       ? localProfile
       : null;
+    const localPlaceholder = Boolean(store && typeof store.isLegacyPlaceholderProfile === "function" && safeLocalProfile && store.isLegacyPlaceholderProfile(safeLocalProfile));
+    const remotePlaceholder = Boolean(store && typeof store.isLegacyPlaceholderProfile === "function" && remoteProfile && store.isLegacyPlaceholderProfile(remoteProfile));
+    const mergedDisplayName = firstNonEmpty(
+      overrideData && overrideData.displayName,
+      !localPlaceholder && safeLocalProfile ? safeLocalProfile.displayName : "",
+      !remotePlaceholder && remoteProfile ? remoteProfile.displayName : "",
+      firebaseProfile.displayName
+    );
+    const mergedUsername = firstNonEmpty(
+      overrideData && overrideData.username,
+      safeLocalProfile && safeLocalProfile.username,
+      remoteProfile && remoteProfile.username,
+      firebaseProfile.username
+    );
     const mergedProfile = createProfile({
-      ...firebaseProfile,
-      ...remoteProfile,
-      ...safeLocalProfile,
-      ...overrideData,
       uid: user.uid,
+      email: firebaseProfile.email,
+      username: mergedUsername,
+      displayName: mergedDisplayName,
+      bio: firstNonEmpty(
+        overrideData && overrideData.bio,
+        !localPlaceholder && safeLocalProfile ? safeLocalProfile.bio : "",
+        !remotePlaceholder && remoteProfile ? remoteProfile.bio : ""
+      ),
+      location: firstNonEmpty(
+        overrideData && overrideData.location,
+        !localPlaceholder && safeLocalProfile ? safeLocalProfile.location : "",
+        !remotePlaceholder && remoteProfile ? remoteProfile.location : ""
+      ),
+      avatar: resolveMergedAvatar({
+        overrideAvatar: overrideData && overrideData.avatar,
+        localAvatar: !localPlaceholder && safeLocalProfile ? safeLocalProfile.avatar : "",
+        remoteAvatar: !remotePlaceholder && remoteProfile ? remoteProfile.avatar : "",
+        providerAvatar: firebaseProfile.avatar,
+        displayName: mergedDisplayName,
+        username: mergedUsername,
+        email: firebaseProfile.email
+      }),
       authProvider,
       theme: (overrideData && overrideData.theme)
         || (safeLocalProfile && safeLocalProfile.theme)
@@ -774,7 +917,7 @@
       if (currentUser && currentUser.uid === safeProfile.uid && typeof currentUser.updateProfile === "function") {
         try {
           await currentUser.updateProfile({
-            displayName: safeProfile.displayName || currentUser.displayName || "Cinefilo",
+            displayName: safeProfile.displayName || currentUser.displayName || safeProfile.username || "",
             photoURL: safeProfile.avatar || currentUser.photoURL || defaultAvatar
           });
         } catch (error) {

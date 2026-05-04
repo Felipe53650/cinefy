@@ -141,7 +141,7 @@
         friendList.innerHTML = friends.map((friend) => `
           <article class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
             <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(friend))}">
-              <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-16 h-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}" />
+              <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-16 h-16 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar, friend))}" />
               <div class="min-w-0">
                 <h3 class="text-lg font-black text-white truncate">${escapeHtml(friend.displayName || friend.name || "Usuario")}</h3>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(friend.username || "cinefyuser")}</p>
@@ -174,7 +174,7 @@
           <article class="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
             <div class="flex items-center justify-between gap-4">
               <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref({ uid: request.id, ...request }))}">
-                <img alt="${escapeAttribute(request.displayName || request.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(request.avatar))}" />
+                <img alt="${escapeAttribute(request.displayName || request.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(request.avatar, request))}" />
                 <div class="min-w-0">
                   <h3 class="font-black text-white truncate">${escapeHtml(request.displayName || request.name || "Usuario")}</h3>
                   <p class="text-sm text-zinc-400 truncate">@${escapeHtml(request.username || "cinefyuser")}</p>
@@ -233,11 +233,11 @@
         searchResults.innerHTML = filteredUsers.map((user) => `
           <article class="flex items-center justify-between gap-4 rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
             <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(user))}">
-              <img alt="${escapeAttribute(user.displayName || user.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(user.avatar))}" />
+              <img alt="${escapeAttribute(user.displayName || user.name || "Usuario")}" class="w-14 h-14 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(user.avatar, user))}" />
               <div class="min-w-0">
                 <h3 class="font-black text-white truncate">${escapeHtml(user.displayName || user.name || "Usuario")}</h3>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(user.username || "cinefyuser")}</p>
-                <p class="text-sm text-zinc-300 mt-1">${escapeHtml(user.location || "Brasil")}</p>
+                <p class="text-sm text-zinc-300 mt-1">${escapeHtml(user.location || "")}</p>
               </div>
             </a>
             ${outgoingRequestIds.has(user.uid)
@@ -357,17 +357,17 @@
               username: request.username || "cinefyuser",
               avatar: request.avatar,
               favoriteGenre: "Cinema",
-              location: request.location || "Brasil",
+              location: request.location || "",
               createdAt: new Date().toISOString()
             });
             batch.set(refs.otherFriend, {
               id: currentProfile.uid,
-              name: currentProfile.displayName,
-              displayName: currentProfile.displayName,
+              name: currentProfile.displayName || currentProfile.username || "Usuario",
+              displayName: currentProfile.displayName || currentProfile.username || "Usuario",
               username: currentProfile.username || "cinefyuser",
               avatar: currentProfile.avatar,
               favoriteGenre: "Cinema",
-              location: currentProfile.location || "Brasil",
+              location: currentProfile.location || "",
               createdAt: new Date().toISOString()
             });
             batch.delete(refs.currentIncoming);
@@ -380,7 +380,7 @@
             id: `friend-accepted-${currentProfile.uid}`,
             type: "friend_accepted",
             title: "Pedido aceito",
-            message: `${currentProfile.displayName} aceitou seu pedido de amizade.`,
+            message: `${currentProfile.displayName || currentProfile.username || "Um usuario"} aceitou seu pedido de amizade.`,
             href: "amigos.html",
             read: false,
             createdAt: new Date().toISOString()
@@ -434,12 +434,18 @@
         }
       }
 
-      function safeAvatarUrl(value) {
-        const fallbackAvatar = currentProfile.avatar || "assets/img/logo.svg";
+      function safeAvatarUrl(value, userLike) {
+        const fallbackAvatar = store && typeof store.resolveProfileAvatar === "function"
+          ? store.resolveProfileAvatar(userLike || currentProfile || { username: "cinefyuser" })
+          : (currentProfile.avatar || "assets/img/logo.svg");
         const candidate = String(value || "").trim();
         if (!candidate) return fallbackAvatar;
 
-        if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+        if (
+          /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+          (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+          candidate.startsWith("blob:")
+        ) {
           return candidate;
         }
 

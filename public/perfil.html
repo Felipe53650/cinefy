@@ -45,10 +45,10 @@
 <div class="profile-hero-copy">
 <h1 class="mt-2 text-3xl md:text-5xl font-bold text-white font-display" id="profileDisplayName">Seu perfil</h1>
 <p class="mt-2 text-zinc-300 text-lg" id="profileUsername">@cinefyuser</p>
-<p class="mt-4 text-zinc-400 max-w-2xl leading-relaxed" id="profileBioText"></p>
+<p class="mt-4 text-zinc-400 max-w-2xl leading-relaxed hidden" id="profileBioText"></p>
 <div class="profile-hero-chips mt-4 flex flex-wrap gap-3 text-sm">
-<span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200" id="profileLocation"></span>
-<span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200"><span id="friendCountBadge">0</span> amigos</span>
+<span class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200 hidden" id="profileLocation"></span>
+<a class="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-200 transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-white" href="usuario-amigos.html" id="profileFriendsLink"><span id="friendCountBadge">0</span> amigos</a>
 </div>
 </div>
 </div>
@@ -74,7 +74,6 @@
 <div class="glass-card self-start rounded-[2rem] p-6 md:p-8">
 <div class="flex items-center justify-between gap-4">
 <div class="section-heading">
-<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Editar perfil</p>
 <h2 class="mt-2 text-2xl font-black text-white">Suas informações públicas</h2>
 </div>
 <span class="material-symbols-outlined text-red-400 text-3xl">edit_square</span>
@@ -118,7 +117,6 @@
 <div class="glass-card rounded-[2rem] p-6">
 <div class="flex items-center justify-between gap-4">
 <div class="section-heading">
-<p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Tema visual</p>
 <h2 class="mt-2 text-2xl font-black text-white">Mude a identidade do site</h2>
 </div>
 <span class="material-symbols-outlined text-red-300 text-3xl">palette</span>

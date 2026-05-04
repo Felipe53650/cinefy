@@ -17,15 +17,19 @@
   const defaultAvatar = "/assets/img/logo.svg";
   const state = {
     targetUid: "",
+    targetFriendCount: 0,
     viewerSignedIn: false,
     viewerUid: "",
     profile: {
       uid: "",
-      displayName: sanitizeText(params.get("name") || "Cinefilo", 80) || "Cinefilo",
+      displayName: sanitizeText(params.get("name") || "", 80),
       username: sanitizeUsername(params.get("username") || params.get("u") || "cinefyuser"),
-      avatar: safeAvatarUrl(params.get("avatar")),
-      bio: "Esse usuario ainda nao adicionou uma bio publica.",
-      location: "Brasil",
+      avatar: safeAvatarUrl(params.get("avatar"), {
+        displayName: params.get("name") || "",
+        username: params.get("username") || params.get("u") || "cinefyuser"
+      }),
+      bio: "",
+      location: "",
       theme: "ember"
     },
     sharedLists: [],
@@ -42,6 +46,8 @@
   const publicProfileHandle = document.getElementById("publicProfileHandle");
   const publicProfileBio = document.getElementById("publicProfileBio");
   const publicProfileLocation = document.getElementById("publicProfileLocation");
+  const publicProfileFriendsLink = document.getElementById("publicProfileFriendsLink");
+  const publicProfileFriendCount = document.getElementById("publicProfileFriendCount");
   const publicProfileTheme = document.getElementById("publicProfileTheme");
   const publicProfileStatus = document.getElementById("publicProfileStatus");
   const publicProfileStatusCopy = document.getElementById("publicProfileStatusCopy");
@@ -99,9 +105,10 @@
     }
 
     try {
-      const [profileSnapshot, reviewsSnapshot] = await Promise.all([
+      const [profileSnapshot, reviewsSnapshot, friendSnapshot] = await Promise.all([
         firestore.collection("users").doc(state.targetUid).get(),
-        firestore.collection("users").doc(state.targetUid).collection("public_reviews").orderBy("updatedAt", "desc").limit(6).get()
+        firestore.collection("users").doc(state.targetUid).collection("public_reviews").orderBy("updatedAt", "desc").limit(6).get(),
+        firestore.collection("users").doc(state.targetUid).collection("friends").get()
       ]);
 
       if (profileSnapshot.exists) {
@@ -111,9 +118,11 @@
       state.reviews = reviewsSnapshot.docs
         .map((doc) => normalizeReviewRecord(doc.data()))
         .filter(Boolean);
+      state.targetFriendCount = friendSnapshot.size;
       await loadSocialState();
     } catch (error) {
       console.error("Erro ao carregar perfil publico:", error);
+      state.targetFriendCount = 0;
       await loadSocialState();
       renderNotice("Nao foi possivel carregar tudo agora", "Os dados principais do perfil ainda podem aparecer, mas reviews e detalhes adicionais falharam nesta tentativa.");
     }
@@ -162,11 +171,14 @@
     const safeProfile = rawProfile && typeof rawProfile === "object" ? rawProfile : {};
     state.profile = {
       uid: sanitizeText(safeProfile.uid || state.targetUid, 128),
-      displayName: sanitizeText(safeProfile.displayName || state.profile.displayName, 80) || "Cinefilo",
+      displayName: sanitizeText(safeProfile.displayName || state.profile.displayName, 80),
       username: sanitizeUsername(safeProfile.username || state.profile.username || "cinefyuser"),
-      avatar: safeAvatarUrl(safeProfile.avatar || state.profile.avatar),
-      bio: sanitizeMultilineText(safeProfile.bio || state.profile.bio, 280) || "Esse usuario ainda nao adicionou uma bio publica.",
-      location: sanitizeText(safeProfile.location || state.profile.location, 120) || "Brasil",
+      avatar: safeAvatarUrl(safeProfile.avatar || state.profile.avatar, {
+        displayName: safeProfile.displayName || state.profile.displayName,
+        username: safeProfile.username || state.profile.username || "cinefyuser"
+      }),
+      bio: sanitizeMultilineText(safeProfile.bio || state.profile.bio, 280),
+      location: sanitizeText(safeProfile.location || state.profile.location, 120),
       theme: sanitizeText(safeProfile.theme || state.profile.theme || "ember", 24).toLowerCase() || "ember"
     };
   }
@@ -176,12 +188,18 @@
       ? `Cinefy Club - @${state.profile.username}`
       : "Cinefy Club - Perfil publico";
 
-    publicProfileAvatar.src = state.profile.avatar || defaultAvatar;
-    publicProfileName.textContent = state.profile.displayName || "Cinefilo";
+    publicProfileAvatar.src = safeAvatarUrl(state.profile.avatar, state.profile);
+    publicProfileName.textContent = state.profile.displayName || state.profile.username || "Usuario do Cinefy Club";
     publicProfileHandle.textContent = `@${state.profile.username || "cinefyuser"}`;
-    publicProfileBio.textContent = state.profile.bio || "Esse usuario ainda nao adicionou uma bio publica.";
-    publicProfileLocation.textContent = state.profile.location || "Brasil";
+    publicProfileBio.textContent = state.profile.bio || "";
+    publicProfileBio.classList.toggle("hidden", !state.profile.bio);
+    publicProfileLocation.textContent = state.profile.location || "";
+    publicProfileLocation.classList.toggle("hidden", !state.profile.location);
     publicProfileTheme.textContent = `Tema favorito: ${themeLabels[state.profile.theme] || "Ember"}`;
+    publicProfileFriendCount.textContent = String(state.targetFriendCount);
+    if (publicProfileFriendsLink) {
+      publicProfileFriendsLink.href = getFriendsPageHref(state.profile);
+    }
     publicProfileListCount.textContent = String(state.sharedLists.length);
     publicProfileReviewCount.textContent = String(state.reviews.length);
 
@@ -552,7 +570,7 @@
     try {
       const requestPayload = {
         senderUid: state.viewerUid,
-        displayName: currentProfile.displayName || "Cinefilo",
+        displayName: currentProfile.displayName || currentProfile.username || "Usuario",
         username: currentProfile.username || "cinefyuser",
         avatar: currentProfile.avatar || defaultAvatar,
         createdAt: new Date().toISOString()
@@ -562,7 +580,7 @@
         firestore.collection("users").doc(state.targetUid).collection("friend_requests").doc(state.viewerUid).set(requestPayload),
         firestore.collection("users").doc(state.viewerUid).collection("outgoing_requests").doc(state.targetUid).set({
           recipientUid: state.targetUid,
-          displayName: state.profile.displayName || "Cinefilo",
+          displayName: state.profile.displayName || state.profile.username || "Usuario",
           username: state.profile.username || "cinefyuser",
           avatar: state.profile.avatar || defaultAvatar,
           createdAt: new Date().toISOString()
@@ -573,7 +591,7 @@
         id: `friend-request-${state.viewerUid}`,
         type: "friend_request",
         title: "Pedido de amizade recebido",
-        message: `${currentProfile.displayName || "Um cinefilo"} enviou um pedido de amizade.`,
+        message: `${currentProfile.displayName || currentProfile.username || "Um usuario"} enviou um pedido de amizade.`,
         href: "amigos.html",
         read: false,
         createdAt: new Date().toISOString()
@@ -608,22 +626,22 @@
       await commitRelationshipBatch(state.targetUid, (batch, refs) => {
         batch.set(refs.currentFriend, {
           id: state.targetUid,
-          name: state.profile.displayName || "Cinefilo",
-          displayName: state.profile.displayName || "Cinefilo",
+          name: state.profile.displayName || state.profile.username || "Usuario",
+          displayName: state.profile.displayName || state.profile.username || "Usuario",
           username: state.profile.username || "cinefyuser",
           avatar: state.profile.avatar || defaultAvatar,
           favoriteGenre: "Cinema",
-          location: state.profile.location || "Brasil",
+          location: state.profile.location || "",
           createdAt: new Date().toISOString()
         });
         batch.set(refs.otherFriend, {
           id: state.viewerUid,
-          name: currentProfile.displayName || "Cinefilo",
-          displayName: currentProfile.displayName || "Cinefilo",
+          name: currentProfile.displayName || currentProfile.username || "Usuario",
+          displayName: currentProfile.displayName || currentProfile.username || "Usuario",
           username: currentProfile.username || "cinefyuser",
           avatar: currentProfile.avatar || defaultAvatar,
           favoriteGenre: "Cinema",
-          location: currentProfile.location || "Brasil",
+          location: currentProfile.location || "",
           createdAt: new Date().toISOString()
         });
         batch.delete(refs.currentIncoming);
@@ -636,7 +654,7 @@
         id: `friend-accepted-${state.viewerUid}`,
         type: "friend_accepted",
         title: "Pedido aceito",
-        message: `${currentProfile.displayName || "Um cinefilo"} aceitou seu pedido de amizade.`,
+        message: `${currentProfile.displayName || currentProfile.username || "Um usuario"} aceitou seu pedido de amizade.`,
         href: "amigos.html",
         read: false,
         createdAt: new Date().toISOString()
@@ -783,11 +801,18 @@
     return String(value ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim().slice(0, maxLength);
   }
 
-  function safeAvatarUrl(value) {
+  function safeAvatarUrl(value, userLike) {
     const candidate = String(value || "").trim();
-    if (!candidate) return defaultAvatar;
+    const fallbackAvatar = store && typeof store.resolveProfileAvatar === "function"
+      ? store.resolveProfileAvatar(userLike || state.profile || { username: "cinefyuser" })
+      : defaultAvatar;
+    if (!candidate) return fallbackAvatar;
 
-    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+    if (
+      /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+      (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+      candidate.startsWith("blob:")
+    ) {
       return candidate;
     }
 
@@ -797,10 +822,10 @@
         return parsedUrl.href;
       }
     } catch (error) {
-      return defaultAvatar;
+      return fallbackAvatar;
     }
 
-    return defaultAvatar;
+    return fallbackAvatar;
   }
 
   function formatDate(value) {
@@ -827,5 +852,13 @@
 
   function escapeAttribute(value) {
     return escapeHtml(value).replace(/`/g, "&#96;");
+  }
+
+  function getFriendsPageHref(user) {
+    if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicFriendsHref === "function") {
+      return window.CinefyProfiles.buildPublicFriendsHref(user);
+    }
+
+    return "usuario-amigos.html";
   }
 })();

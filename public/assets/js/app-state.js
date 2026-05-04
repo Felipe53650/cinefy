@@ -24,14 +24,34 @@
   const MAX_REVIEW_COMMENT_LENGTH = 1600;
   const ALLOWED_THEMES = new Set(["ember", "ocean", "emerald", "aurora", "sunset", "rose", "noir", "golden-age"]);
   const USERNAME_DISALLOWED_PATTERN = /[\s<>`"'\\/|@]/g;
+  const LEGACY_DEFAULT_AVATAR =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7";
+  const LEGACY_PROFILE_DEFAULTS = {
+    displayNames: new Set([
+      "Felipe Martins",
+      "Felipe de Oliveira Santos",
+      "Novo Usuario",
+      "Cinefilo",
+      "Seu perfil"
+    ]),
+    bios: new Set([
+      "Cinefilo de drama, ficcao cientifica e listas para compartilhar com os amigos.",
+      "Conte um pouco sobre seus gostos e compartilhe sua curadoria social de filmes.",
+      "Personalize este texto quando quiser para apresentar seu perfil no Cinefy Club."
+    ]),
+    locations: new Set([
+      "Sao Paulo, BR",
+      "São Paulo, BR",
+      "Brasil"
+    ])
+  };
 
   const defaultProfile = {
     username: "cinefyuser",
-    displayName: "Seu perfil",
-    bio: "Conte um pouco sobre seus gostos e compartilhe sua curadoria social de filmes.",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBm2HxOu-EGtKkBUP5RwOS7MwT9dJkKn_7vG4oxQF95I4rUUD0IUB61Lm0FY8S49Y0bEJZbDRec6XyHVVI2wtwYH_Yac791G4SqebfMan9yXRJ3UivuQwzgCwdBZfV8AjzdJvR8j5LLytM3KZHnmCKnmEOrZ0-rvzyHbAHBk71hyUzfZLiQmlLyUxlYWRfQnDaHkVF2KpjNQSbD-cG2NehFuEUFCQThMuDwSpEXw_OnY1VqPbRj-d9qdKH1_QJcw1v3n6wdeP9Dn_q7",
-    location: "Brasil",
+    displayName: "",
+    bio: "",
+    avatar: "",
+    location: "",
     theme: "ember"
   };
 
@@ -175,7 +195,11 @@
     const candidate = truncate(String(value ?? "").trim(), 2048);
     if (!candidate) return "";
 
-    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+    if (
+      /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+      (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+      candidate.startsWith("blob:")
+    ) {
       return candidate;
     }
 
@@ -193,7 +217,7 @@
 
   function sanitizeNotificationHref(value) {
     const candidate = String(value ?? "").trim();
-    if (/^(index|lista|busca|amigos|perfil|usuario|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(candidate)) {
+    if (/^(index|lista|busca|amigos|perfil|usuario|usuario-amigos|detalhes|modoleitor|login|cadastro|404)\.html(\?.*)?$/i.test(candidate)) {
       return candidate;
     }
 
@@ -206,8 +230,124 @@
     return Math.min(max, Math.max(min, parsedValue));
   }
 
+  function normalizePlainText(value) {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isLegacyDefaultDisplayName(value) {
+    const normalized = normalizePlainText(value);
+    return normalized && Array.from(LEGACY_PROFILE_DEFAULTS.displayNames).some((candidate) => (
+      normalizePlainText(candidate) === normalized
+    ));
+  }
+
+  function isLegacyDefaultBio(value) {
+    const normalized = normalizePlainText(value);
+    return normalized && Array.from(LEGACY_PROFILE_DEFAULTS.bios).some((candidate) => (
+      normalizePlainText(candidate) === normalized
+    ));
+  }
+
+  function isLegacyDefaultLocation(value) {
+    const normalized = normalizePlainText(value);
+    return normalized && Array.from(LEGACY_PROFILE_DEFAULTS.locations).some((candidate) => (
+      normalizePlainText(candidate) === normalized
+    ));
+  }
+
+  function isLegacyPlaceholderProfile(profileLike) {
+    const safeProfile = profileLike && typeof profileLike === "object" ? profileLike : {};
+    const username = sanitizeUsername(safeProfile.username || "");
+    const displayName = safeProfile.displayName || safeProfile.name || "";
+    const bio = safeProfile.bio || "";
+    const location = safeProfile.location || "";
+    const avatar = safeProfile.avatar || "";
+
+    return username === "felipecine" ||
+      (
+        isLegacyDefaultDisplayName(displayName) &&
+        (isLegacyDefaultBio(bio) || isLegacyDefaultLocation(location) || isLegacyDefaultAvatar(avatar))
+      );
+  }
+
+  function getAvatarInitial(seedValue) {
+    const normalized = String(seedValue ?? "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+    const fallback = normalized || "C";
+    return (fallback.match(/[A-Za-z0-9]/) || ["C"])[0].toUpperCase();
+  }
+
+  function buildGeneratedAvatar(seedValue) {
+    const initial = getAvatarInitial(seedValue);
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="${initial}" data-cinefy-avatar="cinefy-generated-avatar">
+        <defs>
+          <linearGradient id="cinefyAvatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff7b61"/>
+            <stop offset="100%" stop-color="#df3e2a"/>
+          </linearGradient>
+        </defs>
+        <rect width="160" height="160" rx="40" fill="#12090a"/>
+        <rect x="6" y="6" width="148" height="148" rx="34" fill="#1c0f11" stroke="rgba(255,255,255,0.08)"/>
+        <circle cx="112" cy="126" r="14" fill="rgba(223,62,42,0.18)"/>
+        <text x="80" y="98" fill="url(#cinefyAvatarGradient)" font-family="Outfit, Arial, sans-serif" font-size="74" font-weight="800" text-anchor="middle">${initial}</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
+  function isLegacyDefaultAvatar(value) {
+    const candidate = String(value ?? "").trim();
+    return !candidate || candidate === LEGACY_DEFAULT_AVATAR || /\/assets\/img\/logo\.svg$/i.test(candidate);
+  }
+
+  function isGeneratedAvatar(value) {
+    return String(value ?? "").trim().startsWith("data:image/svg+xml") &&
+      String(value ?? "").includes("cinefy-generated-avatar");
+  }
+
+  function resolveProfileAvatar(profileLike) {
+    const safeProfile = profileLike && typeof profileLike === "object" ? profileLike : {};
+    const candidate = sanitizeUrl(safeProfile.avatar);
+    if (candidate) {
+      return candidate;
+    }
+
+    return buildGeneratedAvatar(
+      safeProfile.displayName ||
+      safeProfile.name ||
+      safeProfile.username ||
+      safeProfile.email ||
+      defaultProfile.username
+    );
+  }
+
   function sanitizeProfile(profile) {
     const safeProfile = profile && typeof profile === "object" ? profile : {};
+    const placeholderProfile = isLegacyPlaceholderProfile(safeProfile);
+    const preferredDisplayName = sanitizeText(
+      placeholderProfile && isLegacyDefaultDisplayName(safeProfile.displayName || safeProfile.name)
+        ? ""
+        : safeProfile.displayName || safeProfile.name || "",
+      MAX_PROFILE_NAME_LENGTH
+    );
+    const preferredBio = sanitizeMultilineText(
+      placeholderProfile && isLegacyDefaultBio(safeProfile.bio) ? "" : (safeProfile.bio || ""),
+      MAX_BIO_LENGTH
+    );
+    const preferredLocation = sanitizeText(
+      placeholderProfile && isLegacyDefaultLocation(safeProfile.location) ? "" : (safeProfile.location || ""),
+      MAX_LOCATION_LENGTH
+    );
+
     return {
       ...clone(defaultProfile),
       ...safeProfile,
@@ -217,10 +357,15 @@
         .normalize("NFKD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase(),
-      displayName: sanitizeText(safeProfile.displayName || safeProfile.name || defaultProfile.displayName, MAX_PROFILE_NAME_LENGTH) || defaultProfile.displayName,
-      bio: sanitizeMultilineText(safeProfile.bio || defaultProfile.bio, MAX_BIO_LENGTH) || defaultProfile.bio,
-      avatar: sanitizeUrl(safeProfile.avatar) || defaultProfile.avatar,
-      location: sanitizeText(safeProfile.location || defaultProfile.location, MAX_LOCATION_LENGTH) || defaultProfile.location,
+      displayName: preferredDisplayName,
+      bio: preferredBio,
+      avatar: resolveProfileAvatar({
+        ...safeProfile,
+        avatar: placeholderProfile && isLegacyDefaultAvatar(safeProfile.avatar) ? "" : safeProfile.avatar,
+        displayName: preferredDisplayName,
+        username: sanitizeUsername(safeProfile.username || safeProfile.email || safeProfile.displayName || defaultProfile.username)
+      }),
+      location: preferredLocation,
       theme: sanitizeTheme(safeProfile.theme || defaultProfile.theme),
       email: sanitizeEmail(safeProfile.email),
       authProvider: sanitizeText(safeProfile.authProvider || "email", 24) || "email"
@@ -237,7 +382,11 @@
       name: sanitizeText(safeFriend.name || safeFriend.displayName || "Usuario", MAX_PROFILE_NAME_LENGTH) || "Usuario",
       displayName: sanitizeText(safeFriend.displayName || safeFriend.name || "", MAX_PROFILE_NAME_LENGTH),
       favoriteGenre: sanitizeText(safeFriend.favoriteGenre || "Cinema", 60) || "Cinema",
-      avatar: sanitizeUrl(safeFriend.avatar) || defaultProfile.avatar
+      avatar: resolveProfileAvatar({
+        avatar: safeFriend.avatar,
+        displayName: safeFriend.displayName || safeFriend.name || username,
+        username
+      })
     };
   }
 
@@ -414,8 +563,7 @@
       const isLegacySeedProfile =
         parsedProfile &&
         !parsedProfile.uid &&
-        parsedProfile.username === "felipecine" &&
-        parsedProfile.displayName === "Felipe Martins";
+        isLegacyPlaceholderProfile(parsedProfile);
       const storedProfile = isLegacySeedProfile ? {} : parsedProfile;
 
       if (isLegacySeedProfile) {
@@ -439,7 +587,7 @@
         })
       };
     } catch (error) {
-      return clone(defaultProfile);
+      return sanitizeProfile(clone(defaultProfile));
     }
   }
 
@@ -811,6 +959,14 @@
     defaultProfile: clone(defaultProfile),
     defaultFriends: clone(defaultFriends),
     suggestedUsers: clone(suggestedUsers),
+    buildGeneratedAvatar,
+    resolveProfileAvatar,
+    isGeneratedAvatar,
+    isLegacyDefaultAvatar,
+    isLegacyDefaultDisplayName,
+    isLegacyDefaultBio,
+    isLegacyDefaultLocation,
+    isLegacyPlaceholderProfile,
     loadProfile,
     saveProfile,
     sanitizeProfile,

@@ -19,6 +19,14 @@ const relationshipState = {
   loaded: false
 };
 
+function resolveUserAvatar(userLike) {
+  if (store && typeof store.resolveProfileAvatar === "function") {
+    return store.resolveProfileAvatar(userLike || { username: "cinefyuser" });
+  }
+
+  return (userLike && userLike.avatar) || "/assets/img/logo.svg";
+}
+
 const addToListButton = document.getElementById("addToListButton");
 const addToListButtonIcon = document.getElementById("addToListButtonIcon");
 const addToListButtonLabel = document.getElementById("addToListButtonLabel");
@@ -1223,7 +1231,7 @@ function getOwnCinefyReview() {
     uid: currentProfile.uid,
     authorName: currentProfile.displayName || currentProfile.username || "Voce",
     authorUsername: currentProfile.username || "",
-    authorAvatar: currentProfile.avatar || fallbackPoster,
+    authorAvatar: resolveUserAvatar(currentProfile),
     rating: review.rating,
     comment: review.comment,
     updatedAt: review.updatedAt,
@@ -1261,7 +1269,7 @@ async function loadFriendCinefyReviews() {
         ...data,
         authorName: data.authorName || friend.displayName || friend.name || "Amigo",
         authorUsername: data.authorUsername || friend.username || "",
-        authorAvatar: data.authorAvatar || friend.avatar || fallbackPoster,
+        authorAvatar: data.authorAvatar || resolveUserAvatar(friend),
         sourceLabel: "Amigo no Cinefy Club",
         isOwn: false
       });
@@ -1288,9 +1296,9 @@ async function syncPublicReviewForCurrentMovie(reviewPayload) {
     title: truncateText(currentMovie && currentMovie.title ? currentMovie.title : "", 120),
     poster: truncateText(currentMovie && currentMovie.poster_path ? window.TMDB.getImageUrl(currentMovie.poster_path, fallbackPoster) : "", 2048),
     authorUid: currentProfile.uid,
-    authorName: truncateText(currentProfile.displayName || currentProfile.username || "Cinefilo", 80),
+    authorName: truncateText(currentProfile.displayName || currentProfile.username || "Usuario", 80),
     authorUsername: truncateText(currentProfile.username || "", 24),
-    authorAvatar: truncateText(currentProfile.avatar || fallbackPoster, 2048),
+    authorAvatar: truncateText(resolveUserAvatar(currentProfile), 2048),
     rating: sanitizeReviewRating(reviewPayload.rating),
     comment: sanitizeReviewComment(reviewPayload.comment),
     updatedAt: reviewPayload.updatedAt || new Date().toISOString()
@@ -1311,9 +1319,12 @@ function normalizeCinefyReviewRecord(review) {
   const ratingNumber = Number(rating);
   return {
     authorUid: review.authorUid || review.uid || "",
-    authorName: review.authorName || "Cinefilo",
+    authorName: review.authorName || review.authorUsername || "Usuario",
     authorUsername: review.authorUsername || "",
-    authorAvatar: review.authorAvatar || fallbackPoster,
+    authorAvatar: review.authorAvatar || resolveUserAvatar({
+      displayName: review.authorName || "",
+      username: review.authorUsername || ""
+    }),
     comment: comment || "Sem comentario.",
     ratingValue: Number.isFinite(ratingNumber) ? ratingNumber : null,
     updatedAt: review.updatedAt || "",
@@ -1464,9 +1475,9 @@ async function sendFriendRequestFromReview(targetUser) {
   try {
     const requestPayload = {
       senderUid: currentProfile.uid,
-      displayName: currentProfile.displayName || "Cinefilo",
+      displayName: currentProfile.displayName || currentProfile.username || "Usuario",
       username: currentProfile.username || "cinefyuser",
-      avatar: currentProfile.avatar || fallbackPoster,
+      avatar: resolveUserAvatar(currentProfile),
       createdAt: new Date().toISOString()
     };
 
@@ -1474,9 +1485,9 @@ async function sendFriendRequestFromReview(targetUser) {
       firestore.collection("users").doc(targetUid).collection("friend_requests").doc(currentProfile.uid).set(requestPayload),
       firestore.collection("users").doc(currentProfile.uid).collection("outgoing_requests").doc(targetUid).set({
         recipientUid: targetUid,
-        displayName: targetUser.displayName || "Cinefilo",
+        displayName: targetUser.displayName || targetUser.username || "Usuario",
         username: targetUser.username || "cinefyuser",
-        avatar: targetUser.avatar || fallbackPoster,
+        avatar: resolveUserAvatar(targetUser),
         createdAt: new Date().toISOString()
       })
     ]);
@@ -1485,7 +1496,7 @@ async function sendFriendRequestFromReview(targetUser) {
       id: `friend-request-${currentProfile.uid}`,
       type: "friend_request",
       title: "Pedido de amizade recebido",
-      message: `${currentProfile.displayName || "Um cinefilo"} enviou um pedido de amizade.`,
+      message: `${currentProfile.displayName || currentProfile.username || "Um usuario"} enviou um pedido de amizade.`,
       href: "amigos.html",
       read: false,
       createdAt: new Date().toISOString()
@@ -1510,22 +1521,22 @@ async function acceptFriendRequestFromReview(targetUser) {
     await commitRelationshipBatch(targetUid, (batch, refs) => {
       batch.set(refs.currentFriend, {
         id: targetUid,
-        name: targetUser.displayName || "Cinefilo",
-        displayName: targetUser.displayName || "Cinefilo",
+        name: targetUser.displayName || targetUser.username || "Usuario",
+        displayName: targetUser.displayName || targetUser.username || "Usuario",
         username: targetUser.username || "cinefyuser",
-        avatar: targetUser.avatar || fallbackPoster,
+        avatar: resolveUserAvatar(targetUser),
         favoriteGenre: "Cinema",
-        location: "Brasil",
+        location: targetUser.location || "",
         createdAt: new Date().toISOString()
       });
       batch.set(refs.otherFriend, {
         id: currentProfile.uid,
-        name: currentProfile.displayName || "Cinefilo",
-        displayName: currentProfile.displayName || "Cinefilo",
+        name: currentProfile.displayName || currentProfile.username || "Usuario",
+        displayName: currentProfile.displayName || currentProfile.username || "Usuario",
         username: currentProfile.username || "cinefyuser",
-        avatar: currentProfile.avatar || fallbackPoster,
+        avatar: resolveUserAvatar(currentProfile),
         favoriteGenre: "Cinema",
-        location: currentProfile.location || "Brasil",
+        location: currentProfile.location || "",
         createdAt: new Date().toISOString()
       });
       batch.delete(refs.currentIncoming);
@@ -1538,7 +1549,7 @@ async function acceptFriendRequestFromReview(targetUser) {
       id: `friend-accepted-${currentProfile.uid}`,
       type: "friend_accepted",
       title: "Pedido aceito",
-      message: `${currentProfile.displayName || "Um cinefilo"} aceitou seu pedido de amizade.`,
+      message: `${currentProfile.displayName || currentProfile.username || "Um usuario"} aceitou seu pedido de amizade.`,
       href: "amigos.html",
       read: false,
       createdAt: new Date().toISOString()

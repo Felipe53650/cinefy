@@ -1,6 +1,6 @@
 ﻿const store = window.CinefyStore;
       const themeManager = window.CinefyTheme || null;
-      const defaultAvatar = store.defaultProfile.avatar;
+      const defaultAvatar = store.resolveProfileAvatar({ username: "cinefyuser" });
       let profile = store.loadProfile();
       let friends = store.loadFriends();
 
@@ -19,6 +19,9 @@
       const locationSuggestionsPanel = document.getElementById("locationSuggestionsPanel");
       const locationSuggestionsList = document.getElementById("locationSuggestionsList");
       const locationSuggestionsHint = document.getElementById("locationSuggestionsHint");
+      const profileBioText = document.getElementById("profileBioText");
+      const profileLocationChip = document.getElementById("profileLocation");
+      const profileFriendsLink = document.getElementById("profileFriendsLink");
       const availableThemes = themeManager && typeof themeManager.getThemes === "function"
         ? themeManager.getThemes()
         : [];
@@ -57,25 +60,30 @@
       }
 
       function hydrateForm() {
-        document.getElementById("displayNameInput").value = profile.displayName;
+        document.getElementById("displayNameInput").value = profile.displayName || "";
         document.getElementById("usernameInput").value = profile.username;
-        document.getElementById("bioInput").value = profile.bio;
-        document.getElementById("locationInput").value = profile.location;
+        document.getElementById("bioInput").value = profile.bio || "";
+        document.getElementById("locationInput").value = profile.location || "";
       }
 
       function renderProfile() {
         friends = store.loadFriends();
         profile.theme = resolveTheme(profile.theme);
         const friendCountStat = document.getElementById("friendCountStat");
-        document.getElementById("profileDisplayName").textContent = profile.displayName;
+        document.getElementById("profileDisplayName").textContent = profile.displayName || profile.username || "Seu perfil";
         document.getElementById("profileUsername").textContent = `@${profile.username}`;
-        document.getElementById("profileBioText").textContent = profile.bio;
-        document.getElementById("profileLocation").textContent = profile.location;
+        profileBioText.textContent = profile.bio || "";
+        profileBioText.classList.toggle("hidden", !profile.bio);
+        profileLocationChip.textContent = profile.location || "";
+        profileLocationChip.classList.toggle("hidden", !profile.location);
         document.getElementById("friendCountBadge").textContent = friends.length;
+        if (profileFriendsLink) {
+          profileFriendsLink.href = getFriendsPageHref(profile);
+        }
         if (friendCountStat) {
           friendCountStat.textContent = friends.length;
         }
-        avatarPreview.src = profile.avatar || defaultAvatar;
+        avatarPreview.src = safeAvatarUrl(profile.avatar, profile);
         renderFriendPreview();
         renderThemeOptions();
       }
@@ -94,7 +102,7 @@
         list.innerHTML = friends.slice(0, 4).map((friend) => `
           <div class="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/60 px-4 py-3">
             <a class="cinefy-user-link cinefy-user-link-card" href="${escapeAttribute(getPublicProfileHref(friend))}">
-              <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-12 h-12 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar))}" />
+              <img alt="${escapeAttribute(friend.displayName || friend.name || "Usuario")}" class="w-12 h-12 rounded-2xl object-cover" decoding="async" loading="lazy" src="${escapeAttribute(safeAvatarUrl(friend.avatar, friend))}" />
               <div class="min-w-0">
                 <p class="font-bold text-white truncate">${escapeHtml(friend.displayName || friend.name || "Usuario")}</p>
                 <p class="text-sm text-zinc-400 truncate">@${escapeHtml(friend.username || "cinefyuser")} • ${escapeHtml(friend.favoriteGenre || "Cinema")}</p>
@@ -189,7 +197,7 @@
 
       async function removeAvatar() {
         try {
-          profile.avatar = defaultAvatar;
+          profile.avatar = resolveAuthAvatarFallback();
           if (typeof window.saveCurrentProfile === "function") {
             await window.saveCurrentProfile(profile);
           } else {
@@ -746,12 +754,16 @@
           .replace(/'/g, "&#39;");
       }
 
-      function safeAvatarUrl(value) {
-        const fallbackAvatar = profile.avatar || defaultAvatar;
+      function safeAvatarUrl(value, userLike) {
+        const fallbackAvatar = store.resolveProfileAvatar(userLike || profile || { username: "cinefyuser" });
         const candidate = String(value || "").trim();
         if (!candidate) return fallbackAvatar;
 
-        if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+        if (
+          /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+          (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+          candidate.startsWith("blob:")
+        ) {
           return candidate;
         }
 
@@ -767,11 +779,35 @@
         return fallbackAvatar;
       }
 
+      function resolveAuthAvatarFallback() {
+        const currentUser = window.CinefyFirebase && window.CinefyFirebase.auth
+          ? window.CinefyFirebase.auth.currentUser
+          : null;
+        const providerEntry = currentUser && Array.isArray(currentUser.providerData)
+          ? currentUser.providerData.find((entry) => entry && entry.photoURL)
+          : null;
+        const providerPhoto = String(
+          (providerEntry && providerEntry.photoURL) ||
+          (currentUser && currentUser.photoURL) ||
+          ""
+        ).trim();
+
+        return providerPhoto || store.resolveProfileAvatar(profile);
+      }
+
       function getPublicProfileHref(user) {
         if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicProfileHref === "function") {
           return window.CinefyProfiles.buildPublicProfileHref(user);
         }
 
         return "perfil.html";
+      }
+
+      function getFriendsPageHref(user) {
+        if (window.CinefyProfiles && typeof window.CinefyProfiles.buildPublicFriendsHref === "function") {
+          return window.CinefyProfiles.buildPublicFriendsHref(user);
+        }
+
+        return "usuario-amigos.html";
       }
 

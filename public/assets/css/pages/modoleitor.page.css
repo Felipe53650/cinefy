@@ -26,11 +26,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  max-width: 30rem;
+  width: min(100%, 38rem);
   padding: 1rem 1.05rem;
   border-radius: 1.5rem;
   text-decoration: none;
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.reader-owner-card .min-w-0 {
+  flex: 1 1 auto;
 }
 
 .reader-owner-card:hover {
@@ -78,6 +82,9 @@
 
 .reader-owner-name {
   font-size: 1.05rem;
+  max-width: none;
+  line-height: 1.12;
+  text-wrap: balance;
 }
 
 .reader-owner-handle,

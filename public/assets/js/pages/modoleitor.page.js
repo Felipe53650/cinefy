@@ -13,7 +13,7 @@
   let activeOwner = {
     uid: localProfile.uid || "",
     username: localProfile.username || "cinefyuser",
-    displayName: localProfile.displayName || "Cinefilo",
+    displayName: localProfile.displayName || localProfile.username || "Usuario",
     avatar: localProfile.avatar || "/assets/img/logo.svg"
   };
   let activeListState = normalizeSharedListState(localListState);
@@ -105,8 +105,11 @@
       activeOwner = {
         uid: String(data.ownerUid || ""),
         username: sanitizeText(data.ownerUsername || "cinefyuser", 24) || "cinefyuser",
-        displayName: sanitizeText(data.ownerDisplayName || "Cinefilo", 80) || "Cinefilo",
-        avatar: safeAvatarUrl(data.ownerAvatar)
+        displayName: sanitizeText(data.ownerDisplayName || data.ownerUsername || "Usuario", 80) || "Usuario",
+        avatar: safeAvatarUrl(data.ownerAvatar, {
+          displayName: data.ownerDisplayName || data.ownerUsername || "Usuario",
+          username: data.ownerUsername || "cinefyuser"
+        })
       };
       activeListState = normalizeSharedListState({
         title: data.title || "Lista compartilhada",
@@ -137,9 +140,9 @@
     readerDescription.textContent = activeListState.description || defaultDescription;
     readerMovieCount.textContent = activeListState.movies.length;
     readerMovieCountInline.textContent = activeListState.movies.length;
-    readerOwnerName.textContent = activeOwner.displayName || "Cinefilo";
+    readerOwnerName.textContent = activeOwner.displayName || activeOwner.username || "Usuario";
     readerOwnerHandle.textContent = `@${activeOwner.username || "cinefyuser"}`;
-    readerOwnerAvatar.src = safeAvatarUrl(activeOwner.avatar);
+    readerOwnerAvatar.src = safeAvatarUrl(activeOwner.avatar, activeOwner);
     if (readerOwnerLink) {
       readerOwnerLink.href = getPublicProfileHref(activeOwner);
     }
@@ -538,11 +541,18 @@
     return defaultPoster;
   }
 
-  function safeAvatarUrl(value) {
+  function safeAvatarUrl(value, userLike) {
     const candidate = String(value || "").trim();
-    if (!candidate) return "/assets/img/logo.svg";
+    const fallbackAvatar = store && typeof store.resolveProfileAvatar === "function"
+      ? store.resolveProfileAvatar(userLike || activeOwner || { username: "cinefyuser" })
+      : "/assets/img/logo.svg";
+    if (!candidate) return fallbackAvatar;
 
-    if (/^data:image\/(png|jpeg|webp);/i.test(candidate) || candidate.startsWith("blob:")) {
+    if (
+      /^data:image\/(png|jpeg|webp);/i.test(candidate) ||
+      (candidate.startsWith("data:image/svg+xml") && candidate.includes("cinefy-generated-avatar")) ||
+      candidate.startsWith("blob:")
+    ) {
       return candidate;
     }
 
@@ -552,10 +562,10 @@
         return parsedUrl.href;
       }
     } catch (error) {
-      return "/assets/img/logo.svg";
+      return fallbackAvatar;
     }
 
-    return "/assets/img/logo.svg";
+    return fallbackAvatar;
   }
 
   function getPublicProfileHref(user) {

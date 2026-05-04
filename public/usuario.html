@@ -42,9 +42,10 @@
             <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Perfil publico</p>
             <h1 class="mt-3 text-3xl md:text-5xl font-black text-white font-display" id="publicProfileName">Cinefilo</h1>
             <p class="mt-2 text-lg text-zinc-300" id="publicProfileHandle">@cinefyuser</p>
-            <p class="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base" id="publicProfileBio">Esse usuario ainda nao adicionou uma bio publica.</p>
+            <p class="mt-4 max-w-none text-sm leading-relaxed text-zinc-400 md:text-base hidden" id="publicProfileBio"></p>
             <div class="public-profile-chips mt-4">
-              <span class="public-profile-chip" id="publicProfileLocation">Brasil</span>
+              <a class="public-profile-chip public-profile-chip--interactive" href="usuario-amigos.html" id="publicProfileFriendsLink"><span id="publicProfileFriendCount">0</span> amigos</a>
+              <span class="public-profile-chip hidden" id="publicProfileLocation"></span>
               <span class="public-profile-chip" id="publicProfileTheme">Tema favorito: Ember</span>
             </div>
           </div>

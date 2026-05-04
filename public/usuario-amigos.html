@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Cinefy Club - Amigos do usuario</title>
+  <meta name="description" content="Veja a rede de amigos de um usuario e interaja com a comunidade do Cinefy Club."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="theme-color" content="#e83b24"/>
+  <link rel="canonical" href="https://cinefyclub.com.br/usuario-amigos"/>
+  <meta property="og:title" content="Cinefy Club - Amigos do usuario"/>
+  <meta property="og:description" content="Veja a rede de amigos de um usuario e interaja com a comunidade do Cinefy Club."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://cinefyclub.com.br/usuario-amigos"/>
+  <meta property="og:image" content="/assets/img/github-cover.svg"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Cinefy Club - Amigos do usuario"/>
+  <meta name="twitter:description" content="Veja a rede de amigos de um usuario e interaja com a comunidade do Cinefy Club."/>
+  <meta name="twitter:image" content="/assets/img/github-cover.svg"/>
+  <link rel="icon" sizes="any" type="image/svg+xml" href="/assets/img/favicon-club.svg"/>
+  <script src="assets/js/theme.js"></script>
+  <link href="assets/css/tailwind.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="assets/css/pages/usuario-amigos.page.css" rel="stylesheet"/>
+  <link href="assets/css/theme.css" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col" data-page="usuario-amigos">
+  <header data-layout="navbar" aria-label="Cabecalho do site"></header>
+
+  <main class="flex-grow pt-20 pb-20 px-4 md:px-8 md:pb-28 md:pt-24 max-w-7xl mx-auto w-full">
+    <section class="glass-card user-friends-hero rounded-[2rem] overflow-hidden">
+      <div class="user-friends-hero__cover"></div>
+      <div class="user-friends-hero__body">
+        <div class="user-friends-identity">
+          <div class="user-friends-avatar-shell">
+            <img alt="Avatar do usuario" class="user-friends-avatar" id="userFriendsAvatar" src="/assets/img/logo.svg"/>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Rede social</p>
+            <h1 class="mt-3 text-3xl md:text-5xl font-black text-white font-display" id="userFriendsTitle">Amigos deste perfil</h1>
+            <p class="mt-2 text-lg text-zinc-300" id="userFriendsHandle">@cinefyuser</p>
+            <p class="mt-4 max-w-none text-sm leading-relaxed text-zinc-400 md:text-base" id="userFriendsSummary">Explore a rede desse usuario com o menor numero de cliques possivel.</p>
+          </div>
+        </div>
+        <div class="user-friends-actions">
+          <a class="user-friends-action" href="usuario.html" id="userFriendsBackLink">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span>Voltar ao perfil</span>
+          </a>
+          <a class="user-friends-action user-friends-action--strong hidden" href="amigos.html" id="userFriendsManageLink">
+            <span class="material-symbols-outlined">groups</span>
+            <span>Gerenciar amizades</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 grid gap-4 md:grid-cols-3">
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Amigos visiveis</p>
+        <p class="mt-3 text-3xl font-black text-white" id="userFriendsCount">0</p>
+        <p class="mt-2 text-sm text-zinc-400">A lista abaixo mostra a rede que esse perfil compartilhou no Cinefy Club.</p>
+      </article>
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Seu contexto</p>
+        <p class="mt-3 text-xl font-black text-white" id="userFriendsStatus">Entre para interagir</p>
+        <p class="mt-2 text-sm text-zinc-400" id="userFriendsStatusCopy">Quando voce entra, pode adicionar ou remover pessoas direto desta lista.</p>
+      </article>
+      <article class="glass-card rounded-[1.6rem] p-5">
+        <p class="text-xs uppercase tracking-[0.22em] text-zinc-500">Navegacao rapida</p>
+        <p class="mt-3 text-xl font-black text-white">Fluxo sem desvio</p>
+        <p class="mt-2 text-sm text-zinc-400">Abra o perfil, veja o contexto social e aja direto no card certo, sem telas intermediarias desnecessarias.</p>
+      </article>
+    </section>
+
+    <section class="user-friends-notice hidden mt-6 glass-card rounded-[1.6rem] p-5" id="userFriendsNotice"></section>
+
+    <section class="mt-8 glass-card rounded-[2rem] p-6 md:p-8">
+      <div class="flex items-center justify-between gap-4">
+        <div class="section-heading">
+          <p class="text-xs uppercase tracking-[0.24em] text-zinc-500">Lista de amigos</p>
+          <h2 class="mt-2 text-2xl font-black text-white">Conexoes visiveis</h2>
+        </div>
+        <span class="material-symbols-outlined text-3xl text-red-300">group</span>
+      </div>
+      <p class="mt-4 text-sm text-zinc-400" id="userFriendsCaption">Carregando a rede desse perfil...</p>
+      <div class="mt-6 space-y-4" id="userFriendsList"></div>
+    </section>
+  </main>
+
+  <footer data-layout="footer" aria-label="Rodape do site"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="assets/js/app-state.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/pages/usuario-amigos.page.js"></script>
+</body>
+</html>
