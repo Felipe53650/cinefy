@@ -210,7 +210,7 @@ function renderLocalMovie(movie) {
   document.getElementById("movieGenres").textContent = movie.genre || "-";
   document.getElementById("movieScore").textContent = typeof movie.rating === "number" ? movie.rating.toFixed(1) : "-";
   document.getElementById("movieCertification").textContent = "Personalizado";
-  document.getElementById("movieProvidersSummary").textContent = "Indisponivel";
+  document.getElementById("movieProvidersSummary").textContent = "Indisponível";
   document.getElementById("movieDirectors").textContent = "Nao informado";
   document.getElementById("movieLeadCast").textContent = "Nao informado";
   document.getElementById("movieOriginalLanguage").textContent = "Nao informado";
@@ -423,7 +423,7 @@ function renderWatchProviders(providerData, isManual = false) {
     watchProvidersRegionSelect.classList.add("hidden");
     caption.textContent = isManual
       ? "Filmes manuais nao possuem disponibilidade sincronizada com o TMDB."
-      : "O TMDB nao informou plataformas para este filme na regiao consultada.";
+      : "O TMDB não informou disponibilidade por região para este filme.";
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
         ${isManual
@@ -438,14 +438,14 @@ function renderWatchProviders(providerData, isManual = false) {
 
   if (!providerData.groups.length) {
     watchProvidersLink.classList.add("hidden");
-    caption.textContent = providerData.selectedRegion.code === "BR"
-      ? "Ainda nao encontramos plataformas no Brasil. Troque a regiao para continuar a busca."
-      : `Ainda nao encontramos plataformas em ${providerData.regionLabel}. Tente outra regiao.`;
+    caption.textContent = providerData.hasRequestedRegionData
+      ? `O TMDB tem dados para ${providerData.regionLabel}, mas não listou plataformas de streaming, aluguel ou compra.`
+      : `O TMDB não retornou dados para ${providerData.regionLabel}. Escolha outra região disponível.`;
     grid.innerHTML = `
       <div class="rounded-3xl border border-white/8 bg-black/20 p-5 text-sm text-zinc-400">
-        ${providerData.selectedRegion.code === "BR"
-          ? "Este titulo ainda nao tem disponibilidade confirmada para o Brasil no TMDB. Use o seletor acima para consultar outras regioes suportadas."
-          : `Nao ha plataformas listadas para ${escapeHtml(providerData.regionLabel)} neste momento.`}
+        ${providerData.hasRequestedRegionData
+          ? `Não há plataformas listadas para ${escapeHtml(providerData.regionLabel)} neste momento.`
+          : "A lista abaixo mostra apenas regiões que o TMDB retornou para este título."}
       </div>
     `;
     return;
@@ -458,7 +458,7 @@ function renderWatchProviders(providerData, isManual = false) {
     <section class="rounded-3xl border border-white/8 bg-black/20 p-4">
       <div class="flex items-center justify-between gap-3">
         <h4 class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-300">${escapeHtml(group.label)}</h4>
-        <span class="text-xs text-zinc-500">${group.providers.length} opcao(oes)</span>
+        <span class="text-xs text-zinc-500">${escapeHtml(formatProviderCount(group.providers.length))}</span>
       </div>
       <div class="mt-4 flex flex-wrap gap-3">
         ${group.providers.map((provider) => `
@@ -746,7 +746,7 @@ function renderWatchProviderRegionOptions(providerData) {
 
   watchProvidersRegionSelect.classList.remove("hidden");
   watchProvidersRegionSelect.innerHTML = providerData.availableRegions.map((region) => `
-    <option value="${escapeHtml(region.code)}" ${region.code === providerData.selectedRegion.code ? "selected" : ""}>
+    <option value="${escapeAttribute(region.code)}" ${region.code === providerData.selectedRegion.code ? "selected" : ""}>
       ${escapeHtml(region.label)}
     </option>
   `).join("");
@@ -765,8 +765,8 @@ function buildWatchProviderState(watchProviders, selectedRegionCode = "BR") {
   const regionData = results[regionCode] || null;
   const mappings = [
     { key: "flatrate", label: "Streaming" },
-    { key: "free", label: "Gratis" },
-    { key: "ads", label: "Com anuncios" },
+    { key: "free", label: "Grátis" },
+    { key: "ads", label: "Com anúncios" },
     { key: "rent", label: "Alugar" },
     { key: "buy", label: "Comprar" }
   ];
@@ -778,20 +778,12 @@ function buildWatchProviderState(watchProviders, selectedRegionCode = "BR") {
     }))
     .filter((group) => group.providers.length);
 
-  const allOptions = new Map();
-  allOptions.set(regionCode, {
-    code: regionCode,
-    label: regionData ? getRegionLabel(regionCode) : `${getRegionLabel(regionCode)} (sem dados)`
-  });
-
-  availableCodes
+  const availableRegions = availableCodes
     .sort((left, right) => getRegionLabel(left).localeCompare(getRegionLabel(right), "pt-BR"))
-    .forEach((code) => {
-      allOptions.set(code, {
-        code,
-        label: getRegionLabel(code)
-      });
-    });
+    .map((code) => ({
+      code,
+      label: getRegionLabel(code)
+    }));
 
   return {
     hasAnyData: availableCodes.length > 0,
@@ -803,7 +795,7 @@ function buildWatchProviderState(watchProviders, selectedRegionCode = "BR") {
     regionLabel: getRegionLabel(regionCode),
     link: regionData && regionData.link ? regionData.link : "",
     groups,
-    availableRegions: Array.from(allOptions.values())
+    availableRegions
   };
 }
 
@@ -814,13 +806,18 @@ function getProvidersSummary(providerData) {
 
   if (!providerData.groups.length) {
     return providerData.selectedRegion && providerData.selectedRegion.code === "BR"
-      ? "Indisponivel no Brasil"
-      : "Indisponivel";
+      ? "Indisponível no Brasil"
+      : "Indisponível";
   }
 
   const names = providerData.groups[0].providers.slice(0, 2).map((provider) => provider.provider_name);
   const suffix = providerData.groups[0].providers.length > 2 ? " e outras" : "";
   return `${names.join(", ")}${suffix}`;
+}
+
+function formatProviderCount(count) {
+  const safeCount = Number(count) || 0;
+  return safeCount === 1 ? "1 opção" : `${safeCount} opções`;
 }
 
 function renderHeroStats({ score, voteCount, certification, runtime, isManual = false }) {
@@ -1097,11 +1094,11 @@ function getRegionLabel(regionCode) {
     BR: "Brasil",
     US: "Estados Unidos",
     PT: "Portugal",
-    FR: "Franca",
+    FR: "França",
     ES: "Espanha",
-    MX: "Mexico",
+    MX: "México",
     AR: "Argentina",
-    IT: "Italia",
+    IT: "Itália",
     DE: "Alemanha",
     GB: "Reino Unido"
   };
