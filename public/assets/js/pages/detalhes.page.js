@@ -1593,6 +1593,10 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
 function sanitizeReviewRating(value) {
   const candidate = String(value ?? "").trim();
   if (!candidate) return "";
