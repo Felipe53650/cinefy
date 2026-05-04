@@ -223,11 +223,14 @@
       }
 
       function buildShareUrl() {
+        const shareUrl = new URL("modoleitor.html", window.location.href);
         const params = new URLSearchParams({
           share: getShareId(),
           lista: getShareSlug()
         });
-        return window.location.href.replace(/lista\.html.*$/i, `modoleitor.html?${params.toString()}`);
+        shareUrl.search = params.toString();
+        shareUrl.hash = "";
+        return shareUrl.toString();
       }
 
       function buildSharedListPayload() {

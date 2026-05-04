@@ -156,7 +156,12 @@
 
   async function loadPublicLists() {
     try {
-      const snapshot = await firestore.collection("shared_lists").where("ownerUid", "==", state.targetUid).limit(12).get();
+      const snapshot = await firestore
+        .collection("shared_lists")
+        .where("ownerUid", "==", state.targetUid)
+        .where("privacy", "==", "publica")
+        .limit(12)
+        .get();
       state.sharedLists = snapshot.docs
         .map((doc) => normalizeSharedList(doc.data()))
         .filter((list) => list && list.privacy === "publica")

@@ -499,8 +499,7 @@
   }
 
   function buildShareUrl() {
-    const shareUrl = new URL(window.location.href);
-    shareUrl.pathname = shareUrl.pathname.replace(/lista\.html$/i, "modoleitor.html");
+    const shareUrl = new URL("modoleitor.html", window.location.href);
     shareUrl.search = new URLSearchParams({
       share: getShareId(),
       lista: getShareSlug()

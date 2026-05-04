@@ -112,6 +112,33 @@
   font-size: 0.92rem;
 }
 
+.reader-login-edit-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
+  background: linear-gradient(180deg, rgb(var(--theme-accent-rgb) / 0.92), rgb(var(--theme-accent-strong-rgb) / 0.9));
+  color: rgb(255 255 255);
+  padding: 0.72rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 16px 34px rgb(var(--theme-accent-strong-rgb) / 0.18);
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.reader-login-edit-link:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.reader-login-edit-link.hidden {
+  display: none;
+}
+
 .reader-card {
   display: flex;
   flex-direction: column;

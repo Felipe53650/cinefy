@@ -106,6 +106,19 @@
     return normalizeRoutePath(window.location.pathname);
   }
 
+  function redirectSharedListRouteIfNeeded() {
+    if (getCurrentPath() !== "lista") return false;
+
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("share")) return false;
+
+    const targetUrl = new URL("modoleitor.html", window.location.href);
+    targetUrl.search = params.toString();
+    targetUrl.hash = window.location.hash || "";
+    window.location.replace(targetUrl.toString());
+    return true;
+  }
+
   function getFirebaseProvider(providerName) {
     if (!hasFirebaseAuth()) return null;
 
@@ -356,8 +369,27 @@
     window.location.replace(path);
   }
 
+  function getSafeAuthRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const redirectPath = String(params.get("redirect") || "").trim();
+    if (!redirectPath) return "";
+
+    try {
+      const redirectUrl = new URL(redirectPath, window.location.origin);
+      if (redirectUrl.origin !== window.location.origin) return "";
+
+      const route = normalizeRoutePath(redirectUrl.pathname);
+      const allowedRoutes = new Set(["index", "lista", "busca", "amigos", "perfil", "usuario", "usuario-amigos", "detalhes", "modoleitor"]);
+      if (!allowedRoutes.has(route)) return "";
+
+      return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+    } catch (error) {
+      return "";
+    }
+  }
+
   function goToApp() {
-    redirectTo("index.html");
+    redirectTo(getSafeAuthRedirect() || "index.html");
   }
 
   function requireFirebaseAuth() {
@@ -986,10 +1018,16 @@
       return;
     }
 
+    if (redirectSharedListRouteIfNeeded()) {
+      return;
+    }
+
     if (isProtectedPage() && (!hasFirebaseAuth() || firebaseAuthResolved)) {
       redirectTo("login.html");
     }
   }
+
+  redirectSharedListRouteIfNeeded();
 
   if (hasFirebaseAuth()) {
     getFirebaseAuth().onAuthStateChanged(async (user) => {

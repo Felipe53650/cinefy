@@ -38,6 +38,7 @@
   const readerOwnerLink = document.getElementById("readerOwnerLink");
   const readerStatusValue = document.getElementById("readerStatusValue");
   const readerExperienceCopy = document.getElementById("readerExperienceCopy");
+  const readerLoginToEditLink = document.getElementById("readerLoginToEditLink");
   const readerEditorPanel = document.getElementById("readerEditorPanel");
   const readerSharedMetaForm = document.getElementById("readerSharedMetaForm");
   const readerSharedTitleInput = document.getElementById("readerSharedTitleInput");
@@ -154,6 +155,7 @@
 
   function renderReaderStatus() {
     const currentUid = getCurrentUid();
+    updateLoginToEditLink(false);
 
     if (!shareId) {
       readerStatusValue.textContent = "Somente leitura";
@@ -170,6 +172,7 @@
     if (activeShareSettings.shareAccessLevel === "editor" && !currentUid) {
       readerStatusValue.textContent = "Entre para editar";
       readerExperienceCopy.textContent = "A lista aceita colaboradores logados. Voce ainda pode explorar o conteudo, mas precisa entrar na conta para editar.";
+      updateLoginToEditLink(true);
       return;
     }
 
@@ -406,8 +409,17 @@
     const authUid = auth && auth.currentUser ? String(auth.currentUser.uid || "") : "";
     if (authUid) return authUid;
 
-    const profile = store.loadProfile();
-    return String(profile && profile.uid ? profile.uid : "");
+    return "";
+  }
+
+  function updateLoginToEditLink(shouldShow) {
+    if (!readerLoginToEditLink) return;
+
+    readerLoginToEditLink.classList.toggle("hidden", !shouldShow);
+    if (!shouldShow) return;
+
+    const redirectUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    readerLoginToEditLink.href = `login.html?redirect=${encodeURIComponent(redirectUrl)}`;
   }
 
   function normalizeSharedListState(listState) {

@@ -387,7 +387,9 @@ service cloud.firestore {
     }
 
     match /shared_lists/{shareId} {
-      allow read: if true;
+      allow get: if resource.data.privacy == "publica" ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow list: if resource.data.privacy == "publica";
       allow create, update: if isSignedIn() && (
         isValidSharedListOwnerWrite(shareId) ||
         isValidSharedListCollaboratorUpdate(shareId)
