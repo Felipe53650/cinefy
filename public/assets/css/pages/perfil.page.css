@@ -10,7 +10,7 @@
       }
       .glass-card {
         background: rgba(31, 14, 15, 0.74);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         backdrop-filter: blur(16px);
         box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
       }
@@ -128,7 +128,7 @@
       }
 
       .profile-username-suggestion-chip {
-        border: 1px solid rgb(var(--theme-outline-rgb) / 0.28);
+        border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
         background: rgb(var(--theme-surface-rgb) / 0.52);
         color: rgb(var(--theme-text-rgb));
         border-radius: 999px;
@@ -181,7 +181,7 @@
 
       .profile-location-option {
         width: 100%;
-        border: 1px solid rgb(var(--theme-outline-rgb) / 0.18);
+        border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
         border-radius: 1rem;
         background: rgb(var(--theme-surface-rgb) / 0.42);
         color: rgb(var(--theme-text-rgb));
@@ -227,7 +227,7 @@
       .profile-location-option__uf {
         flex-shrink: 0;
         border-radius: 999px;
-        border: 1px solid rgb(var(--theme-outline-rgb) / 0.24);
+        border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
         background: rgb(var(--theme-surface-strong-rgb) / 0.35);
         padding: 0.38rem 0.72rem;
         font-size: 0.72rem;
@@ -238,7 +238,7 @@
       }
 
       .profile-location-empty {
-        border: 1px dashed rgb(var(--theme-outline-rgb) / 0.24);
+        border: 1px dashed rgb(var(--theme-outline-rgb) / 0.14);
         border-radius: 1rem;
         padding: 1rem;
         color: rgb(var(--theme-muted-rgb) / 0.78);

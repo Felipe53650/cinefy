@@ -14,7 +14,7 @@
     .auth-shell {
       background: rgba(18, 8, 8, 0.6);
       backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: 0 36px 90px rgba(0, 0, 0, 0.5);
     }
 
@@ -31,7 +31,7 @@
 
     .field {
       background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .field:focus-within {
@@ -41,7 +41,7 @@
 
     .social-button {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .social-button:hover {
@@ -85,7 +85,7 @@
     }
 
     .username-suggestion-chip {
-      border: 1px solid rgb(var(--theme-outline-rgb) / 0.28);
+      border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
       background: rgb(var(--theme-surface-rgb) / 0.55);
       color: rgb(var(--theme-text-rgb));
       border-radius: 999px;

@@ -18,26 +18,26 @@
 
     .glass-panel {
       background: rgba(27, 12, 13, 0.74);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
       backdrop-filter: blur(18px);
     }
 
     .section-shell {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
     }
 
     .hero-list-button {
       background: rgb(var(--theme-surface-rgb) / 0.24);
-      border-color: rgb(var(--theme-outline-rgb) / 0.32);
+      border-color: rgb(var(--theme-outline-rgb) / 0.12);
       box-shadow: 0 14px 28px rgb(0 0 0 / 0.12);
     }
 
     .hero-list-button:hover {
       background: rgb(var(--theme-surface-rgb) / 0.34);
-      border-color: rgb(var(--theme-outline-rgb) / 0.48);
+      border-color: rgb(var(--theme-accent-rgb) / 0.28);
     }
 
     .hero-list-button.is-added {
@@ -92,7 +92,7 @@
       width: 2.9rem;
       height: 2.9rem;
       border-radius: 999px;
-      border: 1px solid rgb(var(--theme-outline-rgb) / 0.28);
+      border: 1px solid rgb(var(--theme-outline-rgb) / 0.12);
       background: rgb(var(--theme-surface-rgb) / 0.4);
       color: rgb(var(--theme-text-rgb) / 0.96);
       box-shadow: 0 14px 32px rgb(0 0 0 / 0.14);
