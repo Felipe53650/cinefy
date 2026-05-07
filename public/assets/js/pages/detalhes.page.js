@@ -15,6 +15,7 @@ let currentWatchProvidersPayload = null;
 let currentVideoItems = [];
 let featuredVideo = null;
 let lastFocusedElement = null;
+let activeVideoFilter = "all";
 const relationshipState = {
   friends: new Set(),
   incoming: new Set(),
@@ -42,6 +43,7 @@ const videoSection = document.getElementById("videoSection");
 const videoNavChip = document.getElementById("videoNavChip");
 const movieVideosGrid = document.getElementById("movieVideosGrid");
 const movieVideosCaption = document.getElementById("movieVideosCaption");
+const movieVideosFilters = document.getElementById("movieVideosFilters");
 const videoModal = document.getElementById("videoModal");
 const videoModalFrameShell = document.getElementById("videoModalFrameShell");
 const videoModalTitle = document.getElementById("videoModalTitle");
@@ -57,6 +59,9 @@ watchProvidersRegionSelect.addEventListener("change", handleWatchProviderRegionC
 document.querySelectorAll("[data-video-modal-close]").forEach((button) => {
   button.addEventListener("click", closeVideoModal);
 });
+if (movieVideosFilters) {
+  movieVideosFilters.addEventListener("click", handleVideoFilterClick);
+}
 document.addEventListener("keydown", handleVideoModalKeydown);
 syncRatingStars();
 
@@ -441,6 +446,7 @@ function buildTmdbScoreLabel(score, voteCount) {
 function renderMovieVideos(videos, isManual = false) {
   currentVideoItems = [];
   featuredVideo = null;
+  activeVideoFilter = "all";
 
   if (heroTrailerButton) {
     heroTrailerButton.classList.add("hidden");
@@ -458,6 +464,8 @@ function renderMovieVideos(videos, isManual = false) {
     movieVideosGrid.innerHTML = "";
   }
 
+  updateVideoFilterButtons();
+
   if (isManual) {
     return;
   }
@@ -467,7 +475,7 @@ function renderMovieVideos(videos, isManual = false) {
     return;
   }
 
-  currentVideoItems = rankedVideos.slice(0, 8);
+  currentVideoItems = rankedVideos;
   featuredVideo = currentVideoItems[0];
 
   if (heroTrailerButton && heroTrailerButtonLabel) {
@@ -489,11 +497,70 @@ function renderMovieVideos(videos, isManual = false) {
     movieVideosCaption.textContent = buildVideoCaption(trailerCount, teaserCount);
   }
 
+  updateVideoFilterButtons();
+  renderMovieVideoCards();
+}
+
+function handleVideoFilterClick(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  const button = target ? target.closest("[data-video-filter]") : null;
+  if (!button || button.disabled) {
+    return;
+  }
+
+  const nextFilter = button.getAttribute("data-video-filter");
+  if (!["all", "Trailer", "Teaser"].includes(nextFilter) || nextFilter === activeVideoFilter) {
+    return;
+  }
+
+  activeVideoFilter = nextFilter;
+  updateVideoFilterButtons();
+  renderMovieVideoCards();
+}
+
+function getFilteredMovieVideos() {
+  if (activeVideoFilter === "Trailer" || activeVideoFilter === "Teaser") {
+    return currentVideoItems.filter((video) => video.type === activeVideoFilter);
+  }
+
+  return currentVideoItems;
+}
+
+function updateVideoFilterButtons() {
+  if (!movieVideosFilters) {
+    return;
+  }
+
+  const counts = {
+    all: currentVideoItems.length,
+    Trailer: currentVideoItems.filter((video) => video.type === "Trailer").length,
+    Teaser: currentVideoItems.filter((video) => video.type === "Teaser").length
+  };
+
+  movieVideosFilters.querySelectorAll("[data-video-filter]").forEach((button) => {
+    const filter = button.getAttribute("data-video-filter");
+    const isActive = filter === activeVideoFilter;
+    const count = counts[filter] || 0;
+    const countElement = button.querySelector("[data-video-filter-count]");
+
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+    button.disabled = filter !== "all" && count === 0;
+
+    if (countElement) {
+      countElement.textContent = String(count);
+    }
+  });
+}
+
+function renderMovieVideoCards() {
   if (!movieVideosGrid) {
     return;
   }
 
-  movieVideosGrid.innerHTML = currentVideoItems.map((video, index) => `
+  const visibleVideos = getFilteredMovieVideos().slice(0, 8);
+
+  movieVideosGrid.innerHTML = visibleVideos.map((video, index) => `
     <button class="details-video-card" data-video-index="${index}" type="button">
       <span class="details-video-card__thumb">
         <img alt="" aria-hidden="true" decoding="async" loading="lazy" src="${escapeAttribute(getYoutubeThumbnailUrl(video.key))}" />
@@ -515,7 +582,7 @@ function renderMovieVideos(videos, isManual = false) {
   movieVideosGrid.querySelectorAll("[data-video-index]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.getAttribute("data-video-index"));
-      openVideoModal(currentVideoItems[index]);
+      openVideoModal(visibleVideos[index]);
     });
   });
 }

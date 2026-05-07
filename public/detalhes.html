@@ -189,6 +189,17 @@
             <h2 class="font-display text-3xl font-bold text-white">Previas e trailers</h2>
             <p class="mt-1 text-sm text-zinc-400" id="movieVideosCaption">Trailers e teasers oficiais sincronizados pelo TMDB.</p>
           </div>
+          <div aria-label="Filtrar videos" class="details-video-filters" id="movieVideosFilters">
+            <button aria-pressed="true" class="details-video-filter is-active" data-video-filter="all" type="button">
+              Todos <span data-video-filter-count>0</span>
+            </button>
+            <button aria-pressed="false" class="details-video-filter" data-video-filter="Trailer" type="button">
+              Trailers <span data-video-filter-count>0</span>
+            </button>
+            <button aria-pressed="false" class="details-video-filter" data-video-filter="Teaser" type="button">
+              Previas <span data-video-filter-count>0</span>
+            </button>
+          </div>
         </div>
         <div class="details-video-grid mt-5" id="movieVideosGrid"></div>
       </div>
