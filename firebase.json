@@ -57,12 +57,8 @@
         ]
       },
       {
-        "source": "**/*.@(html)",
+        "source": "**",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          },
           {
             "key": "Content-Security-Policy",
             "value": "default-src 'self'; script-src 'self' 'sha256-ldmXwlXTCeHI4X1oLRka1LavqOUuVrH3Bc8YGpwCGxM=' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://connect.facebook.net https://www.facebook.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://image.tmdb.org https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://*.googleapis.com https://*.firebaseio.com https://*.gstatic.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://graph.facebook.com https://www.facebook.com https://southamerica-east1-cinefy3-83a9a.cloudfunctions.net; frame-src https://www.facebook.com https://staticxx.facebook.com https://accounts.google.com https://apis.google.com https://www.youtube-nocookie.com https://www.youtube.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://www.facebook.com https://accounts.google.com; upgrade-insecure-requests"
@@ -94,6 +90,33 @@
           {
             "key": "Strict-Transport-Security",
             "value": "max-age=31536000; includeSubDomains; preload"
+          }
+        ]
+      },
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/@(404|amigos|busca|cadastro|detalhes|exclusao-dados|index|lista|login|modoleitor|perfil|privacidade|termos|usuario-amigos|usuario)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(html)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
           }
         ]
       }
