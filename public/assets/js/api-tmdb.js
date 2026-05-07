@@ -4,6 +4,7 @@
   const TMDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500";
   const TMDB_BACKDROP_URL = "https://image.tmdb.org/t/p/original";
   const movieCertificationCache = new Map();
+  const movieVideosCache = new Map();
 
   async function tmdbFetch(path, params = {}) {
     const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
@@ -110,6 +111,22 @@
     }
 
     return tmdbFetch(`/movie/${movieId}/watch/providers`);
+  }
+
+  async function getMovieVideos(movieId) {
+    if (!movieId) {
+      throw new Error("movieId is required");
+    }
+
+    const normalizedMovieId = String(movieId).trim();
+    if (movieVideosCache.has(normalizedMovieId)) {
+      return movieVideosCache.get(normalizedMovieId);
+    }
+
+    const data = await tmdbFetch(`/movie/${normalizedMovieId}/videos`);
+    const videos = Array.isArray(data && data.results) ? data.results : [];
+    movieVideosCache.set(normalizedMovieId, videos);
+    return videos;
   }
 
   async function getMovieRecommendations(movieId, page = 1) {
@@ -225,6 +242,7 @@
     getMovieReleaseDates,
     getMovieCertificationLabel,
     getMovieWatchProviders,
+    getMovieVideos,
     getMovieRecommendations,
     getMovieExternalIds,
     getMovieReviews,

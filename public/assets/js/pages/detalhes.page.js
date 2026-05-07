@@ -12,6 +12,9 @@ let currentExternalLinks = buildExternalLinks({});
 let currentTmdbReviews = [];
 let currentCinefyReviews = [];
 let currentWatchProvidersPayload = null;
+let currentVideoItems = [];
+let featuredVideo = null;
+let lastFocusedElement = null;
 const relationshipState = {
   friends: new Set(),
   incoming: new Set(),
@@ -33,13 +36,28 @@ const addToListButtonLabel = document.getElementById("addToListButtonLabel");
 const watchProvidersLink = document.getElementById("watchProvidersLink");
 const watchProvidersRegionSelect = document.getElementById("watchProvidersRegion");
 const communityReviewsLink = document.getElementById("communityReviewsLink");
+const heroTrailerButton = document.getElementById("heroTrailerButton");
+const heroTrailerButtonLabel = document.getElementById("heroTrailerButtonLabel");
+const videoSection = document.getElementById("videoSection");
+const videoNavChip = document.getElementById("videoNavChip");
+const movieVideosGrid = document.getElementById("movieVideosGrid");
+const movieVideosCaption = document.getElementById("movieVideosCaption");
+const videoModal = document.getElementById("videoModal");
+const videoModalFrameShell = document.getElementById("videoModalFrameShell");
+const videoModalTitle = document.getElementById("videoModalTitle");
+const videoModalMeta = document.getElementById("videoModalMeta");
 const ratingInput = document.getElementById("ratingInput");
 const ratingStars = document.getElementById("ratingStars");
 
 document.getElementById("saveReviewButton").addEventListener("click", saveReview);
 addToListButton.addEventListener("click", toggleCurrentMovieInList);
+heroTrailerButton.addEventListener("click", () => openVideoModal(featuredVideo));
 ratingInput.addEventListener("input", syncRatingStars);
 watchProvidersRegionSelect.addEventListener("change", handleWatchProviderRegionChange);
+document.querySelectorAll("[data-video-modal-close]").forEach((button) => {
+  button.addEventListener("click", closeVideoModal);
+});
+document.addEventListener("keydown", handleVideoModalKeydown);
 syncRatingStars();
 
 void loadViewerRelationshipState();
@@ -58,18 +76,22 @@ async function loadMovie() {
   }
 
   try {
-    const [movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations] = await Promise.all([
+    const [movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations, videos] = await Promise.all([
       window.TMDB.getMovieDetails(movieId),
       window.TMDB.getMovieCredits(movieId),
       window.TMDB.getMovieReleaseDates(movieId),
       window.TMDB.getMovieWatchProviders(movieId),
       window.TMDB.getMovieExternalIds(movieId),
       window.TMDB.getMovieReviews(movieId),
-      window.TMDB.getMovieRecommendations(movieId)
+      window.TMDB.getMovieRecommendations(movieId),
+      window.TMDB.getMovieVideos(movieId).catch((error) => {
+        console.warn("Nao foi possivel carregar videos do TMDB:", error);
+        return [];
+      })
     ]);
 
     currentMovie = movie;
-    renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations);
+    renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviews, recommendations, videos);
     hydrateReview();
     syncAddButtonState();
   } catch (error) {
@@ -120,7 +142,7 @@ async function findLocalMovie() {
   return store.loadListState().movies.find((movie) => String(movie.id) === localMovieId);
 }
 
-function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviewsResponse, recommendations = []) {
+function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, reviewsResponse, recommendations = [], videos = []) {
   const certification = getMovieCertification(releaseDates);
   const cast = Array.isArray(credits && credits.cast) ? credits.cast : [];
   const crew = Array.isArray(credits && credits.crew) ? credits.crew : [];
@@ -166,6 +188,7 @@ function renderMovie(movie, credits, releaseDates, watchProviders, externalIds, 
     runtime: movie.runtime
   });
   renderWatchProviders(providerData);
+  renderMovieVideos(videos);
   renderExternalLinks(externalLinks);
   renderSimilarMovies(recommendations);
   renderCommunityReviews(currentTmdbReviews, externalLinks);
@@ -229,6 +252,7 @@ function renderLocalMovie(movie) {
     isManual: true
   });
   renderWatchProviders(null, true);
+  renderMovieVideos([], true);
   renderExternalLinks(externalLinks);
   renderSimilarMovies([], true);
   renderCommunityReviews([], externalLinks, true, []);
@@ -412,6 +436,274 @@ function buildTmdbScoreLabel(score, voteCount) {
 
   const formattedVoteCount = window.TMDB.formatVoteCount(voteCount);
   return formattedVoteCount ? `${formattedScore} (${formattedVoteCount})` : formattedScore;
+}
+
+function renderMovieVideos(videos, isManual = false) {
+  currentVideoItems = [];
+  featuredVideo = null;
+
+  if (heroTrailerButton) {
+    heroTrailerButton.classList.add("hidden");
+  }
+
+  if (videoSection) {
+    videoSection.classList.add("hidden");
+  }
+
+  if (videoNavChip) {
+    videoNavChip.classList.add("hidden");
+  }
+
+  if (movieVideosGrid) {
+    movieVideosGrid.innerHTML = "";
+  }
+
+  if (isManual) {
+    return;
+  }
+
+  const rankedVideos = rankMovieVideos(videos);
+  if (!rankedVideos.length) {
+    return;
+  }
+
+  currentVideoItems = rankedVideos.slice(0, 8);
+  featuredVideo = currentVideoItems[0];
+
+  if (heroTrailerButton && heroTrailerButtonLabel) {
+    heroTrailerButtonLabel.textContent = featuredVideo.type === "Teaser" ? "Assistir previa" : "Assistir trailer";
+    heroTrailerButton.classList.remove("hidden");
+  }
+
+  if (videoSection) {
+    videoSection.classList.remove("hidden");
+  }
+
+  if (videoNavChip) {
+    videoNavChip.classList.remove("hidden");
+  }
+
+  if (movieVideosCaption) {
+    const trailerCount = currentVideoItems.filter((video) => video.type === "Trailer").length;
+    const teaserCount = currentVideoItems.filter((video) => video.type === "Teaser").length;
+    movieVideosCaption.textContent = buildVideoCaption(trailerCount, teaserCount);
+  }
+
+  if (!movieVideosGrid) {
+    return;
+  }
+
+  movieVideosGrid.innerHTML = currentVideoItems.map((video, index) => `
+    <button class="details-video-card" data-video-index="${index}" type="button">
+      <span class="details-video-card__thumb">
+        <img alt="" aria-hidden="true" decoding="async" loading="lazy" src="${escapeAttribute(getYoutubeThumbnailUrl(video.key))}" />
+        <span class="details-video-card__play">
+          <span class="material-symbols-outlined filled-icon">play_arrow</span>
+        </span>
+      </span>
+      <span class="details-video-card__body">
+        <span class="details-video-card__meta">
+          <span>${escapeHtml(video.typeLabel)}</span>
+          <span>${escapeHtml(video.languageLabel)}</span>
+          ${video.official ? "<span>Oficial</span>" : ""}
+        </span>
+        <span class="details-video-card__title">${escapeHtml(video.name)}</span>
+      </span>
+    </button>
+  `).join("");
+
+  movieVideosGrid.querySelectorAll("[data-video-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.getAttribute("data-video-index"));
+      openVideoModal(currentVideoItems[index]);
+    });
+  });
+}
+
+function rankMovieVideos(videos) {
+  const allowedTypes = new Set(["Trailer", "Teaser"]);
+  const normalizedVideos = Array.isArray(videos)
+    ? videos
+      .map(normalizeMovieVideo)
+      .filter((video) => video && allowedTypes.has(video.type))
+    : [];
+
+  return normalizedVideos.sort((a, b) => getVideoRankScore(b) - getVideoRankScore(a));
+}
+
+function normalizeMovieVideo(video) {
+  const source = video && typeof video === "object" ? video : {};
+  const site = String(source.site || "").trim().toLowerCase();
+  const key = sanitizeYoutubeKey(source.key);
+  const type = String(source.type || "").trim();
+
+  if (site !== "youtube" || !key) {
+    return null;
+  }
+
+  return {
+    key,
+    name: sanitizeInlineText(source.name || type || "Video oficial", 120),
+    type,
+    typeLabel: type === "Teaser" ? "Teaser" : "Trailer",
+    official: Boolean(source.official),
+    language: String(source.iso_639_1 || "").trim().toLowerCase(),
+    country: String(source.iso_3166_1 || "").trim().toUpperCase(),
+    publishedAt: String(source.published_at || ""),
+    languageLabel: buildVideoLanguageLabel(source.iso_639_1, source.iso_3166_1)
+  };
+}
+
+function getVideoRankScore(video) {
+  const typeScore = video.type === "Trailer" ? 400 : video.type === "Teaser" ? 300 : 0;
+  const officialScore = video.official ? 80 : 0;
+  const languageScore = getVideoLanguageScore(video);
+  const publishedScore = Number.isFinite(Date.parse(video.publishedAt)) ? Date.parse(video.publishedAt) / 100000000000 : 0;
+  return typeScore + officialScore + languageScore + publishedScore;
+}
+
+function getVideoLanguageScore(video) {
+  if (video.language === "pt" && video.country === "BR") return 70;
+  if (video.language === "pt") return 60;
+  if (video.language === "en") return 35;
+  return 10;
+}
+
+function buildVideoCaption(trailerCount, teaserCount) {
+  const parts = [];
+  if (trailerCount) {
+    parts.push(`${trailerCount} trailer${trailerCount > 1 ? "s" : ""}`);
+  }
+  if (teaserCount) {
+    parts.push(`${teaserCount} teaser${teaserCount > 1 ? "s" : ""}`);
+  }
+
+  return parts.length
+    ? `${parts.join(" e ")} disponiveis via TMDB. O player so carrega quando voce toca no video.`
+    : "Previas oficiais sincronizadas pelo TMDB.";
+}
+
+function openVideoModal(video) {
+  if (!video || !video.key || !videoModal || !videoModalFrameShell) {
+    return;
+  }
+
+  lastFocusedElement = document.activeElement;
+
+  if (videoModalTitle) {
+    videoModalTitle.textContent = video.name || "Video oficial";
+  }
+
+  if (videoModalMeta) {
+    videoModalMeta.textContent = `${video.typeLabel || "Video"} ${video.official ? "oficial" : "do TMDB"} em ${video.languageLabel || "idioma nao informado"}`;
+  }
+
+  videoModalFrameShell.innerHTML = `
+    <iframe
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="eager"
+      referrerpolicy="strict-origin-when-cross-origin"
+      src="${escapeAttribute(getYoutubeEmbedUrl(video.key))}"
+      title="${escapeAttribute(video.name || "Video oficial")}"
+    ></iframe>
+  `;
+
+  videoModal.classList.remove("hidden");
+  videoModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  const closeButton = videoModal.querySelector("[data-video-modal-close]");
+  if (closeButton) {
+    closeButton.focus();
+  }
+}
+
+function closeVideoModal() {
+  if (!videoModal || videoModal.classList.contains("hidden")) {
+    return;
+  }
+
+  videoModal.classList.add("hidden");
+  videoModal.setAttribute("aria-hidden", "true");
+
+  if (videoModalFrameShell) {
+    videoModalFrameShell.innerHTML = "";
+  }
+
+  document.body.style.overflow = "";
+
+  if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+    lastFocusedElement.focus();
+  }
+
+  lastFocusedElement = null;
+}
+
+function handleVideoModalKeydown(event) {
+  if (!videoModal || videoModal.classList.contains("hidden")) {
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeVideoModal();
+    return;
+  }
+
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  const focusableElements = Array.from(videoModal.querySelectorAll("button, iframe"))
+    .filter((element) => !element.hasAttribute("disabled"));
+  if (!focusableElements.length) {
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+    return;
+  }
+
+  if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
+}
+
+function getYoutubeEmbedUrl(key) {
+  const url = new URL(`https://www.youtube-nocookie.com/embed/${sanitizeYoutubeKey(key)}`);
+  url.searchParams.set("rel", "0");
+  url.searchParams.set("modestbranding", "1");
+  url.searchParams.set("playsinline", "1");
+  return url.toString();
+}
+
+function getYoutubeThumbnailUrl(key) {
+  return `https://i.ytimg.com/vi/${encodeURIComponent(sanitizeYoutubeKey(key))}/hqdefault.jpg`;
+}
+
+function sanitizeYoutubeKey(value) {
+  const key = String(value || "").trim();
+  return /^[A-Za-z0-9_-]{6,128}$/.test(key) ? key : "";
+}
+
+function buildVideoLanguageLabel(languageCode, countryCode) {
+  const language = String(languageCode || "").trim().toLowerCase();
+  const country = String(countryCode || "").trim().toUpperCase();
+  if (language === "pt" && country === "BR") return "PT-BR";
+  if (language === "pt") return "PT";
+  if (language === "en") return "EN";
+  return language ? language.toUpperCase() : "Idioma nao informado";
+}
+
+function sanitizeInlineText(value, maxLength) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 function renderWatchProviders(providerData, isManual = false) {

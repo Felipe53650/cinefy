@@ -26,6 +26,7 @@ const ALLOWED_EXACT_OR_REGEX = [
   /^\/movie\/\d+$/,
   /^\/movie\/\d+\/credits$/,
   /^\/movie\/\d+\/release_dates$/,
+  /^\/movie\/\d+\/videos$/,
   /^\/movie\/\d+\/watch\/providers$/,
   /^\/movie\/\d+\/recommendations$/,
   /^\/movie\/\d+\/external_ids$/,
