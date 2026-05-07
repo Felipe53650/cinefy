@@ -67,7 +67,7 @@
       <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
         <label class="sr-only" for="globalSearchInput">Buscar filmes no Cinefy Club</label>
         <span class="material-symbols-outlined cinefy-global-search__icon">search</span>
-        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, gênero ou clima..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
+        <input class="cinefy-global-search__input" id="globalSearchInput" name="q" placeholder="Busque um filme, gênero ou vibe..." type="search" value="${escapeAttribute(currentSearchQuery)}"/>
         <button class="cinefy-global-search__button" type="submit">Buscar</button>
       </form>
     `;
@@ -217,7 +217,7 @@
             <a class="transition-colors hover:text-zinc-200" href="termos.html">Termos</a>
             <a class="transition-colors hover:text-zinc-200" href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club">Contato</a>
           </nav>
-          <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Felipe de Oliveira Santos</p>
+          <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Desenvolvido por Felipe de Oliveira Santos</p>
         </div>
       </div>
     `;
