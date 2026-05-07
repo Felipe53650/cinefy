@@ -62,36 +62,6 @@
     }).join("");
   }
 
-  function buildHeaderTrustLinks() {
-    return `
-      <div aria-label="Sinais de confiança" class="cinefy-header-trust hidden xl:flex">
-        <a
-          class="cinefy-header-trust-link"
-          href="https://github.com/Felipe53650/cinefy"
-          rel="noopener noreferrer"
-          target="_blank"
-          title="Ver projeto no GitHub"
-        >
-          <svg aria-hidden="true" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.4-1.33-1.77-1.33-1.77-1.09-.75.08-.74.08-.74 1.2.09 1.84 1.24 1.84 1.24 1.08 1.84 2.82 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.11.81 2.24 0 1.62-.01 2.92-.01 3.31 0 .32.21.7.82.58A12 12 0 0 0 12 .5Z"></path>
-          </svg>
-          <span>GitHub</span>
-        </a>
-        <a
-          class="cinefy-header-trust-link"
-          href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club"
-          title="Entrar em contato"
-        >
-          <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
-            <path d="M4 6h16v12H4z"></path>
-            <path d="m4 7 8 6 8-6"></path>
-          </svg>
-          <span>Contato</span>
-        </a>
-      </div>
-    `;
-  }
-
   function buildGlobalSearch() {
     return `
       <form class="cinefy-global-search hidden md:flex" id="globalSearchForm" role="search">
@@ -153,7 +123,6 @@
           </div>
           <div class="cinefy-topbar__secondary flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
             ${buildGlobalSearch()}
-            ${buildHeaderTrustLinks()}
             <a class="cinefy-search-shortcut items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-red-500/30 hover:bg-white/[0.08]" href="busca.html" aria-label="Buscar filmes">
               <span class="material-symbols-outlined text-[18px]">travel_explore</span>
               <span class="cinefy-search-shortcut__label">Buscar</span>
@@ -248,7 +217,7 @@
             <a class="transition-colors hover:text-zinc-200" href="termos.html">Termos</a>
             <a class="transition-colors hover:text-zinc-200" href="mailto:felipe53650@outlook.com?subject=Contato%20Cinefy%20Club">Contato</a>
           </nav>
-          <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Powered by TMDB</p>
+          <p class="mt-4 text-sm text-zinc-400 md:text-[0.95rem]">Felipe de Oliveira Santos</p>
         </div>
       </div>
     `;
